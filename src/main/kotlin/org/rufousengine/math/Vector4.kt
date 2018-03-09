@@ -289,7 +289,7 @@ open class Vector4(x: Float = 0f, y: Float = 0f, z: Float = 0f, w: Float = 0f) {
     fun rejectFrom(x: Float, y: Float, z: Float, w: Float, out: MutableVector4) = out.set(this).subtract(projectOnto(x, y, z, w, out), out)
 
     /**
-     * Multiplies matrix with this vector.
+     * Multiplies [matrix] with this vector.
      *
      * @param[matrix] The matrix.
      * @param[out] The output vector.

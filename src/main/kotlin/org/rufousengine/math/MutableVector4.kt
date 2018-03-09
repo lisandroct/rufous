@@ -206,4 +206,12 @@ class MutableVector4(x: Float = 0f, y: Float = 0f, z: Float = 0f, w: Float = 0f,
      * @return This vector for chaining.
      */
     fun rejectFrom(x: Float, y: Float, z: Float, w: Float) = rejectFrom(x, y, z, w, this)
+
+    /**
+     * Multiplies [matrix] with this vector.
+     *
+     * @param[matrix] The matrix.
+     * @return This vector for chaining.
+     */
+    fun multiplyLeft(matrix: Matrix4) = multiplyLeft(matrix, this)
 }

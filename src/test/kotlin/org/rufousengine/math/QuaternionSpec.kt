@@ -297,7 +297,7 @@ object QuaternionSpec: Spek({
             val matrix = quaternion.getMatrixRepresentation(MutableMatrix3())
             val vector = getRandomVector3()
             val rotated = matrix.multiply(vector, MutableVector3())
-            it("should give the same results as the quaternion") {
+            it("should represent the same transformation as the quaternion") {
                 val expected = quaternion.transformSafe(vector, MutableVector3())
 
                 assert(rotated).isEqualTo(expected)

@@ -398,6 +398,46 @@ object Vector3Spec: Spek({
                 }
             }
         }
+
+        on("multiplyLeft (Matrix3)") {
+            val matrix = getRandomMatrix3()
+            val multiplied = vector.multiplyLeft(matrix, MutableVector3())
+            it("should give the same results as Matrix3::multiply") {
+                val expected = matrix.multiply(vector, MutableVector3())
+
+                assert(multiplied).isEqualTo(expected)
+            }
+        }
+
+        on("multiplyLeft (Matrix4)") {
+            val matrix = getRandomMatrix4()
+            val multiplied = vector.multiplyLeft(matrix, MutableVector3())
+            it("should give the same results as Matrix4::multiply") {
+                val expected = matrix.multiply(vector, MutableVector3())
+
+                assert(multiplied).isEqualTo(expected)
+            }
+        }
+
+        on("transformSafe") {
+            val quaternion = getRandomQuaternion()
+            val transformed = vector.transformSafe(quaternion, MutableVector3())
+            it("should give the same results as Quaternion::transformSafe") {
+                val expected = quaternion.transformSafe(vector, MutableVector3())
+
+                assert(transformed).isEqualTo(expected)
+            }
+        }
+
+        on("transform") {
+            val quaternion = getRandomQuaternion().normalize(MutableQuaternion())
+            val transformed = vector.transform(quaternion, MutableVector3())
+            it("should give the same results as Quaternion::transform") {
+                val expected = quaternion.transform(vector, MutableVector3())
+
+                assert(transformed).isEqualTo(expected)
+            }
+        }
     }
 
     given("two vectors") {
@@ -784,6 +824,50 @@ object Vector3Spec: Spek({
                 assert(vector).isEqualTo(expected)
             }
         }
+
+        on("multiplyLeft (Matrix3)") {
+            val original = vector.copyImmutable()
+            val matrix = getRandomMatrix3()
+            vector.multiplyLeft(matrix)
+            it("should multiplyLeft and assign") {
+                val expected = original.multiplyLeft(matrix, MutableVector3())
+
+                assert(vector).isEqualTo(expected)
+            }
+        }
+
+        on("multiplyLeft (Matrix4)") {
+            val original = vector.copyImmutable()
+            val matrix = getRandomMatrix4()
+            vector.multiplyLeft(matrix)
+            it("should multiplyLeft and assign") {
+                val expected = original.multiplyLeft(matrix, MutableVector3())
+
+                assert(vector).isEqualTo(expected)
+            }
+        }
+
+        on("transformSafe") {
+            val original = vector.copyImmutable()
+            val quaternion = getRandomQuaternion()
+            vector.transformSafe(quaternion)
+            it("should transformSafe and assign") {
+                val expected = original.transformSafe(quaternion, MutableVector3())
+
+                assert(vector).isEqualTo(expected)
+            }
+        }
+
+        on("transform") {
+            val original = vector.copyImmutable()
+            val quaternion = getRandomQuaternion()
+            vector.transform(quaternion)
+            it("should transform and assign") {
+                val expected = original.transform(quaternion, MutableVector3())
+
+                assert(vector).isEqualTo(expected)
+            }
+        }
     }
 })
 
@@ -792,3 +876,15 @@ private fun getRandomVector2() = Vector2(getRandomValue(), getRandomValue())
 private fun getRandomVector3() = Vector3(getRandomValue(), getRandomValue(), getRandomValue())
 private fun getRandomVector4() = Vector4(getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue())
 private fun getRandomMutable(observer: ((Vector3) -> Unit)) = MutableVector3(getRandomValue(), getRandomValue(), getRandomValue(), observer)
+private fun getRandomQuaternion() = Quaternion(getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue())
+private fun getRandomMatrix3() = Matrix3(
+        getRandomValue(), getRandomValue(), getRandomValue(),
+        getRandomValue(), getRandomValue(), getRandomValue(),
+        getRandomValue(), getRandomValue(), getRandomValue()
+)
+private fun getRandomMatrix4() = Matrix4(
+        getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue(),
+        getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue(),
+        getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue(),
+        getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue()
+)

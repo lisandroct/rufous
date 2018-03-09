@@ -238,7 +238,7 @@ open class Quaternion(x: Float = 0f, y: Float = 0f, z: Float = 0f, w: Float = 1f
     /**
      * Rotates [vector] using this quaternion.
      *
-     * If this quaternion is known to be a unit quaternion, [transform] is a bit cheaper.
+     * If this quaternion is known to be a unit quaternion, [transform] is a cheaper alternative.
      *
      * @param[vector] The vector to transform.
      * @param[out] The output vector.
@@ -248,7 +248,7 @@ open class Quaternion(x: Float = 0f, y: Float = 0f, z: Float = 0f, w: Float = 1f
     /**
      * Rotates ([x], [y], [z]) using this quaternion.
      *
-     * If this quaternion is known to be a unit quaternion, [transform] is a bit cheaper.
+     * If this quaternion is known to be a unit quaternion, [transform] is a cheaper alternative.
      *
      * @param[out] The output vector.
      * @return The output vector for chaining.
@@ -262,6 +262,8 @@ open class Quaternion(x: Float = 0f, y: Float = 0f, z: Float = 0f, w: Float = 1f
     /**
      * Rotates [vector] using this quaternion.
      *
+     * This quaternion must be unit.
+     *
      * @param[vector] The vector to transform.
      * @param[out] The output vector.
      * @return The output vector for chaining.
@@ -269,6 +271,8 @@ open class Quaternion(x: Float = 0f, y: Float = 0f, z: Float = 0f, w: Float = 1f
     fun transform(vector: Vector3, out: MutableVector3) = transform(vector.x, vector.y, vector.z, out)
     /**
      * Rotates ([x], [y], [z]) using this quaternion.
+     *
+     * This quaternion must be unit.
      *
      * @param[out] The output vector.
      * @return The output vector for chaining.

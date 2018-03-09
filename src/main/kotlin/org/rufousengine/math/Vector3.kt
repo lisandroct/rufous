@@ -317,13 +317,40 @@ open class Vector3(x: Float = 0f, y: Float = 0f, z: Float = 0f) {
     )
 
     /**
-     * Multiplies matrix with this vector.
+     * Multiplies [matrix] with this vector.
      *
      * @param[matrix] The matrix.
      * @param[out] The output vector.
      * @return The output vector for chaining.
      */
     fun multiplyLeft(matrix: Matrix3, out: MutableVector3) = matrix.multiply(this, out)
+    /**
+     * Multiplies [matrix] with this vector.
+     *
+     * @param[matrix] The matrix.
+     * @param[out] The output vector.
+     * @return The output vector for chaining.
+     */
+    fun multiplyLeft(matrix: Matrix4, out: MutableVector3) = matrix.multiply(this, out)
+
+    /**
+     * Rotates this vector with [quaternion].
+     *
+     * If the quaternion is known to be a unit quaternion, [transform] is a cheaper alternative.
+     *
+     * @param[quaternion] The rotation quaternion.
+     * @param[out] The output vector.
+     * @return The output vector for chaining.
+     */
+    fun transformSafe(quaternion: Quaternion, out: MutableVector3) = quaternion.transformSafe(this, out)
+    /**
+     * Rotates this vector with [quaternion].
+     *
+     * @param[quaternion] The rotation quaternion. Must be unit.
+     * @param[out] The output vector.
+     * @return The output vector for chaining.
+     */
+    fun transform(quaternion: Quaternion, out: MutableVector3) = quaternion.transform(this, out)
 
     fun equals(other: Vector2) = equals(other.x, other.y, 0f)
     fun equals(other: Vector3) = equals(other.x, other.y, other.z)
