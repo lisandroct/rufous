@@ -293,6 +293,28 @@ object QuaternionSpec: Spek({
             }
         }
 
+        on("getMatrixRepresentation (Matrix3)") {
+            val matrix = quaternion.getMatrixRepresentation(MutableMatrix3())
+            val vector = getRandomVector3()
+            val rotated = matrix.multiply(vector, MutableVector3())
+            it("should give the same results as the quaternion") {
+                val expected = quaternion.transformSafe(vector, MutableVector3())
+
+                assert(rotated).isEqualTo(expected)
+            }
+        }
+
+        on("getMatrixRepresentation (Matrix4)") {
+            val matrix = quaternion.getMatrixRepresentation(MutableMatrix4())
+            val vector = getRandomVector3()
+            val rotated = matrix.multiply(vector, MutableVector3())
+            it("should give the same results as the quaternion") {
+                val expected = quaternion.transformSafe(vector, MutableVector3())
+
+                assert(rotated).isEqualTo(expected)
+            }
+        }
+
         on("scale") {
             val scalar = getRandomValue()
             val scaled = quaternion.scale(scalar, MutableQuaternion())
@@ -606,6 +628,32 @@ object QuaternionSpec: Spek({
             }
             it("should always be the same reference") {
                 assert(inverse).isSameAs(quaternion.inverse)
+            }
+        }
+
+        on("setFromMatrixRepresentation (Matrix3)") {
+            val original = quaternion.copyImmutable()
+            val matrix = quaternion.getMatrixRepresentation(MutableMatrix3())
+            quaternion.setFromMatrixRepresentation(matrix)
+            it("should represent the same transformation") {
+                val vector = getRandomVector3()
+                val result = quaternion.transformSafe(vector, MutableVector3())
+                val expected = original.transformSafe(vector, MutableVector3())
+
+                assert(result).isEqualTo(expected)
+            }
+        }
+
+        on("setFromMatrixRepresentation (Matrix4)") {
+            val original = quaternion.copyImmutable()
+            val matrix = quaternion.getMatrixRepresentation(MutableMatrix4())
+            quaternion.setFromMatrixRepresentation(matrix)
+            it("should represent the same transformation") {
+                val vector = getRandomVector3()
+                val result = quaternion.transformSafe(vector, MutableVector3())
+                val expected = original.transformSafe(vector, MutableVector3())
+
+                assert(result).isEqualTo(expected)
             }
         }
 

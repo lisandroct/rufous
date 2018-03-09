@@ -94,6 +94,66 @@ open class Quaternion(x: Float = 0f, y: Float = 0f, z: Float = 0f, w: Float = 1f
     fun getVectorPart(out: MutableVector3) = out.set(x, y, z)
 
     /**
+     * Returns a matrix that represents the same rotation as this quaternion.
+     *
+     * @param[out] The output matrix.
+     * @return The output matrix for chaining.
+     */
+    fun getMatrixRepresentation(out: MutableMatrix3) : MutableMatrix3 {
+        val invMagnitude = 1 / magnitude
+        val x = x * invMagnitude
+        val y = y * invMagnitude
+        val z = z * invMagnitude
+        val w = w * invMagnitude
+
+        val x2 = x * x
+        val y2 = y * y
+        val z2 = z * z
+        val xy = x * y
+        val xz = x * z
+        val yz = y * z
+        val wx = w * x
+        val wy = w * y
+        val wz = w * z
+
+        return out.set(
+                1f - 2f * (y2 + z2), 2f * (xy - wz), 2f * (xz + wy),
+                2f * (xy + wz), 1f - 2f * (x2 + z2), 2f * (yz - wx),
+                2f * (xz - wy), 2f * (yz + wx), 1f - 2f * (x2 + y2)
+        )
+    }
+    /**
+     * Returns a matrix that represents the same rotation as this quaternion.
+     *
+     * @param[out] The output matrix.
+     * @return The output matrix for chaining.
+     */
+    fun getMatrixRepresentation(out: MutableMatrix4) : MutableMatrix4 {
+        val invMagnitude = 1 / magnitude
+        val x = x * invMagnitude
+        val y = y * invMagnitude
+        val z = z * invMagnitude
+        val w = w * invMagnitude
+
+        val x2 = x * x
+        val y2 = y * y
+        val z2 = z * z
+        val xy = x * y
+        val xz = x * z
+        val yz = y * z
+        val wx = w * x
+        val wy = w * y
+        val wz = w * z
+
+        return out.set(
+                1f - 2f * (y2 + z2), 2f * (xy - wz), 2f * (xz + wy), 0f,
+                2f * (xy + wz), 1f - 2f * (x2 + z2), 2f * (yz - wx), 0f,
+                2f * (xz - wy), 2f * (yz + wx), 1f - 2f * (x2 + y2), 0f,
+                0f, 0f, 0f, 1f
+        )
+    }
+
+    /**
      * Scales this quaternion (i.e., multiplies each component with [scalar]).
      *
      * @param[scalar] The scalar to multiply the quaternion with.

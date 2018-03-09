@@ -1,5 +1,7 @@
 package org.rufousengine.math
 
+import kotlin.math.sqrt
+
 /**
  * An immutable quaternion.
  *
@@ -122,6 +124,97 @@ class MutableQuaternion(x: Float = 0f, y: Float = 0f, z: Float = 0f, w: Float = 
         inverseDirty = true
 
         observer?.invoke(this)
+    }
+
+    /**
+     * Set this quaternion to represent the same rotation as [matrix].
+     *
+     * @param[matrix] The rotation matrix.
+     * @return This quaternion for chaining.
+     */
+    fun setFromMatrixRepresentation(matrix: Matrix3) : Quaternion {
+        val m00 = matrix.e00
+        val m11 = matrix.e11
+        val m22 = matrix.e22
+        val sum = m00 + m11 + m22
+
+        val x: Float
+        val y: Float
+        val z: Float
+        val w: Float
+
+        if(sum > 0f) {
+            w = sqrt(sum + 1f) * 0.5f
+            val f = 0.25f / w
+            x = (matrix.e21 - matrix.e12) * f
+            y = (matrix.e02 - matrix.e20) * f
+            z = (matrix.e10 - matrix.e01) * f
+        } else if(m00 > m11 && m00 > m22) {
+            x = sqrt(m00 - m11 - m22 + 1f) * 0.5f
+            val f = 0.25f / x
+            y = (matrix.e10 + matrix.e01) * f
+            z = (matrix.e02 + matrix.e20) * f
+            w = (matrix.e21 - matrix.e12) * f
+        } else if(m11 > m22) {
+            y = sqrt(m11 - m00 - m22 + 1f) * 0.5f
+            val f = 0.25f / y
+            x = (matrix.e10 + matrix.e01) * f
+            z = (matrix.e21 + matrix.e12) * f
+            w = (matrix.e02 - matrix.e20) * f
+        } else {
+            z = sqrt(m22 - m00 - m11 + 1f) * 0.5f
+            val f = 0.25f / z
+            x = (matrix.e02 + matrix.e20) * f
+            y = (matrix.e21 + matrix.e12) * f
+            w = (matrix.e10 - matrix.e01) * f
+        }
+
+        return set(x, y, z, w)
+    }
+    /**
+     * Set this quaternion to represent the same rotation as [matrix].
+     *
+     * @param[matrix] The rotation matrix.
+     * @return This quaternion for chaining.
+     */
+    fun setFromMatrixRepresentation(matrix: Matrix4) : Quaternion {
+        val m00 = matrix.e00
+        val m11 = matrix.e11
+        val m22 = matrix.e22
+        val sum = m00 + m11 + m22
+
+        val x: Float
+        val y: Float
+        val z: Float
+        val w: Float
+
+        if(sum > 0f) {
+            w = sqrt(sum + 1f) * 0.5f
+            val f = 0.25f / w
+            x = (matrix.e21 - matrix.e12) * f
+            y = (matrix.e02 - matrix.e20) * f
+            z = (matrix.e10 - matrix.e01) * f
+        } else if(m00 > m11 && m00 > m22) {
+            x = sqrt(m00 - m11 - m22 + 1f) * 0.5f
+            val f = 0.25f / x
+            y = (matrix.e10 + matrix.e01) * f
+            z = (matrix.e02 + matrix.e20) * f
+            w = (matrix.e21 - matrix.e12) * f
+        } else if(m11 > m22) {
+            y = sqrt(m11 - m00 - m22 + 1f) * 0.5f
+            val f = 0.25f / y
+            x = (matrix.e10 + matrix.e01) * f
+            z = (matrix.e21 + matrix.e12) * f
+            w = (matrix.e02 - matrix.e20) * f
+        } else {
+            z = sqrt(m22 - m00 - m11 + 1f) * 0.5f
+            val f = 0.25f / z
+            x = (matrix.e02 + matrix.e20) * f
+            y = (matrix.e21 + matrix.e12) * f
+            w = (matrix.e10 - matrix.e01) * f
+        }
+
+        return set(x, y, z, w)
     }
 
     /**
