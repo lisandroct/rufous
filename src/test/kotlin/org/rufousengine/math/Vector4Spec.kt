@@ -797,7 +797,7 @@ object Vector4Spec: Spek({
             }
         }
 
-        on("multiplyLeft (Matrix4)") {
+        on("multiplyLeft") {
             val original = vector.copyImmutable()
             val matrix = getRandomMatrix4()
             vector.multiplyLeft(matrix)

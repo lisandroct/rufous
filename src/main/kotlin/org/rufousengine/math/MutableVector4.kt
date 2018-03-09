@@ -210,6 +210,8 @@ class MutableVector4(x: Float = 0f, y: Float = 0f, z: Float = 0f, w: Float = 0f,
     /**
      * Multiplies [matrix] with this vector.
      *
+     * Wrapper to [Matrix4.multiply].
+     *
      * @param[matrix] The matrix.
      * @return This vector for chaining.
      */

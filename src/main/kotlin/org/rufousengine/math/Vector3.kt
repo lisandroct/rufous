@@ -319,6 +319,8 @@ open class Vector3(x: Float = 0f, y: Float = 0f, z: Float = 0f) {
     /**
      * Multiplies [matrix] with this vector.
      *
+     * Wrapper to [Matrix3.multiply].
+     *
      * @param[matrix] The matrix.
      * @param[out] The output vector.
      * @return The output vector for chaining.
@@ -326,6 +328,8 @@ open class Vector3(x: Float = 0f, y: Float = 0f, z: Float = 0f) {
     fun multiplyLeft(matrix: Matrix3, out: MutableVector3) = matrix.multiply(this, out)
     /**
      * Multiplies [matrix] with this vector.
+     *
+     * Wrapper to [Matrix4.multiply].
      *
      * @param[matrix] The matrix.
      * @param[out] The output vector.
@@ -336,6 +340,8 @@ open class Vector3(x: Float = 0f, y: Float = 0f, z: Float = 0f) {
     /**
      * Rotates this vector with [quaternion].
      *
+     * Wrapper to[Quaternion.transformSafe].
+     *
      * If the quaternion is known to be a unit quaternion, [transform] is a cheaper alternative.
      *
      * @param[quaternion] The rotation quaternion.
@@ -345,6 +351,8 @@ open class Vector3(x: Float = 0f, y: Float = 0f, z: Float = 0f) {
     fun transformSafe(quaternion: Quaternion, out: MutableVector3) = quaternion.transformSafe(this, out)
     /**
      * Rotates this vector with [quaternion].
+     *
+     * Wrapper to[Quaternion.transform].
      *
      * @param[quaternion] The rotation quaternion. Must be unit.
      * @param[out] The output vector.

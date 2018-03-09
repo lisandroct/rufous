@@ -336,6 +336,16 @@ object Vector2Spec: Spek({
                 }
             }
         }
+
+        on("multiplyLeft") {
+            val matrix = getRandomMatrix2()
+            val multiplied = vector.multiplyLeft(matrix, MutableVector2())
+            it("should give the same results as Matrix4::multiply") {
+                val expected = matrix.multiply(vector, MutableVector2())
+
+                assert(multiplied).isEqualTo(expected)
+            }
+        }
     }
 
     given("two vectors") {
@@ -671,6 +681,17 @@ object Vector2Spec: Spek({
                 assert(vector).isEqualTo(expected)
             }
         }
+
+        on("multiplyLeft") {
+            val original = vector.copyImmutable()
+            val matrix = getRandomMatrix2()
+            vector.multiplyLeft(matrix)
+            it("should multiplyLeft and assign") {
+                val expected = original.multiplyLeft(matrix, MutableVector2())
+
+                assert(vector).isEqualTo(expected)
+            }
+        }
     }
 })
 
@@ -679,3 +700,7 @@ private fun getRandomVector2() = Vector2(getRandomValue(), getRandomValue())
 private fun getRandomVector3() = Vector3(getRandomValue(), getRandomValue(), getRandomValue())
 private fun getRandomVector4() = Vector4(getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue())
 private fun getRandomMutable(observer: ((Vector2) -> Unit)) = MutableVector2(getRandomValue(), getRandomValue(), observer)
+private fun getRandomMatrix2() = Matrix2(
+        getRandomValue(), getRandomValue(),
+        getRandomValue(), getRandomValue()
+)

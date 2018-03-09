@@ -211,12 +211,16 @@ class MutableVector3(x: Float = 0f, y: Float = 0f, z: Float = 0f, observer: ((Ve
     /**
      * Multiplies [matrix] with this vector.
      *
+     * Wrapper to [Matrix3.multiply].
+     *
      * @param[matrix] The matrix.
      * @return This vector for chaining.
      */
     fun multiplyLeft(matrix: Matrix3) = multiplyLeft(matrix, this)
     /**
      * Multiplies [matrix] with this vector.
+     *
+     * Wrapper to [Matrix4.multiply].
      *
      * @param[matrix] The matrix.
      * @return This vector for chaining.
@@ -226,6 +230,8 @@ class MutableVector3(x: Float = 0f, y: Float = 0f, z: Float = 0f, observer: ((Ve
     /**
      * Rotates this vector with [quaternion].
      *
+     * Wrapper to [Quaternion.transformSafe].
+     *
      * If the quaternion is known to be a unit quaternion, [transform] is a cheaper alternative.
      *
      * @param[quaternion] The rotation quaternion.
@@ -234,6 +240,8 @@ class MutableVector3(x: Float = 0f, y: Float = 0f, z: Float = 0f, observer: ((Ve
     fun transformSafe(quaternion: Quaternion) = transformSafe(quaternion, this)
     /**
      * Rotates this vector with [quaternion].
+     *
+     * Wrapper to [Quaternion.transform].
      *
      * @param[quaternion] The rotation quaternion. Must be unit.
      * @return This vector for chaining.

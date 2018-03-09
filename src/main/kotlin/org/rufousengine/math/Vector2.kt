@@ -281,7 +281,9 @@ open class Vector2(x: Float = 0f, y: Float = 0f) {
     fun rejectFrom(x: Float, y: Float, out: MutableVector2) = out.set(this).subtract(projectOnto(x, y, out))
 
     /**
-     * Multiplies matrix with this vector.
+     * Multiplies [matrix] with this vector.
+     *
+     * Wrapper to [Matrix2.multiply].
      *
      * @param[matrix] The matrix.
      * @param[out] The output vector.

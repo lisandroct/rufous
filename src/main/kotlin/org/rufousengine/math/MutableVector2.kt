@@ -180,4 +180,14 @@ class MutableVector2(x: Float = 0f, y: Float = 0f, observer: ((Vector2) -> Unit)
      * @return This vector forchaining.
      */
     fun rejectFrom(x: Float, y: Float) = rejectFrom(x, y, this)
+
+    /**
+     * Multiplies [matrix] with this vector.
+     *
+     * Wrapper to [Matrix2.multiply].
+     *
+     * @param[matrix] The matrix.
+     * @return This vector for chaining.
+     */
+    fun multiplyLeft(matrix: Matrix2) = multiplyLeft(matrix, this)
 }
