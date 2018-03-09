@@ -149,10 +149,10 @@ open class Quaternion(x: Float = 0f, y: Float = 0f, z: Float = 0f, w: Float = 1f
      * @return The output quaternion for chaining.
      */
     fun multiply(x: Float, y: Float, z: Float, w: Float, out: MutableQuaternion) = out.set(
-            this.w * x + this.x * w + this.y  * z - this.z * y,
-            this.w * y - this.x * z + this.y  * w + this.z * x,
-            this.w * z + this.x * y - this.y  * x + this.z * w,
-            this.w * w - this.x * x - this.y  * y - this.z * z
+            this.w * x + this.x * w + this.y * z - this.z * y,
+            this.w * y - this.x * z + this.y * w + this.z * x,
+            this.w * z + this.x * y - this.y * x + this.z * w,
+            this.w * w - this.x * x - this.y * y - this.z * z
     )
     /**
      * Multiplies [other] with this quaternion.
@@ -169,11 +169,66 @@ open class Quaternion(x: Float = 0f, y: Float = 0f, z: Float = 0f, w: Float = 1f
      * @return The output quaternion for chaining.
      */
     fun multiplyLeft(x: Float, y: Float, z: Float, w: Float, out: MutableQuaternion) = out.set(
-            w * this.x + x * this.w + y  * this.z - z * this.y,
-            w * this.y - x * this.z + y  * this.w + z * this.x,
-            w * this.z + x * this.y - y  * this.x + z * this.w,
-            w * this.w - x * this.x - y  * this.y - z * this.z
+            w * this.x + x * this.w + y * this.z - z * this.y,
+            w * this.y - x * this.z + y * this.w + z * this.x,
+            w * this.z + x * this.y - y * this.x + z * this.w,
+            w * this.w - x * this.x - y * this.y - z * this.z
     )
+
+    /**
+     * Rotates [vector] using this quaternion.
+     *
+     * If this quaternion is known to be a unit quaternion, [transform] is a bit cheaper.
+     *
+     * @param[vector] The vector to transform.
+     * @param[out] The output vector.
+     * @return The output vector for chaining.
+     */
+    fun transformSafe(vector: Vector3, out: MutableVector3) = transformSafe(vector.x, vector.y, vector.z, out)
+    /**
+     * Rotates ([x], [y], [z]) using this quaternion.
+     *
+     * If this quaternion is known to be a unit quaternion, [transform] is a bit cheaper.
+     *
+     * @param[out] The output vector.
+     * @return The output vector for chaining.
+     */
+    fun transformSafe(x: Float, y: Float, z: Float, out: MutableVector3) : MutableVector3 {
+        transform(x, y, z, out)
+
+        return out.scale(1 / magnitudeSquared)
+    }
+
+    /**
+     * Rotates [vector] using this quaternion.
+     *
+     * @param[vector] The vector to transform.
+     * @param[out] The output vector.
+     * @return The output vector for chaining.
+     */
+    fun transform(vector: Vector3, out: MutableVector3) = transform(vector.x, vector.y, vector.z, out)
+    /**
+     * Rotates ([x], [y], [z]) using this quaternion.
+     *
+     * @param[out] The output vector.
+     * @return The output vector for chaining.
+     */
+    fun transform(x: Float, y: Float, z: Float, out: MutableVector3) : MutableVector3 {
+        val a = Cached.a
+        val b = Cached.b
+
+        getVectorPart(a)
+        a.cross(x, y, z, b)
+
+        val s0 = w * w - a.magnitudeSquared
+        val s1 = a.dot(x, y, z) * 2f
+        val s2 = w * 2f
+
+        a.scale(s1)
+        b.scale(s2)
+
+        return out.set(x, y, z).scale(s0).add(a).add(b)
+    }
 
     fun equals(other: Quaternion) = equals(other.x, other.y, other.z, other.w)
     fun equals(x: Float, y: Float, z: Float, w: Float) = this.x isCloseTo x && this.y isCloseTo y && this.z isCloseTo z && this.w isCloseTo w
@@ -193,4 +248,9 @@ open class Quaternion(x: Float = 0f, y: Float = 0f, z: Float = 0f, w: Float = 1f
     }
 
     override fun hashCode() = Arrays.hashCode(components)
+
+    private object Cached {
+        val a by lazy { MutableVector3() }
+        val b by lazy { MutableVector3() }
+    }
 }

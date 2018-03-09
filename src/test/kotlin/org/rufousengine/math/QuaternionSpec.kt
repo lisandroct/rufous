@@ -302,6 +302,30 @@ object QuaternionSpec: Spek({
                 }
             }
         }
+
+        on("transformSafe") {
+            val vector = getRandomVector3()
+            val rotated = quaternion.transformSafe(vector, MutableVector3())
+            it("should satisfy the equation v' = qvq-1") {
+                val expected = quaternion.multiply(Quaternion(vector, 0f), MutableQuaternion()).multiply(quaternion.inverse).getVectorPart(MutableVector3())
+
+                assert(rotated).isEqualTo(expected)
+            }
+        }
+
+        on("transform") {
+            val vector = getRandomVector3()
+            val rotatedSafe = quaternion.transformSafe(vector, MutableVector3())
+            val rotatedUnsafe = quaternion.transform(vector, MutableVector3())
+            val unit = quaternion.normalize(MutableQuaternion())
+            val rotated = unit.transform(vector, MutableVector3())
+            it("should not work when is not unit") {
+                assert(rotatedSafe).isNotEqualTo(rotatedUnsafe)
+            }
+            it("should work when is unit") {
+                assert(rotated).isEqualTo(rotatedSafe)
+            }
+        }
     }
 
     given("two quaternions") {
