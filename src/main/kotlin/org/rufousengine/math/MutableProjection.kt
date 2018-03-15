@@ -195,6 +195,9 @@ class MutableProjection : Projection {
      */
     fun multiplyLeft(other: Projection) = multiplyLeft(other, this)
 
+    /**
+     * Sets this matrix as a symmetric orthographic projection.
+     */
     fun setOrthographic(width: Float, height: Float, near: Float, far: Float) : MutableProjection {
         if(width < 0f || height < 0f || near <= 0f) {
             throw IllegalArgumentException("width, height and near must be positives.")
@@ -215,6 +218,9 @@ class MutableProjection : Projection {
         return set(e00, e11, e22, 0f, e32, 1f)
     }
 
+    /**
+     * Sets this matrix as a symmetric perspective projection.
+     */
     fun setPerspective(fieldOfView: Float, aspectRatio: Float, near: Float, far: Float) : MutableProjection {
         if(fieldOfView <= 0f || fieldOfView > 180f) {
             throw IllegalArgumentException("fieldOfView must be in range (0, 180]")

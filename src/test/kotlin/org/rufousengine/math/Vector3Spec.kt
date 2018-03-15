@@ -30,6 +30,19 @@ object Vector3Spec: Spek({
                 assert(vector.z).isCloseTo(z)
             }
         }
+        on("Vector3") {
+            val other = getRandomPoint()
+            val vector = Vector3(other)
+            it("should have x set") {
+                assert(vector.x).isCloseTo(other.x)
+            }
+            it("should have y set") {
+                assert(vector.y).isCloseTo(other.y)
+            }
+            it("should have z set") {
+                assert(vector.z).isCloseTo(other.z)
+            }
+        }
         on("Vector2") {
             val other = getRandomVector2()
             val vector = Vector3(other)
@@ -94,6 +107,22 @@ object Vector3Spec: Spek({
             }
             it("should have z set") {
                 assert(vector.z).isCloseTo(z)
+            }
+            it("should have the observer set") {
+                assert(vector.observer).isNotNull()
+            }
+        }
+        on("Point") {
+            val other = getRandomPoint()
+            val vector = MutableVector3(other) { }
+            it("should have x set") {
+                assert(vector.x).isCloseTo(other.x)
+            }
+            it("should have y set") {
+                assert(vector.y).isCloseTo(other.y)
+            }
+            it("should have z set") {
+                assert(vector.z).isCloseTo(other.z)
             }
             it("should have the observer set") {
                 assert(vector.observer).isNotNull()
@@ -585,6 +614,24 @@ object Vector3Spec: Spek({
                 }
             }
 
+            on("Point") {
+                counter = 0
+                val other = getRandomPoint()
+                vector.set(other)
+                it("should have notified once") {
+                    assert(counter).isEqualTo(1)
+                }
+                it("should have x set") {
+                    assert(vector.x).isCloseTo(other.x)
+                }
+                it("should have y set") {
+                    assert(vector.y).isCloseTo(other.y)
+                }
+                it("should have z set") {
+                    assert(vector.z).isCloseTo(other.z)
+                }
+            }
+
             on("Vector2") {
                 counter = 0
                 val other = getRandomVector2()
@@ -893,6 +940,7 @@ object Vector3Spec: Spek({
 })
 
 private fun getRandomValue() = random(-100f, 100f)
+private fun getRandomPoint() = Point(getRandomValue(), getRandomValue(), getRandomValue())
 private fun getRandomVector2() = Vector2(getRandomValue(), getRandomValue())
 private fun getRandomVector3() = Vector3(getRandomValue(), getRandomValue(), getRandomValue())
 private fun getRandomVector4() = Vector4(getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue())

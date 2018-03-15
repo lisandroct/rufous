@@ -14,6 +14,7 @@ package org.rufousengine.math
 class MutableVector3(x: Float = 0f, y: Float = 0f, z: Float = 0f, observer: ((Vector3) -> Unit)? = null) : Vector3(x, y, z) {
     val observer = observer
 
+    constructor(point: Point, observer: ((Vector3) -> Unit)? = null) : this(point.components, observer)
     constructor(other: Vector2, observer: ((Vector3) -> Unit)? = null) : this(other.x, other.y, 0f, observer)
     constructor(other: Vector3, observer: ((Vector3) -> Unit)? = null) : this(other.components, observer)
     constructor(other: Vector4, observer: ((Vector3) -> Unit)? = null) : this(other.components, observer)
@@ -53,6 +54,7 @@ class MutableVector3(x: Float = 0f, y: Float = 0f, z: Float = 0f, observer: ((Ve
             observer?.invoke(this)
         }
 
+    fun set(point: Point) = set(point.components)
     fun set(other: Vector2) = set(other.x, other.y, 0f)
     fun set(other: Vector3) = set(other.components)
     fun set(other: Vector4) = set(other.components)

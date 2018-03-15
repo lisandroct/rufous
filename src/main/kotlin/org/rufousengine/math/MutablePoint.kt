@@ -17,7 +17,7 @@ class MutablePoint(x: Float = 0f, y: Float = 0f, z: Float = 0f, observer: ((Poin
     constructor(other: Point, observer: ((Point) -> Unit)? = null) : this(other.components, observer)
     constructor(vector: Vector2, observer: ((Point) -> Unit)? = null) : this(vector.x, vector.y, 0f, observer)
     constructor(vector: Vector3, observer: ((Point) -> Unit)? = null) : this(vector.components, observer)
-    constructor(vector: Vector4, observer: ((Point) -> Unit)? = null) : this(vector.components, observer)
+    constructor(vector: Vector4, observer: ((Point) -> Unit)? = null) : this(vector.x / vector.w, vector.y / vector.w, vector.z / vector.w, observer)
     constructor(components: FloatArray, observer: ((Point) -> Unit)? = null) : this(components[0], components[1], components[2], observer)
 
     override var x: Float
@@ -57,7 +57,11 @@ class MutablePoint(x: Float = 0f, y: Float = 0f, z: Float = 0f, observer: ((Poin
     open fun set(other: Point) = set(other.components)
     open fun set(vector: Vector2) = set(vector.x, vector.y, 0f)
     open fun set(vector: Vector3) = set(vector.components)
-    open fun set(vector: Vector4) = set(vector.components)
+    open fun set(vector: Vector4) : Point {
+        val invW = 1 / vector.w
+
+        return set(vector.x * invW, vector.y * invW, vector.z * invW)
+    }
     open fun set(components: FloatArray) = set(components[0], components[1], components[2])
     open fun set(x: Float = 0f, y: Float = 0f, z: Float = 0f) : MutablePoint {
         if(equals(x, y, z)) {

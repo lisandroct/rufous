@@ -30,7 +30,7 @@ open class Point(x: Float = 0f, y: Float = 0f, z: Float = 0f) {
     constructor(other: Point) : this(other.components)
     constructor(vector: Vector2) : this(vector.x, vector.y, 0f)
     constructor(vector: Vector3) : this(vector.components)
-    constructor(vector: Vector4) : this(vector.components)
+    constructor(vector: Vector4) : this(vector.x / vector.w, vector.y / vector.w, vector.z / vector.w)
     constructor(components: FloatArray) : this(components[0], components[1], components[2])
 
     open val x: Float

@@ -43,6 +43,7 @@ open class Vector3(x: Float = 0f, y: Float = 0f, z: Float = 0f) {
     /** The components of this vector. Do not change its values directly unless you know what you're doing. */
     val components = floatArrayOf(x, y, z)
 
+    constructor(point: Point) : this(point.components)
     constructor(other: Vector2) : this(other.x, other.y, 0f)
     constructor(other: Vector3) : this(other.components)
     constructor(other: Vector4) : this(other.components)

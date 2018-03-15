@@ -87,6 +87,13 @@ object Matrix4Spec: Spek({
                 assert(matrix.e33).isCloseTo(e33)
             }
         }
+        on("Projection") {
+            val other = getRandomProjection()
+            val matrix = Matrix4(other)
+            it("should be equal to other") {
+                assert(matrix).isEqualTo(other)
+            }
+        }
         on("Matrix4") {
             val other = getRandomMatrix()
             val matrix = Matrix4(other)
@@ -194,6 +201,16 @@ object Matrix4Spec: Spek({
             }
             it("should have e33 set") {
                 assert(matrix.e33).isCloseTo(e33)
+            }
+            it("should have the observer set") {
+                assert(matrix.observer).isNotNull()
+            }
+        }
+        on("Projection") {
+            val other = getRandomProjection()
+            val matrix = MutableMatrix4(other) { }
+            it("should be equal to other") {
+                assert(matrix).isEqualTo(other)
             }
             it("should have the observer set") {
                 assert(matrix.observer).isNotNull()
@@ -891,6 +908,18 @@ object Matrix4Spec: Spek({
                 }
                 it("should has e33 set") {
                     assert(matrix.e33).isCloseTo(value)
+                }
+            }
+
+            on("Projection") {
+                counter = 0
+                val other = getRandomProjection()
+                matrix.set(other)
+                it("should have notified once") {
+                    assert(counter).isEqualTo(1)
+                }
+                it("should be equal to other") {
+                    assert(matrix).isEqualTo(other)
                 }
             }
 

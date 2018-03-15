@@ -76,13 +76,13 @@ object PointSpec: Spek({
             val vector = getRandomVector4()
             val point = Point(vector)
             it("should have x set") {
-                assert(point.x).isCloseTo(vector.x)
+                assert(point.x).isCloseTo(vector.x / vector.w)
             }
             it("should have y set") {
-                assert(point.y).isCloseTo(vector.y)
+                assert(point.y).isCloseTo(vector.y / vector.w)
             }
             it("should have z set") {
-                assert(point.z).isCloseTo(vector.z)
+                assert(point.z).isCloseTo(vector.z / vector.w)
             }
         }
     }
@@ -167,13 +167,13 @@ object PointSpec: Spek({
             val vector = getRandomVector4()
             val point = MutablePoint(vector) { }
             it("should have x set") {
-                assert(point.x).isCloseTo(vector.x)
+                assert(point.x).isCloseTo(vector.x / vector.w)
             }
             it("should have y set") {
-                assert(point.y).isCloseTo(vector.y)
+                assert(point.y).isCloseTo(vector.y / vector.w)
             }
             it("should have z set") {
-                assert(point.z).isCloseTo(vector.z)
+                assert(point.z).isCloseTo(vector.z / vector.w)
             }
             it("should have the observer set") {
                 assert(point.observer).isNotNull()
@@ -458,13 +458,13 @@ object PointSpec: Spek({
                     assert(counter).isEqualTo(1)
                 }
                 it("should have x set") {
-                    assert(point.x).isCloseTo(vector.x)
+                    assert(point.x).isCloseTo(vector.x / vector.w)
                 }
                 it("should have y set") {
-                    assert(point.y).isCloseTo(vector.y)
+                    assert(point.y).isCloseTo(vector.y / vector.w)
                 }
                 it("should have z set") {
-                    assert(point.z).isCloseTo(vector.z)
+                    assert(point.z).isCloseTo(vector.z / vector.w)
                 }
             }
 

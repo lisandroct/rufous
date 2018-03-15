@@ -34,6 +34,22 @@ object Vector4Spec: Spek({
                 assert(vector.w).isCloseTo(w)
             }
         }
+        on("Point") {
+            val other = getRandomPoint()
+            val vector = Vector4(other)
+            it("should have x set") {
+                assert(vector.x).isCloseTo(other.x)
+            }
+            it("should have y set") {
+                assert(vector.y).isCloseTo(other.y)
+            }
+            it("should have z set") {
+                assert(vector.z).isCloseTo(other.z)
+            }
+            it("w should be 1") {
+                assert(vector.w).isCloseTo(1f)
+            }
+        }
         on("Vector2") {
             val other = getRandomVector2()
             val vector = Vector4(other)
@@ -102,6 +118,25 @@ object Vector4Spec: Spek({
             }
             it("should have w set") {
                 assert(vector.w).isCloseTo(w)
+            }
+            it("should have the observer set") {
+                assert(vector.observer).isNotNull()
+            }
+        }
+        on("Vector3") {
+            val other = getRandomPoint()
+            val vector = MutableVector4(other) { }
+            it("should have x set") {
+                assert(vector.x).isCloseTo(other.x)
+            }
+            it("should have y set") {
+                assert(vector.y).isCloseTo(other.y)
+            }
+            it("should have z set") {
+                assert(vector.z).isCloseTo(other.z)
+            }
+            it("w should be 1") {
+                assert(vector.w).isCloseTo(1f)
             }
             it("should have the observer set") {
                 assert(vector.observer).isNotNull()
@@ -559,6 +594,27 @@ object Vector4Spec: Spek({
                 }
             }
 
+            on("Point") {
+                counter = 0
+                val other = getRandomPoint()
+                vector.set(other)
+                it("should have notified once") {
+                    assert(counter).isEqualTo(1)
+                }
+                it("should have x set") {
+                    assert(vector.x).isCloseTo(other.x)
+                }
+                it("should have y set") {
+                    assert(vector.y).isCloseTo(other.y)
+                }
+                it("should have z set") {
+                    assert(vector.z).isCloseTo(other.z)
+                }
+                it("w should be 1") {
+                    assert(vector.w).isCloseTo(1f)
+                }
+            }
+
             on("Vector2") {
                 counter = 0
                 val other = getRandomVector2()
@@ -832,6 +888,7 @@ object Vector4Spec: Spek({
 })
 
 private fun getRandomValue() = random(-100f, 100f)
+private fun getRandomPoint() = Point(getRandomValue(), getRandomValue(), getRandomValue())
 private fun getRandomVector2() = Vector2(getRandomValue(), getRandomValue())
 private fun getRandomVector3() = Vector3(getRandomValue(), getRandomValue(), getRandomValue())
 private fun getRandomVector4() = Vector4(getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue())

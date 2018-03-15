@@ -15,6 +15,7 @@ class MutableMatrix4(e00: Float, e01: Float, e02: Float, e03: Float, e10: Float,
     val observer = observer
 
     constructor(observer: ((Matrix4) -> Unit)? = null) : this(1f, 0f, 0f, 0f, 0f, 1f, 0f, 0f, 0f, 0f, 1f, 0f, 0f, 0f, 0f, 1f, observer)
+    constructor(other: Projection, observer: ((Matrix4) -> Unit)? = null) : this(other.components, observer)
     constructor(other: Matrix4, observer: ((Matrix4) -> Unit)? = null) : this(other.components, observer)
     constructor(components: FloatArray, observer: ((Matrix4) -> Unit)? = null) : this(
             components[0], components[1], components[2], components[3],
@@ -368,6 +369,9 @@ class MutableMatrix4(e00: Float, e01: Float, e02: Float, e03: Float, e10: Float,
      */
     fun multiplyLeft(other: Projection) = multiplyLeft(other, this)
 
+    /**
+     * Sets this matrix as a symmetric orthographic projection.
+     */
     fun setOrthographic(width: Float, height: Float, near: Float, far: Float) : MutableMatrix4 {
         if(width < 0f || height < 0f || near <= 0f) {
             throw IllegalArgumentException("width, height and near must be positives.")
@@ -392,7 +396,9 @@ class MutableMatrix4(e00: Float, e01: Float, e02: Float, e03: Float, e10: Float,
                 0f, 0f, e32, 1f
         )
     }
-
+    /**
+     * Sets this matrix as an orthographic projection.
+     */
     fun setOrthographic(top: Float, bottom: Float, right: Float, left: Float, near: Float, far: Float) : MutableMatrix4 {
         if(top < 0f || right < 0f || near <= 0f) {
             throw IllegalArgumentException("top, right and near must be positives.")
@@ -423,7 +429,9 @@ class MutableMatrix4(e00: Float, e01: Float, e02: Float, e03: Float, e10: Float,
                 e30, e31, e32, e33
         )
     }
-
+    /**
+     * Sets this matrix as a symmetric perspective projection.
+     */
     fun setPerspective(fieldOfView: Float, aspectRatio: Float, near: Float, far: Float) : MutableMatrix4 {
         if(fieldOfView <= 0f || fieldOfView > 180f) {
             throw IllegalArgumentException("fieldOfView must be in range (0, 180]")
@@ -448,7 +456,9 @@ class MutableMatrix4(e00: Float, e01: Float, e02: Float, e03: Float, e10: Float,
                 0f, 0f, e32, 0f
         )
     }
-
+    /**
+     * Sets this matrix as a perspective projection.
+     */
     fun setPerspective(top: Float, bottom: Float, right: Float, left: Float, near: Float, far: Float) : MutableMatrix4 {
         if(top < 0f || right < 0f || near <= 0f) {
             throw IllegalArgumentException("top, right and near must be positives.")
