@@ -1,5 +1,7 @@
 package org.rufousengine.math
 
+import kotlin.math.tan
+
 /**
  * A mutable 4x4 row-major matrix.
  *
@@ -233,6 +235,7 @@ class MutableMatrix4(e00: Float, e01: Float, e02: Float, e03: Float, e10: Float,
             return _inverse
         }
 
+    fun set(other: Projection) = set(other.components)
     fun set(other: Matrix4) = set(other.components)
     fun set(components: FloatArray) = set(
             components[0], components[1], components[2], components[3],
@@ -349,4 +352,131 @@ class MutableMatrix4(e00: Float, e01: Float, e02: Float, e03: Float, e10: Float,
      * @return This matrix for chaining.
      */
     fun multiplyLeft(other: Matrix4) = multiplyLeft(other, this)
+
+    /**
+     * Multiplies this matrix with [other].
+     *
+     * @param[other] The other matrix.
+     * @return This matrix for chaining.
+     */
+    fun multiply(other: Projection) = multiply(other, this)
+    /**
+     * Multiplies [other] with this matrix.
+     *
+     * @param[other] The other matrix.
+     * @return This matrix for chaining.
+     */
+    fun multiplyLeft(other: Projection) = multiplyLeft(other, this)
+
+    fun setOrthographic(width: Float, height: Float, near: Float, far: Float) : MutableMatrix4 {
+        if(width < 0f || height < 0f || near <= 0f) {
+            throw IllegalArgumentException("width, height and near must be positives.")
+        }
+        if(far <= near) {
+            throw IllegalArgumentException("far must be greater than near.")
+        }
+
+        val a = 1 / (far - near)
+        val r = width * 0.5f
+        val t = height * 0.5f
+
+        val e00 = 1 / r
+        val e11 = 1 / t
+        val e22 = -2 * a
+        val e32 = -(far + near) * a
+
+        return set(
+                e00, 0f, 0f, 0f,
+                0f, e11, 0f, 0f,
+                0f, 0f, e22, 0f,
+                0f, 0f, e32, 1f
+        )
+    }
+
+    fun setOrthographic(top: Float, bottom: Float, right: Float, left: Float, near: Float, far: Float) : MutableMatrix4 {
+        if(top < 0f || right < 0f || near <= 0f) {
+            throw IllegalArgumentException("top, right and near must be positives.")
+        }
+        if(bottom > 0f || left > 0f) {
+            throw IllegalArgumentException("bottom and left must be negatives.")
+        }
+        if(far <= near) {
+            throw IllegalArgumentException("far must be greater than near.")
+        }
+
+        val a = 1 / (right - left)
+        val b = 1 / (top - bottom)
+        val c = 1 / (far - near)
+
+        val e00 = 2 * a
+        val e11 = 2 * b
+        val e22 = -2f * c
+        val e30 = -(right + left) * a
+        val e31 = -(top + bottom) * b
+        val e32 = -(far + near) * c
+        val e33 = 1f
+
+        return set(
+                e00, 0f, 0f, 0f,
+                0f, e11, 0f, 0f,
+                0f, 0f, e22, 0f,
+                e30, e31, e32, e33
+        )
+    }
+
+    fun setPerspective(fieldOfView: Float, aspectRatio: Float, near: Float, far: Float) : MutableMatrix4 {
+        if(fieldOfView <= 0f || fieldOfView > 180f) {
+            throw IllegalArgumentException("fieldOfView must be in range (0, 180]")
+        }
+        if(aspectRatio < 0f || near <= 0f) {
+            throw IllegalArgumentException("aspectRatio and near must be positives.")
+        }
+        if(far <= near) {
+            throw IllegalArgumentException("far must be greater than near.")
+        }
+
+        val a = 1f / tan(fieldOfView.toRadians() * 0.5f)
+        val b = 1f / (far - near)
+        val e00 = a / aspectRatio
+        val e22 = -(far + near) * b
+        val e32 = -2f * far * near * b
+
+        return set(
+                e00, 0f, 0f, 0f,
+                0f, a, 0f, 0f,
+                0f, 0f, e22, -1f,
+                0f, 0f, e32, 0f
+        )
+    }
+
+    fun setPerspective(top: Float, bottom: Float, right: Float, left: Float, near: Float, far: Float) : MutableMatrix4 {
+        if(top < 0f || right < 0f || near <= 0f) {
+            throw IllegalArgumentException("top, right and near must be positives.")
+        }
+        if(bottom > 0f || left > 0f) {
+            throw IllegalArgumentException("bottom and left must be negatives.")
+        }
+        if(far <= near) {
+            throw IllegalArgumentException("far must be greater than near.")
+        }
+
+        val a = 2f * near
+        val b = 1 / (right - left)
+        val c = 1 / (top - bottom)
+        val d = 1 / (far - near)
+
+        val e00 = a * b
+        val e11 = a * c
+        val e20 = (right + left) * b
+        val e21 = (top + bottom) * c
+        val e22 = -(far + near) * d
+        val e32 = -a * far * d
+
+        return set(
+                e00, 0f, 0f, 0f,
+                0f, e11, 0f, 0f,
+                e20, e21, e22, -1f,
+                0f, 0f, e32, 0f
+        )
+    }
 }

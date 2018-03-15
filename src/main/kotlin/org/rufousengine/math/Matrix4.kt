@@ -20,6 +20,7 @@ open class Matrix4(e00: Float, e01: Float, e02: Float, e03: Float, e10: Float, e
     val components = floatArrayOf(e00, e01, e02, e03, e10, e11, e12, e13, e20, e21, e22, e23, e30, e31, e32, e33)
 
     constructor() : this(1f, 0f, 0f, 0f, 0f, 1f, 0f, 0f, 0f, 0f, 1f, 0f, 0f, 0f, 0f, 1f)
+    constructor(other: Projection) : this(other.components)
     constructor(other: Matrix4) : this(other.components)
     constructor(components: FloatArray) : this(
             components[0], components[1], components[2], components[3],
@@ -263,93 +264,118 @@ open class Matrix4(e00: Float, e01: Float, e02: Float, e03: Float, e10: Float, e
             transpose(out) // if M is orthogonal then inv(M) = conjugate(M)
         } else {
             if (isTransformation) {
-                Cached.a.set(e00, e10, e20)
-                Cached.b.set(e01, e11, e21)
-                Cached.c.set(e02, e12, e22)
-                Cached.d.set(e03, e13, e23)
+                val a = Cached.a
+                val b = Cached.b
+                val c = Cached.c
+                val d = Cached.d
+                val s = Cached.s
+                val t = Cached.t
+                val v = Cached.v
+                val r0 = Cached.r0
+                val r1 = Cached.r1
 
-                // s = a cross b
-                Cached.a.cross(Cached.b, Cached.s)
-                // t = c cross d
-                Cached.c.cross(Cached.d, Cached.t)
-                // u = a * g - b * r = 0
-                // v = c * a - d * b = c
+                a.set(e00, e10, e20)
+                b.set(e01, e11, e21)
+                c.set(e02, e12, e22)
+                d.set(e03, e13, e23)
 
-                // det = s . v + t . u = s . c
-                val invDet = 1 / (Cached.s dot Cached.c)
+                // s = a.cross(b)
+                a.cross(b, s)
+                // t = c.cross(d)
+                c.cross(d, t)
+                // u = a.scale(y) - b.scale(x) = 0
+                // v = c.scale(w) - d.scale(z) = c
 
-                Cached.s *= invDet
-                Cached.t *= invDet
+                // det = s.dot(v) + t.dot(u) = s.dot(c)
+                val invDet = 1 / (s dot c)
 
-                Cached.c.scale(invDet, Cached.v)
+                s *= invDet
+                t *= invDet
 
-                // r0 = b cross v + t * g = b cross v
-                Cached.b.cross(Cached.v, Cached.r0)
-                // r1 = v cross a - t * cross = v cross a
-                Cached.v.cross(Cached.a, Cached.r1)
-                // r2 = d cross u + s * a = s
-                // r3 = u cross c - s * b = 0
+                c.scale(invDet, v)
+
+                // r0 = b.cross(v) + t.scale(y) = b.cross(v)
+                b.cross(v, r0)
+                // r1 = v.cross(a) - t.scale(x) = v.cross(a)
+                v.cross(a, r1)
+                // r2 = d.cross(u) + s.scale(w) = s
+                // r3 = u.cross(c) - s.scale(z) = 0
 
                 out.set(
-                        Cached.r0.x, Cached.r0.y, Cached.r0.z, -(Cached.b dot Cached.t),
-                        Cached.r1.x, Cached.r1.y, Cached.r1.z, (Cached.a dot Cached.t),
-                        Cached.s.x, Cached.s.y, Cached.s.z, -(Cached.d dot Cached.s),
+                        r0.x, r0.y, r0.z, -(b dot t),
+                        r1.x, r1.y, r1.z, (a dot t),
+                        s.x, s.y, s.z, -(d dot s),
                         0.0f, 0.0f, 0.0f, 1.0f
                 )
             } else {
-                Cached.a.set(e00, e10, e20)
-                Cached.b.set(e01, e11, e21)
-                Cached.c.set(e02, e12, e22)
-                Cached.d.set(e03, e13, e23)
+                val a = Cached.a
+                val b = Cached.b
+                val c = Cached.c
+                val d = Cached.d
+                val s = Cached.s
+                val t = Cached.t
+                val u = Cached.u
+                val v = Cached.v
+                val r0 = Cached.r0
+                val r1 = Cached.r1
+                val r2 = Cached.r2
+                val r3 = Cached.r3
+                val t0 = Cached.t0
+                val t1 = Cached.t1
+
+                a.set(e00, e10, e20)
+                b.set(e01, e11, e21)
+                c.set(e02, e12, e22)
+                d.set(e03, e13, e23)
 
                 val x = e30
                 val y = e31
                 val z = e32
                 val w = e33
 
-                // s = a cross b
-                Cached.a.cross(Cached.b, Cached.s)
-                // t = c cross d
-                Cached.c.cross(Cached.d, Cached.t)
-                // u = a * g - b * r
-                Cached.a.scale(y, Cached.t0)
-                Cached.b.scale(x, Cached.t1)
-                Cached.t0.subtract(Cached.t1, Cached.u)
-                // v = c * a - d * b
-                Cached.c.scale(w, Cached.t0)
-                Cached.d.scale(z, Cached.t1)
-                Cached.t0.subtract(Cached.t1, Cached.v)
+                // s = a.cross(b)
+                a.cross(b, s)
+                // t = c.cross(d)
+                c.cross(d, t)
+                // u = a.scale(y) - b.scale(x)
+                a.scale(y, t0)
+                b.scale(x, t1)
+                t0.subtract(t1, u)
+                // v = c.scale(w) - d.scale(z)
+                c.scale(w, t0)
+                d.scale(z, t1)
+                t0.subtract(t1, v)
 
-                // det = s . v + t . u
-                val invDet = 1 / ((Cached.s dot Cached.v) + (Cached.t dot Cached.u))
+                // det = s.dot(v) + t.dot(u)
+                val invDet = 1 / ((s dot v) + (t dot u))
 
-                Cached.s *= invDet
-                Cached.t *= invDet
-                Cached.u *= invDet
-                Cached.v *= invDet
+                s *= invDet
+                t *= invDet
+                u *= invDet
+                v *= invDet
 
-                // r0 = b cross v + t * g
-                Cached.b.cross(Cached.v, Cached.t0)
-                Cached.t.scale(y, Cached.t1)
-                Cached.t0.add(Cached.t1, Cached.r0)
-                // r1 = v cross a - t * r
-                Cached.v.cross(Cached.a, Cached.t0)
-                Cached.t.scale(x, Cached.t1)
-                Cached.t0.subtract(Cached.t1, Cached.r1)
-                // r2 = d cross u + s * a
-                Cached.d.cross(Cached.u, Cached.t0)
-                Cached.s.scale(w, Cached.t1)
-                Cached.t0.add(Cached.t1, Cached.r2)
-                // r3 = u cross c - s * b
-                Cached.u.cross(Cached.c, Cached.t0)
-                Cached.s.scale(z, Cached.t1)
-                Cached.t0.subtract(Cached.t1, Cached.r3)
+                // r0 = b.cross(v) + t.scale(y)
+                b.cross(v, t0)
+                t.scale(y, t1)
+                t0.add(t1, r0)
+                // r1 = v.cross(a) - t.scale(x)
+                v.cross(a, t0)
+                t.scale(x, t1)
+                t0.subtract(t1, r1)
+                // r2 = d.cross(u) + s.scale(w)
+                d.cross(u, t0)
+                s.scale(w, t1)
+                t0.add(t1, r2)
+                // r3 = u.cross(c) - s.scale(z)
+                u.cross(c, t0)
+                s.scale(z, t1)
+                t0.subtract(t1, r3)
 
                 out.set(
-                        Cached.r0.x, Cached.r0.y, Cached.r0.z, -(Cached.b dot Cached.t),
-                        Cached.r1.x, Cached.r1.y, Cached.r1.z, (Cached.a dot Cached.t),
-                        Cached.r2.x, Cached.r2.y, Cached.r2.z, -(Cached.d dot Cached.s),
-                        Cached.r3.x, Cached.r3.y, Cached.r3.z, (Cached.c dot Cached.s)
+                        r0.x, r0.y, r0.z, -(b dot t),
+                        r1.x, r1.y, r1.z, (a dot t),
+                        r2.x, r2.y, r2.z, -(d dot s),
+                        r3.x, r3.y, r3.z, (c dot s)
                 )
             }
         }
@@ -451,6 +477,58 @@ open class Matrix4(e00: Float, e01: Float, e02: Float, e03: Float, e10: Float, e
     fun multiplyLeft(other: Matrix4, out: MutableMatrix4) = other.multiply(this, out)
 
     /**
+     * Multiplies this matrix with [other].
+     *
+     * @param[other] The other matrix.
+     * @param[out] The output matrix.
+     * @return The output matrix for chaining.
+     */
+    fun multiply(other: Projection, out: MutableMatrix4) : MutableMatrix4 {
+        if(isIdentity) {
+            return out.set(other)
+        }
+
+        if(other.isIdentity) {
+            return out.set(this)
+        }
+
+        val e00 = this.e00 * other.e00
+        val e01 = this.e01 * other.e11
+        val e02 = this.e02 * other.e22 + this.e03 * other.e32
+        val e03 = this.e02 * other.e23 + this.e03 * other.e33
+
+        val e10 = this.e10 * other.e00
+        val e11 = this.e11 * other.e11
+        val e12 = this.e12 * other.e22 + this.e13 * other.e32
+        val e13 = this.e12 * other.e23 + this.e13 * other.e33
+
+        val e20 = this.e20 * other.e00
+        val e21 = this.e21 * other.e11
+        val e22 = this.e22 * other.e22 + this.e23 * other.e32
+        val e23 = this.e22 * other.e23 + this.e23 * other.e33
+
+        val e30 = this.e30 * other.e00
+        val e31 = this.e31 * other.e11
+        val e32 = this.e32 * other.e22 + this.e33 * other.e32
+        val e33 = this.e32 * other.e23 + this.e33 * other.e33
+
+        return out.set(
+                e00, e01, e02, e03,
+                e10, e11, e12, e13,
+                e20, e21, e22, e23,
+                e30, e31, e32, e33
+        )
+    }
+    /**
+     * Multiplies [other] with this matrix.
+     *
+     * @param[other] The other matrix.
+     * @param[out] The output matrix.
+     * @return The output matrix for chaining.
+     */
+    fun multiplyLeft(other: Projection, out: MutableMatrix4) = other.multiply(this, out)
+
+    /**
      * Multiplies this matrix with [vector].
      *
      * @param[vector] The vector.
@@ -484,25 +562,54 @@ open class Matrix4(e00: Float, e01: Float, e02: Float, e03: Float, e10: Float, e
      * @param[out] The output vector.
      * @return The output vector for chaining.
      */
-    fun multiply(vector: Vector3, out: MutableVector3) = multiply(vector.x, vector.y, vector.z, out)
+    fun multiply(vector: Vector3, out: MutableVector4) = multiply(vector.x, vector.y, vector.z, out)
     /**
      * Multiplies this matrix with ([x], [y], [z], 0).
      *
      * @param[out] The output vector.
      * @return The output vector for chaining.
      */
-    fun multiply(x: Float, y: Float, z: Float, out: MutableVector3) : MutableVector3 {
+    fun multiply(x: Float, y: Float, z: Float, out: MutableVector4) : MutableVector4 {
         if(isIdentity) {
-            return out.set(x, y, z)
+            return out.set(x, y, z, 0f)
         }
 
         val nx = e00 * x + e01 * y + e02 * z
         val ny = e10 * x + e11 * y + e12 * z
         val nz = e20 * x + e21 * y + e22 * z
+        val nw = e30 * x + e31 * y + e32 * z
 
-        return out.set(nx, ny, nz)
+        return out.set(nx, ny, nz, nw)
     }
-    
+
+    /**
+     * Multiplies this matrix with [point]. It assumes vector's fourth component to be 0.
+     *
+     * @param[point] The point.
+     * @param[out] The output point.
+     * @return The output point for chaining.
+     */
+    fun multiply(point: Point, out: MutablePoint) = multiply(point.x, point.y, point.z, out)
+    /**
+     * Multiplies this matrix with ([x], [y], [z], 1).
+     *
+     * @param[out] The output point.
+     * @return The output point for chaining.
+     */
+    fun multiply(x: Float, y: Float, z: Float, out: MutablePoint) : MutablePoint {
+        if(isIdentity) {
+            return out.set(x, y, z)
+        }
+
+        val nx = e00 * x + e01 * y + e02 * z + e03
+        val ny = e10 * x + e11 * y + e12 * z + e13
+        val nz = e20 * x + e21 * y + e22 * z + e23
+        val nw = e30 * x + e31 * y + e32 * z + e33
+
+        return out.set(nx, ny, nz).scale(1 / nw)
+    }
+
+    fun equals(other: Projection) = equals(other.e00, 0f, 0f, 0f, 0f, other.e11, 0f, 0f, 0f, 0f, other.e22, other.e23, 0f, 0f, other.e32, other.e33)
     fun equals(other: Matrix4) = equals(other.e00, other.e01, other.e02, other.e03, other.e10, other.e11, other.e12, other.e13, other.e20, other.e21, other.e22, other.e23, other.e30, other.e31, other.e32, other.e33)
     fun equals(e00: Float, e01: Float, e02: Float, e03: Float, e10: Float, e11: Float, e12: Float, e13: Float, e20: Float, e21: Float, e22: Float, e23: Float, e30: Float, e31: Float, e32: Float, e33: Float) : Boolean {
         return this.e00 isCloseTo e00 && this.e01 isCloseTo e01 && this.e02 isCloseTo e02 && this.e03 isCloseTo e03 &&
@@ -518,11 +625,11 @@ open class Matrix4(e00: Float, e01: Float, e02: Float, e03: Float, e10: Float, e
             return true
         }
 
-        if(other !is Matrix4) {
-            return false
+        return when(other) {
+            is Projection -> equals(other)
+            is Matrix4 -> equals(other)
+            else -> false
         }
-
-        return equals(other)
     }
 
     override fun hashCode() = Arrays.hashCode(components)

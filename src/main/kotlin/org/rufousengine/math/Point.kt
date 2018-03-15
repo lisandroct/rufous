@@ -217,6 +217,27 @@ open class Point(x: Float = 0f, y: Float = 0f, z: Float = 0f) {
      */
     fun max(x: Float, y: Float, z: Float, out: MutablePoint) = out.set(max(this.x, x), max(this.y, y), max(this.z, z))
 
+    /**
+     * Multiplies [matrix] with this point.
+     *
+     * Wrapper to [Matrix4.multiply].
+     *
+     * @param[matrix] The matrix.
+     * @param[out] The output point.
+     * @return The output point for chaining.
+     */
+    fun multiplyLeft(matrix: Matrix4, out: MutablePoint) = matrix.multiply(this, out)
+    /**
+     * Multiplies [projection] with this point.
+     *
+     * Wrapper to [Projection.multiply].
+     *
+     * @param[projection] The projection.
+     * @param[out] The output point.
+     * @return The output point for chaining.
+     */
+    fun multiplyLeft(projection: Projection, out: MutablePoint) = projection.multiply(this, out)
+
     fun equals(other: Point) = equals(other.x, other.y, other.z)
     fun equals(x: Float, y: Float, z: Float) = this.x isCloseTo x && this.y isCloseTo y && this.z isCloseTo z
 

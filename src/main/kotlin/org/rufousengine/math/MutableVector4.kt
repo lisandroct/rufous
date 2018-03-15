@@ -216,4 +216,13 @@ class MutableVector4(x: Float = 0f, y: Float = 0f, z: Float = 0f, w: Float = 0f,
      * @return This vector for chaining.
      */
     fun multiplyLeft(matrix: Matrix4) = multiplyLeft(matrix, this)
+    /**
+     * Multiplies [projection] with this vector.
+     *
+     * Wrapper to [Projection.multiply].
+     *
+     * @param[projection] The projection.
+     * @return This vector for chaining.
+     */
+    fun multiplyLeft(projection: Projection) = multiplyLeft(projection, this)
 }

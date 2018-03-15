@@ -303,8 +303,11 @@ open class Vector2(x: Float = 0f, y: Float = 0f) {
             return true
         }
 
-        if(other !is Vector2) {
-            return false
+        return when(other) {
+            is Vector2 -> equals(other)
+            is Vector3 -> equals(other)
+            is Vector4 -> equals(other)
+            else -> false
         }
 
         return equals(other)

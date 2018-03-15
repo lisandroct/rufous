@@ -335,7 +335,17 @@ open class Vector3(x: Float = 0f, y: Float = 0f, z: Float = 0f) {
      * @param[out] The output vector.
      * @return The output vector for chaining.
      */
-    fun multiplyLeft(matrix: Matrix4, out: MutableVector3) = matrix.multiply(this, out)
+    fun multiplyLeft(matrix: Matrix4, out: MutableVector4) = matrix.multiply(this, out)
+    /**
+     * Multiplies [projection] with this vector.
+     *
+     * Wrapper to [Projection.multiply].
+     *
+     * @param[projection] The projection.
+     * @param[out] The output vector.
+     * @return The output vector for chaining.
+     */
+    fun multiplyLeft(projection: Projection, out: MutableVector4) = projection.multiply(this, out)
 
     /**
      * Rotates this vector with [quaternion].
@@ -372,8 +382,11 @@ open class Vector3(x: Float = 0f, y: Float = 0f, z: Float = 0f) {
             return true
         }
 
-        if(other !is Vector3) {
-            return false
+        return when(other) {
+            is Vector2 -> equals(other)
+            is Vector3 -> equals(other)
+            is Vector4 -> equals(other)
+            else -> false
         }
 
         return equals(other)

@@ -264,6 +264,26 @@ object PointSpec: Spek({
                 }
             }
         }
+
+        on("multiplyLeft (Matrix4)") {
+            val matrix = getRandomMatrix4()
+            val multiplied = point.multiplyLeft(matrix, MutablePoint())
+            it("should give the same results as Matrix4::multiply") {
+                val expected = matrix.multiply(point, MutablePoint())
+
+                assert(multiplied).isEqualTo(expected)
+            }
+        }
+
+        on("multiplyLeft (Projection)") {
+            val matrix = getRandomProjection()
+            val multiplied = point.multiplyLeft(matrix, MutablePoint())
+            it("should give the same results as Projection::multiply") {
+                val expected = matrix.multiply(point, MutablePoint())
+
+                assert(multiplied).isEqualTo(expected)
+            }
+        }
     }
 
     given("two points") {
@@ -660,6 +680,28 @@ object PointSpec: Spek({
                 assert(point).isEqualTo(expected)
             }
         }
+
+        on("multiplyLeft (Matrix4)") {
+            val original = point.copyImmutable()
+            val matrix = getRandomMatrix4()
+            point.multiplyLeft(matrix)
+            it("should multiplyLeft and assign") {
+                val expected = original.multiplyLeft(matrix, MutablePoint())
+
+                assert(point).isEqualTo(expected)
+            }
+        }
+
+        on("multiplyLeft (Projection)") {
+            val original = point.copyImmutable()
+            val matrix = getRandomProjection()
+            point.multiplyLeft(matrix)
+            it("should multiplyLeft and assign") {
+                val expected = original.multiplyLeft(matrix, MutablePoint())
+
+                assert(point).isEqualTo(expected)
+            }
+        }
     }
 })
 
@@ -669,3 +711,20 @@ private fun getRandomVector2() = Vector2(getRandomValue(), getRandomValue())
 private fun getRandomVector3() = Vector3(getRandomValue(), getRandomValue(), getRandomValue())
 private fun getRandomVector4() = Vector4(getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue())
 private fun getRandomMutable(observer: ((Point) -> Unit)) = MutablePoint(getRandomValue(), getRandomValue(), getRandomValue(), observer)
+private fun getRandomMatrix4() = Matrix4(
+        getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue(),
+        getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue(),
+        getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue(),
+        getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue()
+)
+private fun getRandomProjection() : Projection {
+    val p = MutableProjection()
+    p.set(
+            getRandomValue(),
+            getRandomValue(),
+            getRandomValue(), getRandomValue(),
+            getRandomValue(), getRandomValue()
+    )
+
+    return Projection(p)
+}

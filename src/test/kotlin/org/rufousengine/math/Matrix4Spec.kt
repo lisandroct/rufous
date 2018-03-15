@@ -8,7 +8,9 @@ import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
 import org.rufousengine.assertions.isCloseTo
+import kotlin.math.abs
 import kotlin.math.pow
+import kotlin.math.tan
 
 object Matrix4Spec: Spek({
     describe("immutable constructors") {
@@ -549,6 +551,40 @@ object Matrix4Spec: Spek({
             }
         }
 
+        on("multiply (Projection)") {
+            val other = getRandomProjection()
+            val multiply = matrix.multiply(other, MutableMatrix4())
+            it("should has every (i, j) entry as a linear combination of A's i-row and B's j-column") {
+                for (i in 0 until 4) {
+                    for(j in 0 until 4) {
+                        var expected = 0f
+                        for(k in 0 until 4) {
+                            expected += matrix[i, k] * other[k, j]
+                        }
+
+                        assert(multiply[i, j]).isCloseTo(expected)
+                    }
+                }
+            }
+        }
+
+        on("multiplyLeft (Projection)") {
+            val other = getRandomProjection()
+            val multiply = matrix.multiplyLeft(other, MutableMatrix4())
+            it("should has every (i, j) entry as a linear combination of B's i-row and A's j-column") {
+                for (i in 0 until 4) {
+                    for(j in 0 until 4) {
+                        var expected = 0f
+                        for(k in 0 until 4) {
+                            expected += other[i, k] * matrix[k, j]
+                        }
+
+                        assert(multiply[i, j]).isCloseTo(expected)
+                    }
+                }
+            }
+        }
+
         on("multiply (Vector4)") {
             val vector = getRandomVector4()
             val new = matrix.multiply(vector, MutableVector4())
@@ -566,15 +602,37 @@ object Matrix4Spec: Spek({
 
         on("multiply (Vector3)") {
             val vector = getRandomVector3()
-            val new = matrix.multiply(vector, MutableVector3())
+            val new = matrix.multiply(vector, MutableVector4())
             it("should has every (i, j) entry as a linear combination of matrix' i-row and vector's components") {
-                for (i in 0 until 3) {
+                for (i in 0 until 4) {
                     var expected = 0f
                     for(k in 0 until 3) {
                         expected += matrix[i, k] * vector[k]
                     }
 
                     assert(new[i]).isCloseTo(expected)
+                }
+            }
+        }
+
+        on("multiply (Point)") {
+            val point = getRandomPoint()
+            val new = matrix.multiply(point, MutablePoint())
+            it("should has every (i, j) entry as a linear combination of matrix' i-row and point's components") {
+                var w = 0f
+                for(k in 0 until 3) {
+                    w += matrix[3, k] * point[k]
+                }
+                w += matrix[3, 3]
+
+                for (i in 0 until 3) {
+                    var expected = 0f
+                    for(k in 0 until 3) {
+                        expected += matrix[i, k] * point[k]
+                    }
+                    expected += matrix[i, 3]
+
+                    assert(new[i]).isCloseTo(expected / w)
                 }
             }
         }
@@ -1182,12 +1240,126 @@ object Matrix4Spec: Spek({
                 assert(matrix).isEqualTo(expected)
             }
         }
+
+        on("multiply (Projection)") {
+            val original = matrix.copyImmutable()
+            val other = getRandomProjection()
+            matrix.multiply(other)
+            it("should multiply and assign") {
+                val expected = original.multiply(other, MutableMatrix4())
+
+                assert(matrix).isEqualTo(expected)
+            }
+        }
+
+        on("multiplyLeft (Projection)") {
+            val original = matrix.copyImmutable()
+            val other = getRandomProjection()
+            matrix.multiplyLeft(other)
+            it("should multiplyLeft and assign") {
+                val expected = original.multiplyLeft(other, MutableMatrix4())
+
+                assert(matrix).isEqualTo(expected)
+            }
+        }
+
+        on("setOrthographic (complete)") {
+            val top = getPositiveValue()
+            val bottom = getNegativeValue()
+            val right = getPositiveValue()
+            val left = getNegativeValue()
+            val near = getPositiveValue()
+            val far = near * getPositiveValue()
+
+            matrix.setOrthographic(top, bottom, right, left, near, far)
+            it("should suffice the definition") {
+                val expected = Matrix4(
+                        2f / (right - left), 0f, 0f, 0f,
+                        0f, 2f / (top - bottom), 0f, 0f,
+                        0f, 0f, -2f / (far - near), 0f,
+                        -(right + left) / (right - left), -(top + bottom) / (top - bottom), -(far + near) / (far - near), 1f
+                )
+
+                assert(matrix).isEqualTo(expected)
+            }
+        }
+
+        on("setOrthographic (convenient)") {
+            val width = getPositiveValue()
+            val height = getPositiveValue()
+            val near = getPositiveValue()
+            val far = near * getPositiveValue()
+
+            matrix.setOrthographic(width, height, near, far)
+            it("should be equal to complete alternative") {
+                val top = height * 0.5f
+                val bottom = -top
+                val right = width * 0.5f
+                val left = -right
+                val expected = MutableMatrix4().setOrthographic(top, bottom, right, left, near, far)
+
+                assert(matrix).isEqualTo(expected)
+            }
+        }
+
+        on("setPerspective (complete)") {
+            val top = getPositiveValue()
+            val bottom = getNegativeValue()
+            val right = getPositiveValue()
+            val left = getNegativeValue()
+            val near = getPositiveValue()
+            val far = near * getPositiveValue()
+
+            matrix.setPerspective(top, bottom, right, left, near, far)
+            it("should suffice the definition") {
+                val expected = Matrix4(
+                        (2f * near) / (right - left), 0f, 0f, 0f,
+                        0f, (2f * near) / (top - bottom), 0f, 0f,
+                        (right + left) / (right - left), (top + bottom) / (top - bottom), -(far + near) / (far - near), -1f,
+                        0f, 0f, -(2f * far * near) / (far - near), 0f
+                )
+
+                assert(matrix).isEqualTo(expected)
+            }
+        }
+
+        on("setPerspective (convenient)") {
+            val fieldOfView = random(30f, 160f)
+            val aspectRatio = getPositiveValue()
+            val near = getPositiveValue()
+            val far = near * getPositiveValue()
+
+            matrix.setPerspective(fieldOfView, aspectRatio, near, far)
+            it("should be equal to complete alternative") {
+                val top = tan(fieldOfView.toRadians() / 2f) * near
+                val bottom = -top
+                val right = top * aspectRatio
+                val left = -right
+                val expected = MutableMatrix4().setPerspective(top, bottom, right, left, near, far)
+
+                assert(matrix).isEqualTo(expected)
+            }
+        }
     }
 })
 
 private fun getRandomValue() = random(-100f, 100f)
+private fun getPositiveValue() = random(1f, 100f)
+private fun getNegativeValue() = random(-100f, -1f)
 private fun getRandomVector3() = Vector3(getRandomValue(), getRandomValue(), getRandomValue())
 private fun getRandomVector4() = Vector4(getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue())
+private fun getRandomPoint() = Point(getRandomValue(), getRandomValue(), getRandomValue())
+private fun getRandomProjection() : Projection {
+    val p = MutableProjection()
+    p.set(
+            getRandomValue(),
+            getRandomValue(),
+            getRandomValue(), getRandomValue(),
+            getRandomValue(), getRandomValue()
+    )
+
+    return Projection(p)
+}
 private fun getRandomMatrix() = Matrix4(
         getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue(),
         getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue(),
