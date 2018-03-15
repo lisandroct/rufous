@@ -307,7 +307,7 @@ object QuaternionSpec: Spek({
         on("getMatrixRepresentation (Matrix4)") {
             val matrix = quaternion.getMatrixRepresentation(MutableMatrix4())
             val vector = getRandomVector3()
-            val rotated = matrix.multiply(vector, MutableVector4())
+            val rotated = matrix.multiply(vector, MutableVector3())
             it("should give the same results as the quaternion") {
                 val expected = quaternion.transformSafe(vector, MutableVector3())
 

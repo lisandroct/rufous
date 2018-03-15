@@ -442,24 +442,23 @@ open class Projection {
      * @param[out] The output vector.
      * @return The output vector for chaining.
      */
-    fun multiply(vector: Vector3, out: MutableVector4) = multiply(vector.x, vector.y, vector.z, out)
+    fun multiply(vector: Vector3, out: MutableVector3) = multiply(vector.x, vector.y, vector.z, out)
     /**
      * Multiplies this matrix with ([x], [y], [z], 0).
      *
      * @param[out] The output vector.
      * @return The output vector for chaining.
      */
-    fun multiply(x: Float, y: Float, z: Float, out: MutableVector4) : MutableVector4 {
+    fun multiply(x: Float, y: Float, z: Float, out: MutableVector3) : MutableVector3 {
         if(isIdentity) {
-            return out.set(x, y, z, 0f)
+            return out.set(x, y, z)
         }
 
         val nx = e00 * x
         val ny = e11 * y
         val nz = e22 * z
-        val nw = e32 * z
 
-        return out.set(nx, ny, nz, nw)
+        return out.set(nx, ny, nz)
     }
 
     /**

@@ -562,24 +562,23 @@ open class Matrix4(e00: Float, e01: Float, e02: Float, e03: Float, e10: Float, e
      * @param[out] The output vector.
      * @return The output vector for chaining.
      */
-    fun multiply(vector: Vector3, out: MutableVector4) = multiply(vector.x, vector.y, vector.z, out)
+    fun multiply(vector: Vector3, out: MutableVector3) = multiply(vector.x, vector.y, vector.z, out)
     /**
      * Multiplies this matrix with ([x], [y], [z], 0).
      *
      * @param[out] The output vector.
      * @return The output vector for chaining.
      */
-    fun multiply(x: Float, y: Float, z: Float, out: MutableVector4) : MutableVector4 {
+    fun multiply(x: Float, y: Float, z: Float, out: MutableVector3) : MutableVector3 {
         if(isIdentity) {
-            return out.set(x, y, z, 0f)
+            return out.set(x, y, z)
         }
 
         val nx = e00 * x + e01 * y + e02 * z
         val ny = e10 * x + e11 * y + e12 * z
         val nz = e20 * x + e21 * y + e22 * z
-        val nw = e30 * x + e31 * y + e32 * z
 
-        return out.set(nx, ny, nz, nw)
+        return out.set(nx, ny, nz)
     }
 
     /**

@@ -411,9 +411,9 @@ object Vector3Spec: Spek({
 
         on("multiplyLeft (Matrix4)") {
             val matrix = getRandomMatrix4()
-            val multiplied = vector.multiplyLeft(matrix, MutableVector4())
+            val multiplied = vector.multiplyLeft(matrix, MutableVector3())
             it("should give the same results as Matrix4::multiply") {
-                val expected = matrix.multiply(vector, MutableVector4())
+                val expected = matrix.multiply(vector, MutableVector3())
 
                 assert(multiplied).isEqualTo(expected)
             }
@@ -421,9 +421,9 @@ object Vector3Spec: Spek({
 
         on("multiplyLeft (Projection)") {
             val matrix = getRandomProjection()
-            val multiplied = vector.multiplyLeft(matrix, MutableVector4())
+            val multiplied = vector.multiplyLeft(matrix, MutableVector3())
             it("should give the same results as Projection::multiply") {
-                val expected = matrix.multiply(vector, MutableVector4())
+                val expected = matrix.multiply(vector, MutableVector3())
 
                 assert(multiplied).isEqualTo(expected)
             }
@@ -846,27 +846,27 @@ object Vector3Spec: Spek({
             }
         }
 
-//        on("multiplyLeft (Matrix4)") {
-//            val original = vector.copyImmutable()
-//            val matrix = getRandomMatrix4()
-//            vector.multiplyLeft(matrix)
-//            it("should multiplyLeft and assign") {
-//                val expected = original.multiplyLeft(matrix, MutableVector3())
-//
-//                assert(vector).isEqualTo(expected)
-//            }
-//        }
-//
-//        on("multiplyLeft (Projection)") {
-//            val original = vector.copyImmutable()
-//            val matrix = getRandomProjection()
-//            vector.multiplyLeft(matrix)
-//            it("should multiplyLeft and assign") {
-//                val expected = original.multiplyLeft(matrix, MutableVector3())
-//
-//                assert(vector).isEqualTo(expected)
-//            }
-//        }
+        on("multiplyLeft (Matrix4)") {
+            val original = vector.copyImmutable()
+            val matrix = getRandomMatrix4()
+            vector.multiplyLeft(matrix)
+            it("should multiplyLeft and assign") {
+                val expected = original.multiplyLeft(matrix, MutableVector3())
+
+                assert(vector).isEqualTo(expected)
+            }
+        }
+
+        on("multiplyLeft (Projection)") {
+            val original = vector.copyImmutable()
+            val matrix = getRandomProjection()
+            vector.multiplyLeft(matrix)
+            it("should multiplyLeft and assign") {
+                val expected = original.multiplyLeft(matrix, MutableVector3())
+
+                assert(vector).isEqualTo(expected)
+            }
+        }
 
         on("transformSafe") {
             val original = vector.copyImmutable()

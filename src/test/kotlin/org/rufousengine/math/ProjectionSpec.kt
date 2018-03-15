@@ -301,9 +301,9 @@ object ProjectionSpec: Spek({
 
         on("multiply (Vector3)") {
             val vector = getRandomVector3()
-            val new = matrix.multiply(vector, MutableVector4())
+            val new = matrix.multiply(vector, MutableVector3())
             it("should has every (i, j) entry as a linear combination of matrix' i-row and vector's components") {
-                for (i in 0 until 4) {
+                for (i in 0 until 3) {
                     var expected = 0f
                     for(k in 0 until 3) {
                         expected += matrix[i, k] * vector[k]

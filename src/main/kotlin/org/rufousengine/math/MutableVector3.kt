@@ -217,24 +217,24 @@ class MutableVector3(x: Float = 0f, y: Float = 0f, z: Float = 0f, observer: ((Ve
      * @return This vector for chaining.
      */
     fun multiplyLeft(matrix: Matrix3) = multiplyLeft(matrix, this)
-//    /**
-//     * Multiplies [matrix] with this vector.
-//     *
-//     * Wrapper to [Matrix4.multiply].
-//     *
-//     * @param[matrix] The matrix.
-//     * @return This vector for chaining.
-//     */
-//    fun multiplyLeft(matrix: Matrix4) = multiplyLeft(matrix, this)
-//    /**
-//     * Multiplies [projection] with this vector.
-//     *
-//     * Wrapper to [Projection.multiply].
-//     *
-//     * @param[projection] The projection.
-//     * @return This vector for chaining.
-//     */
-//    fun multiplyLeft(projection: Projection) = multiplyLeft(projection, this)
+    /**
+     * Multiplies [matrix] with this vector.
+     *
+     * Wrapper to [Matrix4.multiply].
+     *
+     * @param[matrix] The matrix.
+     * @return This vector for chaining.
+     */
+    fun multiplyLeft(matrix: Matrix4) = multiplyLeft(matrix, this)
+    /**
+     * Multiplies [projection] with this vector.
+     *
+     * Wrapper to [Projection.multiply].
+     *
+     * @param[projection] The projection.
+     * @return This vector for chaining.
+     */
+    fun multiplyLeft(projection: Projection) = multiplyLeft(projection, this)
 
     /**
      * Rotates this vector with [quaternion].
