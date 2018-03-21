@@ -124,4 +124,98 @@ class MutableTransformation : Transformation {
      * @return This matrix for chaining.
      */
     fun multiplyLeft(other: Transformation) = multiplyLeft(other, this)
+
+    /**
+     * Sets this matrix as a rotation matrix.
+     *
+     * Performs the rotation about the x axis.
+     *
+     * @param[angle] The angle in degrees.
+     * @return This matrix for chaining.
+     */
+    fun makeRotationX(angle: Float) : MutableTransformation {
+        val c = cos(angle)
+        val s = sin(angle)
+
+        return set(
+                1f, 0f, 0f, 0f,
+                0f, c, -s, 0f,
+                0f, s, c, 0f
+        )
+    }
+
+    /**
+     * Sets this matrix as a rotation matrix.
+     *
+     * Performs the rotation about the y axis.
+     *
+     * @param[angle] The angle in degrees.
+     * @return This matrix for chaining.
+     */
+    fun makeRotationY(angle: Float) : MutableTransformation {
+        val c = cos(angle)
+        val s = sin(angle)
+
+        return set(
+                c, 0f, s, 0f,
+                0f, 1f, 0f, 0f,
+                -s, 0f, c, 0f
+        )
+    }
+
+    /**
+     * Sets this matrix as a rotation matrix.
+     *
+     * Performs the rotation about the z axis.
+     *
+     * @param[angle] The angle in degrees.
+     * @return This matrix for chaining.
+     */
+    fun makeRotationZ(angle: Float) : MutableTransformation {
+        val c = cos(angle)
+        val s = sin(angle)
+
+        return set(
+                c, -s, 0f, 0f,
+                s, c, 0f, 0f,
+                0f, 0f, 1f, 0f
+        )
+    }
+
+    /**
+     * Sets this matrix as a rotation matrix through [angle] about [axis].
+     *
+     * @param[angle] The angle in degrees.
+     * @param[axis] The axis.
+     * @return This matrix for chaining.
+     */
+    fun makeRotation(angle: Float, axis: Vector3) = makeRotation(angle, axis.x, axis.y, axis.z)
+
+    /**
+     * Sets this matrix as a rotation matrix through [angle] about ([aX], [aY], [aZ]).
+     *
+     * @param[angle] The angle in degrees.
+     * @return This matrix for chaining.
+     */
+    fun makeRotation(angle: Float, aX: Float, aY: Float, aZ: Float) : MutableTransformation {
+        val c = cos(angle)
+        val s = sin(angle)
+        val d = 1f - c
+
+        val x = aX * d
+        val y = aY * d
+        val z = aZ * d
+        val axay = x * aY
+        val axaz = x * aZ
+        val ayaz = y * aZ
+        val saz = s * aZ
+        val say = s * aY
+        val sax = s * aX
+
+        return set(
+                c + x * aX, axay - saz, axaz + say, 0f,
+                axay + saz, c + y * aY, ayaz - sax, 0f,
+                axaz - say, ayaz + sax, c + z * aZ, 0f
+        )
+    }
 }

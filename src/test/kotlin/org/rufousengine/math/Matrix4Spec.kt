@@ -1502,7 +1502,7 @@ object Matrix4Spec: Spek({
             }
         }
 
-        on("setOrthographic (complete)") {
+        on("makeOrthographic (complete)") {
             val top = getPositiveValue()
             val bottom = getNegativeValue()
             val right = getPositiveValue()
@@ -1510,7 +1510,7 @@ object Matrix4Spec: Spek({
             val near = getPositiveValue()
             val far = near * getPositiveValue()
 
-            matrix.setOrthographic(top, bottom, right, left, near, far)
+            matrix.makeOrthographic(top, bottom, right, left, near, far)
             it("should suffice the definition") {
                 val expected = Matrix4(
                         2f / (right - left), 0f, 0f, 0f,
@@ -1523,25 +1523,25 @@ object Matrix4Spec: Spek({
             }
         }
 
-        on("setOrthographic (convenient)") {
+        on("makeOrthographic (convenient)") {
             val width = getPositiveValue()
             val height = getPositiveValue()
             val near = getPositiveValue()
             val far = near * getPositiveValue()
 
-            matrix.setOrthographic(width, height, near, far)
+            matrix.makeOrthographic(width, height, near, far)
             it("should be equal to complete alternative") {
                 val top = height * 0.5f
                 val bottom = -top
                 val right = width * 0.5f
                 val left = -right
-                val expected = MutableMatrix4().setOrthographic(top, bottom, right, left, near, far)
+                val expected = MutableMatrix4().makeOrthographic(top, bottom, right, left, near, far)
 
                 assert(matrix).isEqualTo(expected)
             }
         }
 
-        on("setPerspective (complete)") {
+        on("makePerspective (complete)") {
             val top = getPositiveValue()
             val bottom = getNegativeValue()
             val right = getPositiveValue()
@@ -1549,7 +1549,7 @@ object Matrix4Spec: Spek({
             val near = getPositiveValue()
             val far = near * getPositiveValue()
 
-            matrix.setPerspective(top, bottom, right, left, near, far)
+            matrix.makePerspective(top, bottom, right, left, near, far)
             it("should suffice the definition") {
                 val expected = Matrix4(
                         (2f * near) / (right - left), 0f, 0f, 0f,
@@ -1562,21 +1562,117 @@ object Matrix4Spec: Spek({
             }
         }
 
-        on("setPerspective (convenient)") {
+        on("makePerspective (convenient)") {
             val fieldOfView = random(30f, 160f)
             val aspectRatio = getPositiveValue()
             val near = getPositiveValue()
             val far = near * getPositiveValue()
 
-            matrix.setPerspective(fieldOfView, aspectRatio, near, far)
+            matrix.makePerspective(fieldOfView, aspectRatio, near, far)
             it("should be equal to complete alternative") {
                 val top = tan(fieldOfView.toRadians() / 2f) * near
                 val bottom = -top
                 val right = top * aspectRatio
                 val left = -right
-                val expected = MutableMatrix4().setPerspective(top, bottom, right, left, near, far)
+                val expected = MutableMatrix4().makePerspective(top, bottom, right, left, near, far)
 
                 assert(matrix).isEqualTo(expected)
+            }
+        }
+
+        on("makeRotationX") {
+            val angle = getRandomValue()
+            matrix.makeRotationX(angle)
+            it("should suffice the definition") {
+                assert(matrix.e00).isCloseTo(1f)
+                assert(matrix.e01).isCloseTo(0f)
+                assert(matrix.e02).isCloseTo(0f)
+                assert(matrix.e03).isCloseTo(0f)
+                assert(matrix.e10).isCloseTo(0f)
+                assert(matrix.e11).isCloseTo(cos(angle))
+                assert(matrix.e12).isCloseTo(-sin(angle))
+                assert(matrix.e13).isCloseTo(0f)
+                assert(matrix.e20).isCloseTo(0f)
+                assert(matrix.e21).isCloseTo(sin(angle))
+                assert(matrix.e22).isCloseTo(cos(angle))
+                assert(matrix.e23).isCloseTo(0f)
+                assert(matrix.e30).isCloseTo(0f)
+                assert(matrix.e31).isCloseTo(0f)
+                assert(matrix.e32).isCloseTo(0f)
+                assert(matrix.e33).isCloseTo(1f)
+            }
+        }
+
+        on("makeRotationY") {
+            val angle = getRandomValue()
+            matrix.makeRotationY(angle)
+            it("should suffice the definition") {
+                assert(matrix.e00).isCloseTo(cos(angle))
+                assert(matrix.e01).isCloseTo(0f)
+                assert(matrix.e02).isCloseTo(sin(angle))
+                assert(matrix.e03).isCloseTo(0f)
+                assert(matrix.e10).isCloseTo(0f)
+                assert(matrix.e11).isCloseTo(1f)
+                assert(matrix.e12).isCloseTo(0f)
+                assert(matrix.e13).isCloseTo(0f)
+                assert(matrix.e20).isCloseTo(-sin(angle))
+                assert(matrix.e21).isCloseTo(0f)
+                assert(matrix.e22).isCloseTo(cos(angle))
+                assert(matrix.e23).isCloseTo(0f)
+                assert(matrix.e30).isCloseTo(0f)
+                assert(matrix.e31).isCloseTo(0f)
+                assert(matrix.e32).isCloseTo(0f)
+                assert(matrix.e33).isCloseTo(1f)
+            }
+        }
+
+        on("makeRotationZ") {
+            val angle = getRandomValue()
+            matrix.makeRotationZ(angle)
+            it("should suffice the definition") {
+                assert(matrix.e00).isCloseTo(cos(angle))
+                assert(matrix.e01).isCloseTo(-sin(angle))
+                assert(matrix.e02).isCloseTo(0f)
+                assert(matrix.e03).isCloseTo(0f)
+                assert(matrix.e10).isCloseTo(sin(angle))
+                assert(matrix.e11).isCloseTo(cos(angle))
+                assert(matrix.e12).isCloseTo(0f)
+                assert(matrix.e13).isCloseTo(0f)
+                assert(matrix.e20).isCloseTo(0f)
+                assert(matrix.e21).isCloseTo(0f)
+                assert(matrix.e22).isCloseTo(1f)
+                assert(matrix.e23).isCloseTo(0f)
+                assert(matrix.e30).isCloseTo(0f)
+                assert(matrix.e31).isCloseTo(0f)
+                assert(matrix.e32).isCloseTo(0f)
+                assert(matrix.e33).isCloseTo(1f)
+            }
+        }
+
+        on("makeRotationZ") {
+            val angle = getRandomValue()
+            val axis = getRandomVector3()
+            matrix.makeRotation(angle, axis)
+            it("should suffice the definition") {
+                assert(matrix.e00).isCloseTo(cos(angle) + (1 - cos(angle)) * axis.x.pow(2))
+                assert(matrix.e01).isCloseTo((1 - cos(angle)) * axis.x * axis.y - sin(angle) * axis.z)
+                assert(matrix.e02).isCloseTo((1 - cos(angle)) * axis.x * axis.z + sin(angle) * axis.y)
+                assert(matrix.e03).isCloseTo(0f)
+
+                assert(matrix.e10).isCloseTo((1 - cos(angle)) * axis.x * axis.y + sin(angle) * axis.z)
+                assert(matrix.e11).isCloseTo(cos(angle) + (1 - cos(angle)) * axis.y.pow(2))
+                assert(matrix.e12).isCloseTo((1 - cos(angle)) * axis.y * axis.z - sin(angle) * axis.x)
+                assert(matrix.e13).isCloseTo(0f)
+
+                assert(matrix.e20).isCloseTo((1 - cos(angle)) * axis.x * axis.z - sin(angle) * axis.y)
+                assert(matrix.e21).isCloseTo((1 - cos(angle)) * axis.y * axis.z + sin(angle) * axis.x)
+                assert(matrix.e22).isCloseTo(cos(angle) + (1 - cos(angle)) * axis.z.pow(2))
+                assert(matrix.e23).isCloseTo(0f)
+
+                assert(matrix.e30).isCloseTo(0f)
+                assert(matrix.e31).isCloseTo(0f)
+                assert(matrix.e32).isCloseTo(0f)
+                assert(matrix.e33).isCloseTo(1f)
             }
         }
     }

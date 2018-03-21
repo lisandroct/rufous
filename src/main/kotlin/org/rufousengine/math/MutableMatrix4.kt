@@ -445,7 +445,7 @@ class MutableMatrix4(e00: Float, e01: Float, e02: Float, e03: Float, e10: Float,
      * @param[far] The distance to the far plan in world units. Must be greater than [near].
      * @return This matrix for chaining.
      */
-    fun setOrthographic(width: Float, height: Float, near: Float, far: Float) : MutableMatrix4 {
+    fun makeOrthographic(width: Float, height: Float, near: Float, far: Float) : MutableMatrix4 {
         if(width < 0f || height < 0f || near <= 0f) {
             throw IllegalArgumentException("width, height and near must be positives.")
         }
@@ -474,7 +474,7 @@ class MutableMatrix4(e00: Float, e01: Float, e02: Float, e03: Float, e10: Float,
      *
      * @return This matrix for chaining.
      */
-    fun setOrthographic(top: Float, bottom: Float, right: Float, left: Float, near: Float, far: Float) : MutableMatrix4 {
+    fun makeOrthographic(top: Float, bottom: Float, right: Float, left: Float, near: Float, far: Float) : MutableMatrix4 {
         if(top < 0f || right < 0f || near <= 0f) {
             throw IllegalArgumentException("top, right and near must be positives.")
         }
@@ -513,7 +513,7 @@ class MutableMatrix4(e00: Float, e01: Float, e02: Float, e03: Float, e10: Float,
      * @param[far] The distance to the far plan in world units. Must be greater than [near].
      * @return This matrix for chaining.
      */
-    fun setPerspective(fieldOfView: Float, aspectRatio: Float, near: Float, far: Float) : MutableMatrix4 {
+    fun makePerspective(fieldOfView: Float, aspectRatio: Float, near: Float, far: Float) : MutableMatrix4 {
         if(fieldOfView <= 0f || fieldOfView > 180f) {
             throw IllegalArgumentException("fieldOfView must be in range (0, 180]")
         }
@@ -542,7 +542,7 @@ class MutableMatrix4(e00: Float, e01: Float, e02: Float, e03: Float, e10: Float,
      *
      * @return This matrix for chaining.
      */
-    fun setPerspective(top: Float, bottom: Float, right: Float, left: Float, near: Float, far: Float) : MutableMatrix4 {
+    fun makePerspective(top: Float, bottom: Float, right: Float, left: Float, near: Float, far: Float) : MutableMatrix4 {
         if(top < 0f || right < 0f || near <= 0f) {
             throw IllegalArgumentException("top, right and near must be positives.")
         }
@@ -570,6 +570,104 @@ class MutableMatrix4(e00: Float, e01: Float, e02: Float, e03: Float, e10: Float,
                 0f, e11, 0f, 0f,
                 e20, e21, e22, -1f,
                 0f, 0f, e32, 0f
+        )
+    }
+
+    /**
+     * Sets this matrix as a rotation matrix.
+     *
+     * Performs the rotation about the x axis.
+     *
+     * @param[angle] The angle in degrees.
+     * @return This matrix for chaining.
+     */
+    fun makeRotationX(angle: Float) : MutableMatrix4 {
+        val c = cos(angle)
+        val s = sin(angle)
+
+        return set(
+                1f, 0f, 0f, 0f,
+                0f, c, -s, 0f,
+                0f, s, c, 0f,
+                0f, 0f, 0f, 1f
+        )
+    }
+
+    /**
+     * Sets this matrix as a rotation matrix.
+     *
+     * Performs the rotation about the y axis.
+     *
+     * @param[angle] The angle in degrees.
+     * @return This matrix for chaining.
+     */
+    fun makeRotationY(angle: Float) : MutableMatrix4 {
+        val c = cos(angle)
+        val s = sin(angle)
+
+        return set(
+                c, 0f, s, 0f,
+                0f, 1f, 0f, 0f,
+                -s, 0f, c, 0f,
+                0f, 0f, 0f, 1f
+        )
+    }
+
+    /**
+     * Sets this matrix as a rotation matrix.
+     *
+     * Performs the rotation about the z axis.
+     *
+     * @param[angle] The angle in degrees.
+     * @return This matrix for chaining.
+     */
+    fun makeRotationZ(angle: Float) : MutableMatrix4 {
+        val c = cos(angle)
+        val s = sin(angle)
+
+        return set(
+                c, -s, 0f, 0f,
+                s, c, 0f, 0f,
+                0f, 0f, 1f, 0f,
+                0f, 0f, 0f, 1f
+        )
+    }
+
+    /**
+     * Sets this matrix as a rotation matrix through [angle] about [axis].
+     *
+     * @param[angle] The angle in degrees.
+     * @param[axis] The axis.
+     * @return This matrix for chaining.
+     */
+    fun makeRotation(angle: Float, axis: Vector3) = makeRotation(angle, axis.x, axis.y, axis.z)
+
+    /**
+     * Sets this matrix as a rotation matrix through [angle] about ([aX], [aY], [aZ]).
+     *
+     * @param[angle] The angle in degrees.
+     * @return This matrix for chaining.
+     */
+    fun makeRotation(angle: Float, aX: Float, aY: Float, aZ: Float) : MutableMatrix4 {
+        val c = cos(angle)
+        val s = sin(angle)
+        val d = 1f - c
+
+        val x = aX * d
+        val y = aY * d
+        val z = aZ * d
+        val axay = x * aY
+        val axaz = x * aZ
+        val ayaz = y * aZ
+        val saz = s * aZ
+        val say = s * aY
+        val sax = s * aX
+
+        return set(
+                c + x * aX, axay - saz, axaz + say, 0f,
+                axay + saz, c + y * aY, ayaz - sax, 0f,
+                axaz - say, ayaz + sax, c + z * aZ, 0f,
+                0f, 0f, 0f, 1f
         )
     }
 }

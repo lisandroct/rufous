@@ -900,6 +900,73 @@ object Matrix3Spec: Spek({
                 assert(matrix).isEqualTo(expected)
             }
         }
+
+        on("makeRotationX") {
+            val angle = getRandomValue()
+            matrix.makeRotationX(angle)
+            it("should suffice the definition") {
+                assert(matrix.e00).isCloseTo(1f)
+                assert(matrix.e01).isCloseTo(0f)
+                assert(matrix.e02).isCloseTo(0f)
+                assert(matrix.e10).isCloseTo(0f)
+                assert(matrix.e11).isCloseTo(cos(angle))
+                assert(matrix.e12).isCloseTo(-sin(angle))
+                assert(matrix.e20).isCloseTo(0f)
+                assert(matrix.e21).isCloseTo(sin(angle))
+                assert(matrix.e22).isCloseTo(cos(angle))
+            }
+        }
+
+        on("makeRotationY") {
+            val angle = getRandomValue()
+            matrix.makeRotationY(angle)
+            it("should suffice the definition") {
+                assert(matrix.e00).isCloseTo(cos(angle))
+                assert(matrix.e01).isCloseTo(0f)
+                assert(matrix.e02).isCloseTo(sin(angle))
+                assert(matrix.e10).isCloseTo(0f)
+                assert(matrix.e11).isCloseTo(1f)
+                assert(matrix.e12).isCloseTo(0f)
+                assert(matrix.e20).isCloseTo(-sin(angle))
+                assert(matrix.e21).isCloseTo(0f)
+                assert(matrix.e22).isCloseTo(cos(angle))
+            }
+        }
+
+        on("makeRotationZ") {
+            val angle = getRandomValue()
+            matrix.makeRotationZ(angle)
+            it("should suffice the definition") {
+                assert(matrix.e00).isCloseTo(cos(angle))
+                assert(matrix.e01).isCloseTo(-sin(angle))
+                assert(matrix.e02).isCloseTo(0f)
+                assert(matrix.e10).isCloseTo(sin(angle))
+                assert(matrix.e11).isCloseTo(cos(angle))
+                assert(matrix.e12).isCloseTo(0f)
+                assert(matrix.e20).isCloseTo(0f)
+                assert(matrix.e21).isCloseTo(0f)
+                assert(matrix.e22).isCloseTo(1f)
+            }
+        }
+
+        on("makeRotationZ") {
+            val angle = getRandomValue()
+            val axis = getRandomVector3()
+            matrix.makeRotation(angle, axis)
+            it("should suffice the definition") {
+                assert(matrix.e00).isCloseTo(cos(angle) + (1 - cos(angle)) * axis.x.pow(2))
+                assert(matrix.e01).isCloseTo((1 - cos(angle)) * axis.x * axis.y - sin(angle) * axis.z)
+                assert(matrix.e02).isCloseTo((1 - cos(angle)) * axis.x * axis.z + sin(angle) * axis.y)
+
+                assert(matrix.e10).isCloseTo((1 - cos(angle)) * axis.x * axis.y + sin(angle) * axis.z)
+                assert(matrix.e11).isCloseTo(cos(angle) + (1 - cos(angle)) * axis.y.pow(2))
+                assert(matrix.e12).isCloseTo((1 - cos(angle)) * axis.y * axis.z - sin(angle) * axis.x)
+
+                assert(matrix.e20).isCloseTo((1 - cos(angle)) * axis.x * axis.z - sin(angle) * axis.y)
+                assert(matrix.e21).isCloseTo((1 - cos(angle)) * axis.y * axis.z + sin(angle) * axis.x)
+                assert(matrix.e22).isCloseTo(cos(angle) + (1 - cos(angle)) * axis.z.pow(2))
+            }
+        }
     }
 })
 

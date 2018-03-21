@@ -653,37 +653,37 @@ object ProjectionSpec: Spek({
             }
         }
 
-        on("setOrthographic") {
+        on("makeOrthographic") {
             val width = getPositiveValue()
             val height = getPositiveValue()
             val near = getPositiveValue()
             val far = near * getPositiveValue()
 
-            matrix.setOrthographic(width, height, near, far)
-            it("should give the same results as Matrix4::setOrthographic") {
+            matrix.makeOrthographic(width, height, near, far)
+            it("should give the same results as Matrix4::makeOrthographic") {
                 val top = height * 0.5f
                 val bottom = -top
                 val right = width * 0.5f
                 val left = -right
-                val expected = MutableMatrix4().setOrthographic(top, bottom, right, left, near, far)
+                val expected = MutableMatrix4().makeOrthographic(top, bottom, right, left, near, far)
 
                 assert(matrix).isEqualTo(expected)
             }
         }
 
-        on("setPerspective") {
+        on("makePerspective") {
             val fieldOfView = random(30f, 160f)
             val aspectRatio = getPositiveValue()
             val near = getPositiveValue()
             val far = near * getPositiveValue()
 
-            matrix.setPerspective(fieldOfView, aspectRatio, near, far)
-            it("should give the same results as Matrix4::setPerspective") {
+            matrix.makePerspective(fieldOfView, aspectRatio, near, far)
+            it("should give the same results as Matrix4::makePerspective") {
                 val top = tan(fieldOfView.toRadians() / 2f) * near
                 val bottom = -top
                 val right = top * aspectRatio
                 val left = -right
-                val expected = MutableMatrix4().setPerspective(top, bottom, right, left, near, far)
+                val expected = MutableMatrix4().makePerspective(top, bottom, right, left, near, far)
 
                 assert(matrix).isEqualTo(expected)
             }

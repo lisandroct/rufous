@@ -587,6 +587,47 @@ object TransformationSpec: Spek({
                 assert(matrix).isEqualTo(expected)
             }
         }
+
+        on("makeRotationX") {
+            val angle = getRandomValue()
+            matrix.makeRotationX(angle)
+            it("should give the same results as Matrix4::makeRotationZ") {
+                val expected = MutableMatrix4().makeRotationX(angle)
+
+                assert(matrix).isEqualTo(expected)
+            }
+        }
+
+        on("makeRotationY") {
+            val angle = getRandomValue()
+            matrix.makeRotationY(angle)
+            it("should give the same results as Matrix4::makeRotationZ") {
+                val expected = MutableMatrix4().makeRotationY(angle)
+
+                assert(matrix).isEqualTo(expected)
+            }
+        }
+
+        on("makeRotationZ") {
+            val angle = getRandomValue()
+            matrix.makeRotationZ(angle)
+            it("should give the same results as Matrix4::makeRotationZ") {
+                val expected = MutableMatrix4().makeRotationZ(angle)
+
+                assert(matrix).isEqualTo(expected)
+            }
+        }
+
+        on("makeRotationZ") {
+            val angle = getRandomValue()
+            val axis = getRandomVector3()
+            matrix.makeRotation(angle, axis)
+            it("should give the same results as Matrix4::makeRotation") {
+                val expected = MutableMatrix4().makeRotation(angle, axis)
+
+                assert(matrix).isEqualTo(expected)
+            }
+        }
     }
 })
 
