@@ -270,7 +270,7 @@ object QuaternionSpec: Spek({
             }
         }
 
-        on("inverse (val)") {
+        on("inverse") {
             val inverse = quaternion.inverse(MutableQuaternion())
             it("should be the multiplicative inverse to the right") {
                 assert(quaternion.multiply(inverse, MutableQuaternion())).isEqualTo(Quaternion.identity)
@@ -325,6 +325,62 @@ object QuaternionSpec: Spek({
             }
         }
 
+        on("add") {
+            val other = getRandomQuaternion()
+            val add = quaternion.add(other, MutableQuaternion())
+            it("should add componentwise") {
+                for (i in 0 until 4) {
+                    assert(add[i]).isCloseTo(quaternion[i] + other[i])
+                }
+            }
+        }
+
+        on("subtract") {
+            val other = getRandomQuaternion()
+            val subtract = quaternion.subtract(other, MutableQuaternion())
+            it("should subtract componentwise") {
+                for (i in 0 until 4) {
+                    assert(subtract[i]).isCloseTo(quaternion[i] - other[i])
+                }
+            }
+        }
+
+        on("multiply") {
+            val other = getRandomQuaternion()
+            val multiply = quaternion.multiply(other, MutableQuaternion())
+            it("should satisfy the equation q1q2 = v1 x v2 + s1v2 + s2v1 + s1s2 - v1 · v2") {
+                val va = quaternion.getVectorPart(MutableVector3())
+                val sa = quaternion.w
+                val vb = other.getVectorPart(MutableVector3())
+                val sb = other.w
+
+                val s = (sa * sb) - (va dot vb)
+                val v = va.cross(vb, MutableVector3()).add(va.scale(sb)).add(vb.scale(sa))
+
+                val expected = Quaternion(v, s)
+
+                assert(multiply).isEqualTo(expected)
+            }
+        }
+
+        on("multiplyLeft") {
+            val other = getRandomQuaternion()
+            val multiply = quaternion.multiplyLeft(other, MutableQuaternion())
+            it("should satisfy the equation q2q1 = v2 x v1 + s2v1 + s1v2 + s2s1 - v2 · v1") {
+                val vb = other.getVectorPart(MutableVector3())
+                val sb = other.w
+                val va = quaternion.getVectorPart(MutableVector3())
+                val sa = quaternion.w
+
+                val s = (sb * sa) - (vb dot va)
+                val v = vb.cross(va, MutableVector3()).add(vb.scale(sa)).add(va.scale(sb))
+
+                val expected = Quaternion(v, s)
+
+                assert(multiply).isEqualTo(expected)
+            }
+        }
+
         on("transformSafe") {
             val vector = getRandomVector3()
             val rotated = quaternion.transformSafe(vector, MutableVector3())
@@ -350,66 +406,9 @@ object QuaternionSpec: Spek({
         }
     }
 
-    given("two quaternions") {
-        val a by memoized { getRandomQuaternion() }
-        val b by memoized { getRandomQuaternion() }
-
-        on("add") {
-            val add = a.add(b, MutableQuaternion())
-            it("should add componentwise") {
-                for (i in 0 until 4) {
-                    assert(add[i]).isCloseTo(a[i] + b[i])
-                }
-            }
-        }
-
-        on("subtract") {
-            val subtract = a.subtract(b, MutableQuaternion())
-            it("should subtract componentwise") {
-                for (i in 0 until 4) {
-                    assert(subtract[i]).isCloseTo(a[i] - b[i])
-                }
-            }
-        }
-
-        on("multiply") {
-            val multiply = a.multiply(b, MutableQuaternion())
-            it("should satisfy the equation q1q2 = v1 x v2 + s1v2 + s2v1 + s1s2 - v1 · v2") {
-                val va = a.getVectorPart(MutableVector3())
-                val sa = a.w
-                val vb = b.getVectorPart(MutableVector3())
-                val sb = b.w
-
-                val s = (sa * sb) - (va dot vb)
-                val v = va.cross(vb, MutableVector3()).add(va.scale(sb)).add(vb.scale(sa))
-
-                val expected = Quaternion(v, s)
-
-                assert(multiply).isEqualTo(expected)
-            }
-        }
-
-        on("multiplyLeft") {
-            val multiply = a.multiplyLeft(b, MutableQuaternion())
-            it("should satisfy the equation q2q1 = v2 x v1 + s2v1 + s1v2 + s2s1 - v2 · v1") {
-                val vb = b.getVectorPart(MutableVector3())
-                val sb = b.w
-                val va = a.getVectorPart(MutableVector3())
-                val sa = a.w
-
-                val s = (sb * sa) - (vb dot va)
-                val v = vb.cross(va, MutableVector3()).add(vb.scale(sa)).add(va.scale(sb))
-
-                val expected = Quaternion(v, s)
-
-                assert(multiply).isEqualTo(expected)
-            }
-        }
-    }
-
     given("a mutable quaternion") {
         var counter = 0
-        val quaternion by memoized { getRandomMutable { counter++ } }
+        val quaternion by memoized { getRandomMutableQuaternion { counter++ } }
 
         describe("seters") {
             on("x") {
@@ -563,7 +562,7 @@ object QuaternionSpec: Spek({
                     assert(quaternion).isEqualTo(original.subtract(other))
                 }
             }
-            on("timesAssign (Float)") {
+            on("timesAssign") {
                 val original = quaternion.copyMutable()
                 val scalar = getRandomValue()
                 quaternion *= scalar
@@ -747,5 +746,5 @@ object QuaternionSpec: Spek({
 private fun getRandomValue() = random(-100f, 100f)
 private fun getRandomVector3() = Vector3(getRandomValue(), getRandomValue(), getRandomValue())
 private fun getRandomQuaternion() = Quaternion(getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue())
-private fun getRandomMutable(observer: ((Quaternion) -> Unit)) = MutableQuaternion(getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue(), observer)
+private fun getRandomMutableQuaternion(observer: ((Quaternion) -> Unit)) = MutableQuaternion(getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue(), observer)
 private fun MutableQuaternion.randomize() = this.set(getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue())

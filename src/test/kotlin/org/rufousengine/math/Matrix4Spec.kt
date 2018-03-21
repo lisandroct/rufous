@@ -8,7 +8,6 @@ import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
 import org.rufousengine.assertions.isCloseTo
-import kotlin.math.abs
 import kotlin.math.pow
 import kotlin.math.tan
 
@@ -95,7 +94,7 @@ object Matrix4Spec: Spek({
             }
         }
         on("Matrix4") {
-            val other = getRandomMatrix()
+            val other = getRandomMatrix4()
             val matrix = Matrix4(other)
             it("should be equal to other") {
                 assert(matrix).isEqualTo(other)
@@ -217,7 +216,7 @@ object Matrix4Spec: Spek({
             }
         }
         on("Matrix4") {
-            val other = getRandomMatrix()
+            val other = getRandomMatrix4()
             val matrix = MutableMatrix4(other) { }
             it("should be equal to other") {
                 assert(matrix).isEqualTo(other)
@@ -366,7 +365,7 @@ object Matrix4Spec: Spek({
     }
 
     given("a matrix") {
-        val matrix by memoized { getRandomMatrix() }
+        val matrix by memoized { getRandomMatrix4() }
 
         on("transpose (val)") {
             val transpose = matrix.transpose
@@ -377,9 +376,6 @@ object Matrix4Spec: Spek({
                     }
                 }
             }
-            it("should always be the same reference") {
-                assert(transpose).isSameAs(matrix.transpose)
-            }
         }
 
         on("inverse (val)") {
@@ -389,9 +385,6 @@ object Matrix4Spec: Spek({
             }
             it("should be the multiplicative inverse from the left") {
                 assert(inverse.multiply(matrix, MutableMatrix4())).isEqualTo(Matrix4.identity)
-            }
-            it("should always be the same reference") {
-                assert(inverse).isSameAs(matrix.inverse)
             }
         }
 
@@ -568,6 +561,78 @@ object Matrix4Spec: Spek({
             }
         }
 
+        on("add (Projection)") {
+            val other = getRandomProjection()
+            val add = matrix.add(other, MutableMatrix4())
+            it("should add componentwise") {
+                for (i in 0 until 4) {
+                    for(j in 0 until 4) {
+                        assert(add[i, j]).isCloseTo(matrix[i, j] + other[i, j])
+                    }
+                }
+            }
+        }
+
+        on("add (Transformation)") {
+            val other = getRandomTransformation()
+            val add = matrix.add(other, MutableMatrix4())
+            it("should add componentwise") {
+                for (i in 0 until 4) {
+                    for(j in 0 until 4) {
+                        assert(add[i, j]).isCloseTo(matrix[i, j] + other[i, j])
+                    }
+                }
+            }
+        }
+
+        on("add (Matrix4)") {
+            val other = getRandomMatrix4()
+            val add = matrix.add(other, MutableMatrix4())
+            it("should add componentwise") {
+                for (i in 0 until 4) {
+                    for(j in 0 until 4) {
+                        assert(add[i, j]).isCloseTo(matrix[i, j] + other[i, j])
+                    }
+                }
+            }
+        }
+
+        on("subtract (Projection)") {
+            val other = getRandomProjection()
+            val subtract = matrix.subtract(other, MutableMatrix4())
+            it("should subtract componentwise") {
+                for (i in 0 until 4) {
+                    for(j in 0 until 4) {
+                        assert(subtract[i, j]).isCloseTo(matrix[i, j] - other[i, j])
+                    }
+                }
+            }
+        }
+
+        on("subtract (Transformation)") {
+            val other = getRandomTransformation()
+            val subtract = matrix.subtract(other, MutableMatrix4())
+            it("should subtract componentwise") {
+                for (i in 0 until 4) {
+                    for(j in 0 until 4) {
+                        assert(subtract[i, j]).isCloseTo(matrix[i, j] - other[i, j])
+                    }
+                }
+            }
+        }
+
+        on("subtract (Matrix4)") {
+            val other = getRandomMatrix4()
+            val subtract = matrix.subtract(other, MutableMatrix4())
+            it("should subtract componentwise") {
+                for (i in 0 until 4) {
+                    for(j in 0 until 4) {
+                        assert(subtract[i, j]).isCloseTo(matrix[i, j] - other[i, j])
+                    }
+                }
+            }
+        }
+
         on("multiply (Projection)") {
             val other = getRandomProjection()
             val multiply = matrix.multiply(other, MutableMatrix4())
@@ -587,6 +652,74 @@ object Matrix4Spec: Spek({
 
         on("multiplyLeft (Projection)") {
             val other = getRandomProjection()
+            val multiply = matrix.multiplyLeft(other, MutableMatrix4())
+            it("should has every (i, j) entry as a linear combination of B's i-row and A's j-column") {
+                for (i in 0 until 4) {
+                    for(j in 0 until 4) {
+                        var expected = 0f
+                        for(k in 0 until 4) {
+                            expected += other[i, k] * matrix[k, j]
+                        }
+
+                        assert(multiply[i, j]).isCloseTo(expected)
+                    }
+                }
+            }
+        }
+
+        on("multiply (Transformation)") {
+            val other = getRandomTransformation()
+            val multiply = matrix.multiply(other, MutableMatrix4())
+            it("should has every (i, j) entry as a linear combination of A's i-row and B's j-column") {
+                for (i in 0 until 4) {
+                    for(j in 0 until 4) {
+                        var expected = 0f
+                        for(k in 0 until 4) {
+                            expected += matrix[i, k] * other[k, j]
+                        }
+
+                        assert(multiply[i, j]).isCloseTo(expected)
+                    }
+                }
+            }
+        }
+
+        on("multiplyLeft (Transformation)") {
+            val other = getRandomTransformation()
+            val multiply = matrix.multiplyLeft(other, MutableMatrix4())
+            it("should has every (i, j) entry as a linear combination of B's i-row and A's j-column") {
+                for (i in 0 until 4) {
+                    for(j in 0 until 4) {
+                        var expected = 0f
+                        for(k in 0 until 4) {
+                            expected += other[i, k] * matrix[k, j]
+                        }
+
+                        assert(multiply[i, j]).isCloseTo(expected)
+                    }
+                }
+            }
+        }
+
+        on("multiply (Matrix4)") {
+            val other = getRandomMatrix4()
+            val multiply = matrix.multiply(other, MutableMatrix4())
+            it("should has every (i, j) entry as a linear combination of A's i-row and B's j-column") {
+                for (i in 0 until 4) {
+                    for(j in 0 until 4) {
+                        var expected = 0f
+                        for(k in 0 until 4) {
+                            expected += matrix[i, k] * other[k, j]
+                        }
+
+                        assert(multiply[i, j]).isCloseTo(expected)
+                    }
+                }
+            }
+        }
+
+        on("multiplyLeft (Matrix4)") {
+            val other = getRandomMatrix4()
             val multiply = matrix.multiplyLeft(other, MutableMatrix4())
             it("should has every (i, j) entry as a linear combination of B's i-row and A's j-column") {
                 for (i in 0 until 4) {
@@ -654,69 +787,10 @@ object Matrix4Spec: Spek({
             }
         }
     }
-
-    given("two matrices") {
-        val a by memoized { getRandomMatrix() }
-        val b by memoized { getRandomMatrix() }
-
-        on("add") {
-            val add = a.add(b, MutableMatrix4())
-            it("should add componentwise") {
-                for (i in 0 until 4) {
-                    for(j in 0 until 4) {
-                        assert(add[i, j]).isCloseTo(a[i, j] + b[i, j])
-                    }
-                }
-            }
-        }
-
-        on("subtract") {
-            val subtract = a.subtract(b, MutableMatrix4())
-            it("should subtract componentwise") {
-                for (i in 0 until 4) {
-                    for(j in 0 until 4) {
-                        assert(subtract[i, j]).isCloseTo(a[i, j] - b[i, j])
-                    }
-                }
-            }
-        }
-
-        on("multiply") {
-            val multiply = a.multiply(b, MutableMatrix4())
-            it("should has every (i, j) entry as a linear combination of A's i-row and B's j-column") {
-                for (i in 0 until 4) {
-                    for(j in 0 until 4) {
-                        var expected = 0f
-                        for(k in 0 until 4) {
-                            expected += a[i, k] * b[k, j]
-                        }
-
-                        assert(multiply[i, j]).isCloseTo(expected)
-                    }
-                }
-            }
-        }
-
-        on("multiplyLeft") {
-            val multiply = a.multiplyLeft(b, MutableMatrix4())
-            it("should has every (i, j) entry as a linear combination of B's i-row and A's j-column") {
-                for (i in 0 until 4) {
-                    for(j in 0 until 4) {
-                        var expected = 0f
-                        for(k in 0 until 4) {
-                            expected += b[i, k] * a[k, j]
-                        }
-
-                        assert(multiply[i, j]).isCloseTo(expected)
-                    }
-                }
-            }
-        }
-    }
     
     given("a mutable matrix") {
         var counter = 0
-        val matrix by memoized { getRandomMutable { counter++ } }
+        val matrix by memoized { getRandomMutableMatrix4 { counter++ } }
 
         describe("seters") {
             on("e00") {
@@ -925,7 +999,7 @@ object Matrix4Spec: Spek({
 
             on("Matrix4") {
                 counter = 0
-                val other = getRandomMatrix()
+                val other = getRandomMatrix4()
                 matrix.set(other)
                 it("should have notified once") {
                     assert(counter).isEqualTo(1)
@@ -1124,17 +1198,49 @@ object Matrix4Spec: Spek({
         }
 
         describe("operators") {
-            on("plusAssign") {
+            on("plusAssign (Projection)") {
                 val original = matrix.copyMutable()
-                val other = getRandomMatrix()
+                val other = getRandomProjection()
                 matrix += other
                 it("should add and assign") {
                     assert(matrix).isEqualTo(original.add(other))
                 }
             }
-            on("minusAssign") {
+            on("plusAssign (Transformation)") {
                 val original = matrix.copyMutable()
-                val other = getRandomMatrix()
+                val other = getRandomTransformation()
+                matrix += other
+                it("should add and assign") {
+                    assert(matrix).isEqualTo(original.add(other))
+                }
+            }
+            on("plusAssign (Matrix4)") {
+                val original = matrix.copyMutable()
+                val other = getRandomMatrix4()
+                matrix += other
+                it("should add and assign") {
+                    assert(matrix).isEqualTo(original.add(other))
+                }
+            }
+            on("minusAssign (Projection)") {
+                val original = matrix.copyMutable()
+                val other = getRandomProjection()
+                matrix -= other
+                it("should subtract and assign") {
+                    assert(matrix).isEqualTo(original.subtract(other))
+                }
+            }
+            on("minusAssign (Transformation)") {
+                val original = matrix.copyMutable()
+                val other = getRandomTransformation()
+                matrix -= other
+                it("should subtract and assign") {
+                    assert(matrix).isEqualTo(original.subtract(other))
+                }
+            }
+            on("minusAssign (Matrix4)") {
+                val original = matrix.copyMutable()
+                val other = getRandomMatrix4()
                 matrix -= other
                 it("should subtract and assign") {
                     assert(matrix).isEqualTo(original.subtract(other))
@@ -1154,6 +1260,30 @@ object Matrix4Spec: Spek({
                 matrix /= scalar
                 it("should scale and assign") {
                     assert(matrix).isEqualTo(original.scale(1 / scalar))
+                }
+            }
+            on("timesAssign (Projection)") {
+                val original = matrix.copyMutable()
+                val other = getRandomProjection()
+                matrix *= other
+                it("should scale and assign") {
+                    assert(matrix).isEqualTo(original.multiply(other))
+                }
+            }
+            on("timesAssign (Transformation)") {
+                val original = matrix.copyMutable()
+                val other = getRandomTransformation()
+                matrix *= other
+                it("should scale and assign") {
+                    assert(matrix).isEqualTo(original.multiply(other))
+                }
+            }
+            on("timesAssign (Matrix4)") {
+                val original = matrix.copyMutable()
+                val other = getRandomMatrix4()
+                matrix *= other
+                it("should scale and assign") {
+                    assert(matrix).isEqualTo(original.multiply(other))
                 }
             }
         }
@@ -1195,6 +1325,20 @@ object Matrix4Spec: Spek({
             }
         }
 
+        on("identity") {
+            matrix.identity()
+            it("should be the identity matrix") {
+                assert(matrix).isEqualTo(Matrix4.identity)
+            }
+        }
+
+        on("zero") {
+            matrix.zero()
+            it("should be the zero matrix") {
+                assert(matrix).isEqualTo(Matrix4.zero)
+            }
+        }
+
         on("transpose") {
             val original = matrix.copyImmutable()
             matrix.transpose()
@@ -1226,9 +1370,9 @@ object Matrix4Spec: Spek({
             }
         }
 
-        on("add") {
+        on("add (Projection)") {
             val original = matrix.copyImmutable()
-            val other = getRandomMatrix()
+            val other = getRandomProjection()
             matrix.add(other)
             it("should add and assign") {
                 val expected = original.add(other, MutableMatrix4())
@@ -1237,9 +1381,31 @@ object Matrix4Spec: Spek({
             }
         }
 
-        on("subtract") {
+        on("add (Transformation)") {
             val original = matrix.copyImmutable()
-            val other = getRandomMatrix()
+            val other = getRandomTransformation()
+            matrix.add(other)
+            it("should add and assign") {
+                val expected = original.add(other, MutableMatrix4())
+
+                assert(matrix).isEqualTo(expected)
+            }
+        }
+
+        on("add (Matrix4)") {
+            val original = matrix.copyImmutable()
+            val other = getRandomMatrix4()
+            matrix.add(other)
+            it("should add and assign") {
+                val expected = original.add(other, MutableMatrix4())
+
+                assert(matrix).isEqualTo(expected)
+            }
+        }
+
+        on("subtract (Projection)") {
+            val original = matrix.copyImmutable()
+            val other = getRandomProjection()
             matrix.subtract(other)
             it("should subtract and assign") {
                 val expected = original.subtract(other, MutableMatrix4())
@@ -1248,23 +1414,23 @@ object Matrix4Spec: Spek({
             }
         }
 
-        on("multiply") {
+        on("subtract (Transformation)") {
             val original = matrix.copyImmutable()
-            val other = getRandomMatrix()
-            matrix.multiply(other)
-            it("should multiply and assign") {
-                val expected = original.multiply(other, MutableMatrix4())
+            val other = getRandomTransformation()
+            matrix.subtract(other)
+            it("should subtract and assign") {
+                val expected = original.subtract(other, MutableMatrix4())
 
                 assert(matrix).isEqualTo(expected)
             }
         }
 
-        on("multiplyLeft") {
+        on("subtract (Matrix4)") {
             val original = matrix.copyImmutable()
-            val other = getRandomMatrix()
-            matrix.multiplyLeft(other)
-            it("should multiplyLeft and assign") {
-                val expected = original.multiplyLeft(other, MutableMatrix4())
+            val other = getRandomMatrix4()
+            matrix.subtract(other)
+            it("should subtract and assign") {
+                val expected = original.subtract(other, MutableMatrix4())
 
                 assert(matrix).isEqualTo(expected)
             }
@@ -1284,6 +1450,50 @@ object Matrix4Spec: Spek({
         on("multiplyLeft (Projection)") {
             val original = matrix.copyImmutable()
             val other = getRandomProjection()
+            matrix.multiplyLeft(other)
+            it("should multiplyLeft and assign") {
+                val expected = original.multiplyLeft(other, MutableMatrix4())
+
+                assert(matrix).isEqualTo(expected)
+            }
+        }
+
+        on("multiply (Transformation)") {
+            val original = matrix.copyImmutable()
+            val other = getRandomTransformation()
+            matrix.multiply(other)
+            it("should multiply and assign") {
+                val expected = original.multiply(other, MutableMatrix4())
+
+                assert(matrix).isEqualTo(expected)
+            }
+        }
+
+        on("multiplyLeft (Transformation)") {
+            val original = matrix.copyImmutable()
+            val other = getRandomTransformation()
+            matrix.multiplyLeft(other)
+            it("should multiplyLeft and assign") {
+                val expected = original.multiplyLeft(other, MutableMatrix4())
+
+                assert(matrix).isEqualTo(expected)
+            }
+        }
+
+        on("multiply (Matrix4)") {
+            val original = matrix.copyImmutable()
+            val other = getRandomMatrix4()
+            matrix.multiply(other)
+            it("should multiply and assign") {
+                val expected = original.multiply(other, MutableMatrix4())
+
+                assert(matrix).isEqualTo(expected)
+            }
+        }
+
+        on("multiplyLeft (Matrix4)") {
+            val original = matrix.copyImmutable()
+            val other = getRandomMatrix4()
             matrix.multiplyLeft(other)
             it("should multiplyLeft and assign") {
                 val expected = original.multiplyLeft(other, MutableMatrix4())
@@ -1375,8 +1585,8 @@ object Matrix4Spec: Spek({
 private fun getRandomValue() = random(-100f, 100f)
 private fun getPositiveValue() = random(1f, 100f)
 private fun getNegativeValue() = random(-100f, -1f)
-private fun getRandomVector3() = Vector3(getRandomValue(), getRandomValue(), getRandomValue())
 private fun getRandomVector4() = Vector4(getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue())
+private fun getRandomVector3() = Vector3(getRandomValue(), getRandomValue(), getRandomValue())
 private fun getRandomPoint() = Point(getRandomValue(), getRandomValue(), getRandomValue())
 private fun getRandomProjection() : Projection {
     val p = MutableProjection()
@@ -1389,13 +1599,23 @@ private fun getRandomProjection() : Projection {
 
     return Projection(p)
 }
-private fun getRandomMatrix() = Matrix4(
+private fun getRandomTransformation() : Transformation {
+    val t = MutableTransformation()
+    t.set(
+            getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue(),
+            getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue(),
+            getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue()
+    )
+
+    return Transformation(t)
+}
+private fun getRandomMatrix4() = Matrix4(
         getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue(),
         getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue(),
         getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue(),
         getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue()
 )
-private fun getRandomMutable(observer: ((Matrix4) -> Unit)) = MutableMatrix4(
+private fun getRandomMutableMatrix4(observer: ((Matrix4) -> Unit)) = MutableMatrix4(
         getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue(),
         getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue(),
         getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue(),

@@ -3,115 +3,80 @@ package org.rufousengine.math
 import java.util.*
 
 /**
- * An immutable 4x4 row-major matrix.
+ * An immutable 4x4 transformation matrix.
  *
- * This is a general matrix representation. To represent transformations or projections, there are more optimized (and limited) alternatives.
- * See [Transformation] and [Projection] instead.
+ * For a general purpose matrix, see [Matrix4] instead.
  *
- * @constructor Creates a 4x4 matrix with the given components.
+ * @constructor Creates the identity matrix.
  */
-open class Matrix4(e00: Float, e01: Float, e02: Float, e03: Float, e10: Float, e11: Float, e12: Float, e13: Float, e20: Float, e21: Float, e22: Float, e23: Float, e30: Float, e31: Float, e32: Float, e33: Float) {
+open class Transformation {
     companion object {
-        val identity = Matrix4()
-        val zero = Matrix4(0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f)
+        val identity by lazy { Transformation() }
     }
 
     /** The components of this matrix. Do not change its values directly unless you know what you're doing. */
-    val components = floatArrayOf(e00, e01, e02, e03, e10, e11, e12, e13, e20, e21, e22, e23, e30, e31, e32, e33)
+    val components: FloatArray
 
-    constructor() : this(1f, 0f, 0f, 0f, 0f, 1f, 0f, 0f, 0f, 0f, 1f, 0f, 0f, 0f, 0f, 1f)
-    constructor(other: Projection) : this(other.components)
-    constructor(other: Transformation) : this(other.components)
-    constructor(other: Matrix4) : this(other.components)
-    constructor(components: FloatArray) : this(
-            components[0], components[1], components[2], components[3],
-            components[4], components[5], components[6], components[7],
-            components[8], components[9], components[10], components[11],
-            components[12], components[13], components[14], components[15]
-    )
-    constructor(a: Vector4, b: Vector4, c: Vector4, d: Vector4) : this(
-            a.x, b.x, c.x, d.x,
-            a.y, b.y, c.y, d.y,
-            a.z, b.z, c.z, d.z,
-            a.w, b.w, c.w, d.w
-    )
+    open val scales: Boolean
+    open val rotates: Boolean
+    open val translates: Boolean
 
-    open val e00: Float
+    constructor() {
+        components = floatArrayOf(1f, 0f, 0f, 0f, 0f, 1f, 0f, 0f, 0f, 0f, 1f, 0f, 0f, 0f, 0f, 1f)
+        scales = false
+        rotates = false
+        translates = false
+    }
+    constructor(other: Transformation) {
+        components = other.components.copyOf()
+        scales = other.scales
+        rotates = other.rotates
+        translates = other.translates
+    }
+
+    val e00: Float
         get() = components[0]
-    open val e01: Float
+    val e01: Float
         get() = components[1]
-    open val e02: Float
+    val e02: Float
         get() = components[2]
-    open val e03: Float
+    val e03: Float
         get() = components[3]
-    open val e10: Float
+    val e10: Float
         get() = components[4]
-    open val e11: Float
+    val e11: Float
         get() = components[5]
-    open val e12: Float
+    val e12: Float
         get() = components[6]
-    open val e13: Float
+    val e13: Float
         get() = components[7]
-    open val e20: Float
+    val e20: Float
         get() = components[8]
-    open val e21: Float
+    val e21: Float
         get() = components[9]
-    open val e22: Float
+    val e22: Float
         get() = components[10]
-    open val e23: Float
+    val e23: Float
         get() = components[11]
-    open val e30: Float
-        get() = components[12]
-    open val e31: Float
-        get() = components[13]
-    open val e32: Float
-        get() = components[14]
-    open val e33: Float
-        get() = components[15]
 
-    /** The transpose of this matrix. It creates a new lazy Matrix4 instance. */
+    /** The transpose of this matrix. It creates a new lazy Transformation instance. */
     open val transpose : Matrix4 by lazy { transpose(MutableMatrix4()) }
-    /** The inverse of this matrix. It creates a new lazy Matrix4 instance. */
-    open val inverse : Matrix4 by lazy { inverse(MutableMatrix4()) }
+    /** The inverse of this matrix. It creates a new lazy Transformation instance. */
+    open val inverse : Transformation by lazy { inverse(MutableTransformation()) }
 
-    val determinant: Float
-        get() {
-            return if(isTransformation) {
-                e00 * (e11 * e22 - e12 * e21) + e01 * (e12 * e20 - e10 * e22) + e02 * (e10 * e21 - e11 * e20)
-            } else {
-                val d0 = e11 * (e22 * e33 - e23 * e32) - e12 * (e21 * e33 - e23 * e31) + e13 * (e21 * e32 - e22 * e31)
-                val d1 = e10 * (e22 * e33 - e23 * e32) - e12 * (e20 * e33 - e23 * e30) + e13 * (e20 * e32 - e22 * e30)
-                val d2 = e10 * (e21 * e33 - e23 * e31) - e11 * (e20 * e33 - e23 * e30) + e13 * (e20 * e31 - e21 * e30)
-                val d3 = e10 * (e21 * e32 - e22 * e31) - e11 * (e20 * e32 - e22 * e30) + e12 * (e20 * e31 - e21 * e30)
+    val determinant : Float
+        get() = e00 * (e11 * e22 - e12 * e21) + e01 * (e12 * e20 - e10 * e22) + e02 * (e10 * e21 - e11 * e20)
 
-                e00 * d0 - e01 * d1 + e02 * d2 - e03 * d3
-            }
-        }
+    val isOrthogonal : Boolean
+        get() = !scales && !translates
 
-    /** Whether this matrix is orthogonal (i.e., all rows (or columns) are orthonormal between each other). */
-    val isOrthogonal: Boolean
-        get() {
-            getRow0(Cached.c0)
-            getRow1(Cached.c1)
-            getRow2(Cached.c2)
-            getRow3(Cached.c3)
-
-            if(!Cached.c0.isUnit || !Cached.c1.isUnit || !Cached.c2.isUnit || !Cached.c3.isUnit) {
-                return false
-            }
-
-            return Cached.c0 isOrthogonal Cached.c1 && Cached.c0 isOrthogonal Cached.c2 && Cached.c0 isOrthogonal Cached.c3 &&
-                    Cached.c1 isOrthogonal Cached.c2 && Cached.c1 isOrthogonal Cached.c3 &&
-                    Cached.c2 isOrthogonal Cached.c3
-        }
-
-    val isIdentity
-        get() = equals(identity)
-    val isZero
-        get() = equals(zero)
+    val isIdentity : Boolean
+        get() = !scales && !rotates && !translates
+    val isZero : Boolean
+        get() = false
     /** Whether the last row is (0, 0, 0, 1). */
     val isTransformation
-        get() = e30.isZero() && e31.isZero() && e32.isZero() && e33.isOne()
+        get() = true
 
     operator fun get(row: Int, column: Int) = components[4 * row + column]
 
@@ -160,7 +125,7 @@ open class Matrix4(e00: Float, e01: Float, e02: Float, e03: Float, e10: Float, e
      * @param[out] The output vector.
      * @return The output vector for chaining.
      */
-    fun getRow3(out: MutableVector4) = out.set(e30, e31, e32, e33)
+    fun getRow3(out: MutableVector4) = out.set(0f, 0f, 0f, 1f)
 
     /**
      * Gets the desired column as a Vector4.
@@ -186,28 +151,28 @@ open class Matrix4(e00: Float, e01: Float, e02: Float, e03: Float, e10: Float, e
      * @param[out] The output vector.
      * @return The output vector for chaining.
      */
-    fun getColumn0(out: MutableVector4) = out.set(e00, e10, e20, e30)
+    fun getColumn0(out: MutableVector4) = out.set(e00, e10, e20, 0f)
     /**
      * Gets the second column as a Vector4.
      *
      * @param[out] The output vector.
      * @return The output vector for chaining.
      */
-    fun getColumn1(out: MutableVector4) = out.set(e01, e11, e21, e31)
+    fun getColumn1(out: MutableVector4) = out.set(e01, e11, e21, 0f)
     /**
      * Gets the third column as a Vector4.
      *
      * @param[out] The output vector.
      * @return The output vector for chaining.
      */
-    fun getColumn2(out: MutableVector4) = out.set(e02, e12, e22, e32)
+    fun getColumn2(out: MutableVector4) = out.set(e02, e12, e22, 0f)
     /**
      * Gets the fourth column as a Vector4.
      *
      * @param[out] The output vector.
      * @return The output vector for chaining.
      */
-    fun getColumn3(out: MutableVector4) = out.set(e03, e13, e23, e33)
+    fun getColumn3(out: MutableVector4) = out.set(e03, e13, e23, 1f)
 
     /**
      * Returns the 3x3 submatrix of this matrix that excludes the [row] row and the [column] column.
@@ -234,13 +199,13 @@ open class Matrix4(e00: Float, e01: Float, e02: Float, e03: Float, e10: Float, e
      *
      * @return The new matrix for chaining.
      */
-    fun copyImmutable() = Matrix4(this)
+    fun copyImmutable() = Transformation(this)
     /**
      * Creates a mutable copy of this matrix.
      *
      * @return The new matrix for chaining.
      */
-    fun copyMutable() = MutableMatrix4(this)
+    fun copyMutable() = MutableTransformation(this)
 
     /**
      * Transposes this matrix.
@@ -249,10 +214,10 @@ open class Matrix4(e00: Float, e01: Float, e02: Float, e03: Float, e10: Float, e
      * @return The output matrix for chaining.
      */
     fun transpose(out: MutableMatrix4) = out.set(
-            e00, e10, e20, e30,
-            e01, e11, e21, e31,
-            e02, e12, e22, e32,
-            e03, e13, e23, e33
+            e00, e10, e20, 0f,
+            e01, e11, e21, 0f,
+            e02, e12, e22, 0f,
+            e03, e13, e23, 1f
     )
     /**
      * Inverts this matrix.
@@ -260,125 +225,73 @@ open class Matrix4(e00: Float, e01: Float, e02: Float, e03: Float, e10: Float, e
      * @param[out] The output matrix.
      * @return The output matrix for chaining.
      */
-    fun inverse(out: MutableMatrix4) : MutableMatrix4 {
+    fun inverse(out: MutableTransformation) : MutableTransformation {
         return when {
             isIdentity -> out.set(this)
-            isOrthogonal -> transpose(out) // if M is orthogonal then inv(M) = conjugate(M)
-            isTransformation -> {
-                val a = Cached.a
-                val b = Cached.b
-                val c = Cached.c
-                val d = Cached.d
-                val s = Cached.s
-                val t = Cached.t
-                val v = Cached.v
-                val r0 = Cached.r0
-                val r1 = Cached.r1
-
-                a.set(e00, e10, e20)
-                b.set(e01, e11, e21)
-                c.set(e02, e12, e22)
-                d.set(e03, e13, e23)
-
-                // s = a.cross(b)
-                a.cross(b, s)
-                // t = c.cross(d)
-                c.cross(d, t)
-                // u = a.scale(y) - b.scale(x) = 0
-                // v = c.scale(w) - d.scale(z) = c
-
-                // det = s.dot(v) + t.dot(u) = s.dot(c)
-                val invDet = 1 / (s dot c)
-
-                s *= invDet
-                t *= invDet
-
-                c.scale(invDet, v)
-
-                // r0 = b.cross(v) + t.scale(y) = b.cross(v)
-                b.cross(v, r0)
-                // r1 = v.cross(a) - t.scale(x) = v.cross(a)
-                v.cross(a, r1)
-                // r2 = d.cross(u) + s.scale(w) = s
-                // r3 = u.cross(c) - s.scale(z) = 0
+            isOrthogonal -> out.set(e00, e10, e20, 0f, e01, e11, e21, 0f, e02, e12, e22, 0f) // if M is orthogonal then inv(M) = conjugate(M)
+            scales && !rotates && !translates -> out.set(1 / e00, 0f, 0f, 0f, 0f, 1 / e11, 0f, 0f, 0f, 0f, 1 / e22, 0f)
+            translates && !scales && !rotates -> out.set(1f, 0f, 0f, -e03, 0f, 1f, 0f, -e13, 0f, 0f, 1f, -e23)
+            translates && scales && !rotates -> {
+                val a = 1 / e00
+                val b = 1 / e11
+                val c = 1 / e22
 
                 out.set(
-                        r0.x, r0.y, r0.z, -(b dot t),
-                        r1.x, r1.y, r1.z, (a dot t),
-                        s.x, s.y, s.z, -(d dot s),
-                        0.0f, 0.0f, 0.0f, 1.0f
+                        a, 0f, 0f, -a * e03,
+                        0f, b, 0f, -b * e13,
+                        0f, 0f, c, -c * e23
+                )
+            }
+            rotates && translates && !scales -> {
+                val x = -e00 * e03 - e10 * e13 - e20 * e23
+                val y = -e01 * e03 - e11 * e13 - e21 * e23
+                val z = -e02 * e03 - e12 * e13 - e22 * e23
+
+                out.set(
+                        e00, e10, e20, x,
+                        e01, e11, e21, y,
+                        e02, e12, e22, z
                 )
             }
             else -> {
                 val a = Cached.a
                 val b = Cached.b
                 val c = Cached.c
-                val d = Cached.d
-                val s = Cached.s
-                val t = Cached.t
-                val u = Cached.u
-                val v = Cached.v
                 val r0 = Cached.r0
                 val r1 = Cached.r1
                 val r2 = Cached.r2
-                val r3 = Cached.r3
-                val t0 = Cached.t0
-                val t1 = Cached.t1
 
                 a.set(e00, e10, e20)
                 b.set(e01, e11, e21)
                 c.set(e02, e12, e22)
-                d.set(e03, e13, e23)
 
-                val x = e30
-                val y = e31
-                val z = e32
-                val w = e33
+                b.cross(c, r0)
+                c.cross(a, r1)
+                a.cross(b, r2)
 
-                // s = a.cross(b)
-                a.cross(b, s)
-                // t = c.cross(d)
-                c.cross(d, t)
-                // u = a.scale(y) - b.scale(x)
-                a.scale(y, t0)
-                b.scale(x, t1)
-                t0.subtract(t1, u)
-                // v = c.scale(w) - d.scale(z)
-                c.scale(w, t0)
-                d.scale(z, t1)
-                t0.subtract(t1, v)
+                val invDet = 1 / (r2 dot c)
 
-                // det = s.dot(v) + t.dot(u)
-                val invDet = 1 / ((s dot v) + (t dot u))
+                r0 *= invDet
+                r1 *= invDet
+                r2 *= invDet
 
-                s *= invDet
-                t *= invDet
-                u *= invDet
-                v *= invDet
+                if(!translates) {
+                    out.set(
+                            r0.x, r0.y, r0.z, 0f,
+                            r1.x, r1.y, r1.z, 0f,
+                            r2.x, r2.y, r2.z, 0f
+                    )
+                } else {
+                    val x = -r0.x * e03 - r0.y * e13 - r0.z * e23
+                    val y = -r1.x * e03 - r1.y * e13 - r1.z * e23
+                    val z = -r2.x * e03 - r2.y * e13 - r2.z * e23
 
-                // r0 = b.cross(v) + t.scale(y)
-                b.cross(v, t0)
-                t.scale(y, t1)
-                t0.add(t1, r0)
-                // r1 = v.cross(a) - t.scale(x)
-                v.cross(a, t0)
-                t.scale(x, t1)
-                t0.subtract(t1, r1)
-                // r2 = d.cross(u) + s.scale(w)
-                d.cross(u, t0)
-                s.scale(w, t1)
-                t0.add(t1, r2)
-                // r3 = u.cross(c) - s.scale(z)
-                u.cross(c, t0)
-                s.scale(z, t1)
-                t0.subtract(t1, r3)
-
-                out.set(
-                        r0.x, r0.y, r0.z, -(b dot t),
-                        r1.x, r1.y, r1.z, (a dot t),
-                        r2.x, r2.y, r2.z, -(d dot s),
-                        r3.x, r3.y, r3.z, (c dot s)
-                )
+                    out.set(
+                            r0.x, r0.y, r0.z, x,
+                            r1.x, r1.y, r1.z, y,
+                            r2.x, r2.y, r2.z, z
+                    )
+                }
             }
         }
     }
@@ -394,7 +307,7 @@ open class Matrix4(e00: Float, e01: Float, e02: Float, e03: Float, e10: Float, e
             e00 * scalar, e01 * scalar, e02 * scalar, e03 * scalar,
             e10 * scalar, e11 * scalar, e12 * scalar, e13 * scalar,
             e20 * scalar, e21 * scalar, e22 * scalar, e23 * scalar,
-            e30 * scalar, e31 * scalar, e32 * scalar, e33 * scalar
+            0f, 0f, 0f, scalar
     )
 
     /**
@@ -408,7 +321,7 @@ open class Matrix4(e00: Float, e01: Float, e02: Float, e03: Float, e10: Float, e
             e00 + other.e00, e01, e02, e03,
             e10, e11 + other.e11, e12, e13,
             e20, e21, e22 + other.e22, e23 + other.e23,
-            e30, e31, e32 + other.e32, e33 + other.e33
+            0f, 0f, other.e32, 1f + other.e33
     )
     /**
      * Adds [other] to this matrix.
@@ -421,7 +334,7 @@ open class Matrix4(e00: Float, e01: Float, e02: Float, e03: Float, e10: Float, e
             e00 + other.e00, e01 + other.e01, e02 + other.e02, e03 + other.e03,
             e10 + other.e10, e11 + other.e11, e12 + other.e12, e13 + other.e13,
             e20 + other.e20, e21 + other.e21, e22 + other.e22, e23 + other.e23,
-            e30, e31, e32, e33 + 1f
+            0f, 0f, 0f, 2f
     )
     /**
      * Adds [other] to this matrix.
@@ -434,9 +347,9 @@ open class Matrix4(e00: Float, e01: Float, e02: Float, e03: Float, e10: Float, e
             e00 + other.e00, e01 + other.e01, e02 + other.e02, e03 + other.e03,
             e10 + other.e10, e11 + other.e11, e12 + other.e12, e13 + other.e13,
             e20 + other.e20, e21 + other.e21, e22 + other.e22, e23 + other.e23,
-            e30 + other.e30, e31 + other.e31, e32 + other.e32, e33 + other.e33
+            other.e30, other.e31, other.e32, 1f + other.e33
     )
-    
+
     /**
      * Subtracts [other] to this matrix.
      *
@@ -448,10 +361,10 @@ open class Matrix4(e00: Float, e01: Float, e02: Float, e03: Float, e10: Float, e
             e00 - other.e00, e01, e02, e03,
             e10, e11 - other.e11, e12, e13,
             e20, e21, e22 - other.e22, e23 - other.e23,
-            e30, e31, e32 - other.e32, e33 - other.e33
+            0f, 0f, -other.e32, 1f - other.e33
     )
     /**
-     * Subtracts [other] to this matrix.
+     * Subtracts [other] from this matrix.
      *
      * @param[other] The other matrix.
      * @param[out] The output matrix.
@@ -461,10 +374,10 @@ open class Matrix4(e00: Float, e01: Float, e02: Float, e03: Float, e10: Float, e
             e00 - other.e00, e01 - other.e01, e02 - other.e02, e03 - other.e03,
             e10 - other.e10, e11 - other.e11, e12 - other.e12, e13 - other.e13,
             e20 - other.e20, e21 - other.e21, e22 - other.e22, e23 - other.e23,
-            e30, e31, e32, e33 - 1f
+            0f, 0f, 0f, 0f
     )
     /**
-     * Subtracts [other] from this matrix.
+     * Subtracts [other] to this matrix.
      *
      * @param[other] The other matrix.
      * @param[out] The output matrix.
@@ -474,7 +387,7 @@ open class Matrix4(e00: Float, e01: Float, e02: Float, e03: Float, e10: Float, e
             e00 - other.e00, e01 - other.e01, e02 - other.e02, e03 - other.e03,
             e10 - other.e10, e11 - other.e11, e12 - other.e12, e13 - other.e13,
             e20 - other.e20, e21 - other.e21, e22 - other.e22, e23 - other.e23,
-            e30 - other.e30, e31 - other.e31, e32 - other.e32, e33 - other.e33
+            -other.e30, -other.e31, -other.e32, 1f - other.e33
     )
 
     /**
@@ -508,16 +421,11 @@ open class Matrix4(e00: Float, e01: Float, e02: Float, e03: Float, e10: Float, e
         val e22 = this.e22 * other.e22 + this.e23 * other.e32
         val e23 = this.e22 * other.e23 + this.e23 * other.e33
 
-        val e30 = this.e30 * other.e00
-        val e31 = this.e31 * other.e11
-        val e32 = this.e32 * other.e22 + this.e33 * other.e32
-        val e33 = this.e32 * other.e23 + this.e33 * other.e33
-
         return out.set(
                 e00, e01, e02, e03,
                 e10, e11, e12, e13,
                 e20, e21, e22, e23,
-                e30, e31, e32, e33
+                0f, 0f, other.e32, other.e33
         )
     }
     /**
@@ -536,7 +444,7 @@ open class Matrix4(e00: Float, e01: Float, e02: Float, e03: Float, e10: Float, e
      * @param[out] The output matrix.
      * @return The output matrix for chaining.
      */
-    fun multiply(other: Transformation, out: MutableMatrix4) : MutableMatrix4 {
+    fun multiply(other: Transformation, out: MutableTransformation) : MutableTransformation {
         if(isIdentity) {
             return out.set(other)
         }
@@ -560,16 +468,10 @@ open class Matrix4(e00: Float, e01: Float, e02: Float, e03: Float, e10: Float, e
         val e22 = this.e20 * other.e02 + this.e21 * other.e12 + this.e22 * other.e22
         val e23 = this.e20 * other.e03 + this.e21 * other.e13 + this.e22 * other.e23 + this.e23
 
-        val e30 = this.e30 * other.e00 + this.e31 * other.e10 + this.e32 * other.e20
-        val e31 = this.e30 * other.e01 + this.e31 * other.e11 + this.e32 * other.e21
-        val e32 = this.e30 * other.e02 + this.e31 * other.e12 + this.e32 * other.e22
-        val e33 = this.e30 * other.e03 + this.e31 * other.e13 + this.e32 * other.e23 + this.e33
-
         return out.set(
                 e00, e01, e02, e03,
                 e10, e11, e12, e13,
-                e20, e21, e22, e23,
-                e30, e31, e32, e33
+                e20, e21, e22, e23
         )
     }
     /**
@@ -579,7 +481,7 @@ open class Matrix4(e00: Float, e01: Float, e02: Float, e03: Float, e10: Float, e
      * @param[out] The output matrix.
      * @return The output matrix for chaining.
      */
-    fun multiplyLeft(other: Transformation, out: MutableMatrix4) = other.multiply(this, out)
+    fun multiplyLeft(other: Transformation, out: MutableTransformation) = other.multiply(this, out)
 
     /**
      * Multiplies this matrix with [other].
@@ -612,16 +514,11 @@ open class Matrix4(e00: Float, e01: Float, e02: Float, e03: Float, e10: Float, e
         val e22 = this.e20 * other.e02 + this.e21 * other.e12 + this.e22 * other.e22 + this.e23 * other.e32
         val e23 = this.e20 * other.e03 + this.e21 * other.e13 + this.e22 * other.e23 + this.e23 * other.e33
 
-        val e30 = this.e30 * other.e00 + this.e31 * other.e10 + this.e32 * other.e20 + this.e33 * other.e30
-        val e31 = this.e30 * other.e01 + this.e31 * other.e11 + this.e32 * other.e21 + this.e33 * other.e31
-        val e32 = this.e30 * other.e02 + this.e31 * other.e12 + this.e32 * other.e22 + this.e33 * other.e32
-        val e33 = this.e30 * other.e03 + this.e31 * other.e13 + this.e32 * other.e23 + this.e33 * other.e33
-
         return out.set(
                 e00, e01, e02, e03,
                 e10, e11, e12, e13,
                 e20, e21, e22, e23,
-                e30, e31, e32, e33
+                other.e30, other.e31, other.e32, other.e33
         )
     }
     /**
@@ -655,9 +552,8 @@ open class Matrix4(e00: Float, e01: Float, e02: Float, e03: Float, e10: Float, e
         val nx = e00 * x + e01 * y + e02 * z + e03 * w
         val ny = e10 * x + e11 * y + e12 * z + e13 * w
         val nz = e20 * x + e21 * y + e22 * z + e23 * w
-        val nw = e30 * x + e31 * y + e32 * z + e33 * w
 
-        return out.set(nx, ny, nz, nw)
+        return out.set(nx, ny, nz, w)
     }
 
     /**
@@ -708,22 +604,20 @@ open class Matrix4(e00: Float, e01: Float, e02: Float, e03: Float, e10: Float, e
         val nx = e00 * x + e01 * y + e02 * z + e03
         val ny = e10 * x + e11 * y + e12 * z + e13
         val nz = e20 * x + e21 * y + e22 * z + e23
-        val nw = e30 * x + e31 * y + e32 * z + e33
 
-        return out.set(nx, ny, nz).scale(1 / nw)
+        return out.set(nx, ny, nz)
     }
 
-    fun equals(other: Projection) = equals(other.e00, 0f, 0f, 0f, 0f, other.e11, 0f, 0f, 0f, 0f, other.e22, other.e23, 0f, 0f, other.e32, other.e33)
-    fun equals(other: Transformation) = equals(other.e00, other.e01, other.e02, other.e03, other.e10, other.e11, other.e12, other.e13, other.e20, other.e21, other.e22, other.e23, 0f, 0f, 0f, 1f)
-    fun equals(other: Matrix4) = equals(other.e00, other.e01, other.e02, other.e03, other.e10, other.e11, other.e12, other.e13, other.e20, other.e21, other.e22, other.e23, other.e30, other.e31, other.e32, other.e33)
-    fun equals(e00: Float, e01: Float, e02: Float, e03: Float, e10: Float, e11: Float, e12: Float, e13: Float, e20: Float, e21: Float, e22: Float, e23: Float, e30: Float, e31: Float, e32: Float, e33: Float) : Boolean {
+    fun equals(other: Projection) = other.isTransformation && equals(other.e00, 0f, 0f, 0f, 0f, other.e11, 0f, 0f, 0f, 0f, other.e22, other.e23)
+    fun equals(other: Transformation) = scales == other.scales && rotates == other.rotates && translates == other.translates && equals(other.e00, other.e01, other.e02, other.e03, other.e10, other.e11, other.e12, other.e13, other.e20, other.e21, other.e22, other.e23)
+    fun equals(other: Matrix4) = other.isTransformation && equals(other.e00, other.e01, other.e02, other.e03, other.e10, other.e11, other.e12, other.e13, other.e20, other.e21, other.e22, other.e23)
+    fun equals(e00: Float, e01: Float, e02: Float, e03: Float, e10: Float, e11: Float, e12: Float, e13: Float, e20: Float, e21: Float, e22: Float, e23: Float) : Boolean {
         return this.e00 isCloseTo e00 && this.e01 isCloseTo e01 && this.e02 isCloseTo e02 && this.e03 isCloseTo e03 &&
                 this.e10 isCloseTo e10 && this.e11 isCloseTo e11 && this.e12 isCloseTo e12 && this.e13 isCloseTo e13 &&
-                this.e20 isCloseTo e20 && this.e21 isCloseTo e21 && this.e22 isCloseTo e22 && this.e23 isCloseTo e23 &&
-                this.e30 isCloseTo e30 && this.e31 isCloseTo e31 && this.e32 isCloseTo e32 && this.e33 isCloseTo e33
+                this.e20 isCloseTo e20 && this.e21 isCloseTo e21 && this.e22 isCloseTo e22 && this.e23 isCloseTo e23
     }
 
-    override fun toString() = "| ($e00, $e01, $e02, $e03) | ($e10, $e11, $e12, $e13) | ($e20, $e21, $e22, $e23) | ($e30, $e31, $e32, $e33) |"
+    override fun toString() = "| ($e00, $e01, $e02, $e03) | ($e10, $e11, $e12, $e13) | ($e20, $e21, $e22, $e23) | (${0f}, ${0f}, ${0f}, ${1f}) |"
 
     override fun equals(other: Any?): Boolean {
         if(this === other) {
@@ -741,23 +635,11 @@ open class Matrix4(e00: Float, e01: Float, e02: Float, e03: Float, e10: Float, e
     override fun hashCode() = Arrays.hashCode(components)
 
     private object Cached {
-        val t0 by lazy { MutableVector3() }
-        val t1 by lazy { MutableVector3() }
         val a by lazy { MutableVector3() }
         val b by lazy { MutableVector3() }
         val c by lazy { MutableVector3() }
-        val d by lazy { MutableVector3() }
-        val s by lazy { MutableVector3() }
-        val t by lazy { MutableVector3() }
-        val u by lazy { MutableVector3() }
-        val v by lazy { MutableVector3() }
         val r0 by lazy { MutableVector3() }
         val r1 by lazy { MutableVector3() }
         val r2 by lazy { MutableVector3() }
-        val r3 by lazy { MutableVector3() }
-        val c0 by lazy { MutableVector4() }
-        val c1 by lazy { MutableVector4() }
-        val c2 by lazy { MutableVector4() }
-        val c3 by lazy { MutableVector4() }
     }
 }

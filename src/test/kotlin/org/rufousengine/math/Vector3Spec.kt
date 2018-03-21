@@ -428,6 +428,105 @@ object Vector3Spec: Spek({
             }
         }
 
+        on("getAngle") {
+            val other = getRandomVector3()
+            val angle = vector.getAngle(other)
+            it("should satisfy the dot product definition") {
+                val dot = vector dot other
+                val expected = acos(dot / (vector.magnitude * other.magnitude)).toDegrees()
+
+                assert(angle).isCloseTo(expected)
+            }
+        }
+
+        on("dot") {
+            val other = getRandomVector3()
+            val dot = vector dot other
+            it("should be the sum of the product of the corresponding components") {
+                var expected = 0f
+                for (i in 0 until 3) {
+                    expected += vector[i] * other[i]
+                }
+
+                assert(dot).isCloseTo(expected)
+            }
+        }
+
+        on("dotAbs") {
+            val other = getRandomVector3()
+            val dotAbs = vector dotAbs other
+            it("should be the absolute value of the dot product") {
+                assert(dotAbs).isCloseTo(abs(vector dot other))
+            }
+        }
+
+        on("add") {
+            val other = getRandomVector3()
+            val add = vector.add(other, MutableVector3())
+            it("should add componentwise") {
+                for (i in 0 until 3) {
+                    assert(add[i]).isCloseTo(vector[i] + other[i])
+                }
+            }
+        }
+
+        on("subtract") {
+            val other = getRandomVector3()
+            val subtract = vector.subtract(other, MutableVector3())
+            it("should subtract componentwise") {
+                for (i in 0 until 3) {
+                    assert(subtract[i]).isCloseTo(vector[i] - other[i])
+                }
+            }
+        }
+
+        on("min") {
+            val other = getRandomVector3()
+            val min = vector.min(other, MutableVector3())
+            it("should perform min componentwise") {
+                for (i in 0 until 3) {
+                    assert(min[i]).isCloseTo(min(vector[i], other[i]))
+                }
+            }
+        }
+
+        on("max") {
+            val other = getRandomVector3()
+            val max = vector.max(other, MutableVector3())
+            it("should perform max componentwise") {
+                for (i in 0 until 3) {
+                    assert(max[i]).isCloseTo(max(vector[i], other[i]))
+                }
+            }
+        }
+
+        on("projectOnto") {
+            val other = getRandomVector3()
+            val projected = vector.projectOnto(other, MutableVector3())
+            it("should be parallel to the vector projected onto") {
+                assert(projected.isParallel(other)).isTrue()
+            }
+        }
+
+        on("rejectFrom") {
+            val other = getRandomVector3()
+            val rejected = vector.rejectFrom(other, MutableVector3())
+            it("should be orthogonal to the vector rejected from") {
+                assert(rejected.isOrthogonal(other)).isTrue()
+            }
+        }
+
+        on("cross") {
+            val other = getRandomVector3()
+            val cross = vector.cross(other, MutableVector3())
+            it("should be orthogonal to vector") {
+                assert(cross.isOrthogonal(vector)).isTrue()
+            }
+            it("should be orthogonal to other") {
+                assert(cross.isOrthogonal(other)).isTrue()
+            }
+        }
+
         on("multiplyLeft (Matrix3)") {
             val matrix = getRandomMatrix3()
             val multiplied = vector.multiplyLeft(matrix, MutableVector3())
@@ -438,20 +537,30 @@ object Vector3Spec: Spek({
             }
         }
 
-        on("multiplyLeft (Matrix4)") {
-            val matrix = getRandomMatrix4()
+        on("multiplyLeft (Projection)") {
+            val matrix = getRandomProjection()
             val multiplied = vector.multiplyLeft(matrix, MutableVector3())
-            it("should give the same results as Matrix4::multiply") {
+            it("should give the same results as Projection::multiply") {
                 val expected = matrix.multiply(vector, MutableVector3())
 
                 assert(multiplied).isEqualTo(expected)
             }
         }
 
-        on("multiplyLeft (Projection)") {
-            val matrix = getRandomProjection()
+        on("multiplyLeft (Transformation)") {
+            val matrix = getRandomTransformation()
             val multiplied = vector.multiplyLeft(matrix, MutableVector3())
             it("should give the same results as Projection::multiply") {
+                val expected = matrix.multiply(vector, MutableVector3())
+
+                assert(multiplied).isEqualTo(expected)
+            }
+        }
+
+        on("multiplyLeft (Matrix4)") {
+            val matrix = getRandomMatrix4()
+            val multiplied = vector.multiplyLeft(matrix, MutableVector3())
+            it("should give the same results as Matrix4::multiply") {
                 val expected = matrix.multiply(vector, MutableVector3())
 
                 assert(multiplied).isEqualTo(expected)
@@ -479,103 +588,9 @@ object Vector3Spec: Spek({
         }
     }
 
-    given("two vectors") {
-        val a by memoized { getRandomVector3() }
-        val b by memoized { getRandomVector3() }
-
-        on("getAngle") {
-            val angle = a.getAngle(b)
-            it("should satisfy the dot product definition") {
-                val dot = a dot b
-                val expected = acos(dot / (a.magnitude * b.magnitude)).toDegrees()
-
-                assert(angle).isCloseTo(expected)
-            }
-        }
-
-        on("dot") {
-            val dot = a dot b
-            it("should be the sum of the product of the corresponding components") {
-                var expected = 0f
-                for (i in 0 until 3) {
-                    expected += a[i] * b[i]
-                }
-
-                assert(dot).isCloseTo(expected)
-            }
-        }
-
-        on("dotAbs") {
-            val dotAbs = a dotAbs b
-            it("should be the absolute value of the dot product") {
-                assert(dotAbs).isCloseTo(abs(a dot b))
-            }
-        }
-
-        on("add") {
-            val add = a.add(b, MutableVector3())
-            it("should add componentwise") {
-                for (i in 0 until 3) {
-                    assert(add[i]).isCloseTo(a[i] + b[i])
-                }
-            }
-        }
-
-        on("subtract") {
-            val subtract = a.subtract(b, MutableVector3())
-            it("should subtract componentwise") {
-                for (i in 0 until 3) {
-                    assert(subtract[i]).isCloseTo(a[i] - b[i])
-                }
-            }
-        }
-
-        on("min") {
-            val min = a.min(b, MutableVector3())
-            it("should perform min componentwise") {
-                for (i in 0 until 3) {
-                    assert(min[i]).isCloseTo(min(a[i], b[i]))
-                }
-            }
-        }
-
-        on("max") {
-            val max = a.max(b, MutableVector3())
-            it("should perform max componentwise") {
-                for (i in 0 until 3) {
-                    assert(max[i]).isCloseTo(max(a[i], b[i]))
-                }
-            }
-        }
-
-        on("projectOnto") {
-            val projected = a.projectOnto(b, MutableVector3())
-            it("should be parallel to the vector projected onto") {
-                assert(projected.isParallel(b)).isTrue()
-            }
-        }
-
-        on("rejectFrom") {
-            val rejected = a.rejectFrom(b, MutableVector3())
-            it("should be orthogonal to the vector rejected from") {
-                assert(rejected.isOrthogonal(b)).isTrue()
-            }
-        }
-
-        on("cross") {
-            val cross = a.cross(b, MutableVector3())
-            it("should be orthogonal to a") {
-                assert(cross.isOrthogonal(a)).isTrue()
-            }
-            it("should be orthogonal to b") {
-                assert(cross.isOrthogonal(b)).isTrue()
-            }
-        }
-    }
-
     given("a mutable vector") {
         var counter = 0
-        val vector by memoized { getRandomMutable { counter++ } }
+        val vector by memoized { getRandomMutableVector3 { counter++ } }
 
         describe("seters") {
             on("x") {
@@ -944,18 +959,12 @@ private fun getRandomPoint() = Point(getRandomValue(), getRandomValue(), getRand
 private fun getRandomVector2() = Vector2(getRandomValue(), getRandomValue())
 private fun getRandomVector3() = Vector3(getRandomValue(), getRandomValue(), getRandomValue())
 private fun getRandomVector4() = Vector4(getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue())
-private fun getRandomMutable(observer: ((Vector3) -> Unit)) = MutableVector3(getRandomValue(), getRandomValue(), getRandomValue(), observer)
+private fun getRandomMutableVector3(observer: ((Vector3) -> Unit)) = MutableVector3(getRandomValue(), getRandomValue(), getRandomValue(), observer)
 private fun getRandomQuaternion() = Quaternion(getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue())
 private fun getRandomMatrix3() = Matrix3(
         getRandomValue(), getRandomValue(), getRandomValue(),
         getRandomValue(), getRandomValue(), getRandomValue(),
         getRandomValue(), getRandomValue(), getRandomValue()
-)
-private fun getRandomMatrix4() = Matrix4(
-        getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue(),
-        getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue(),
-        getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue(),
-        getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue()
 )
 private fun getRandomProjection() : Projection {
     val p = MutableProjection()
@@ -968,3 +977,19 @@ private fun getRandomProjection() : Projection {
 
     return Projection(p)
 }
+private fun getRandomTransformation() : Transformation {
+    val t = MutableTransformation()
+    t.set(
+            getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue(),
+            getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue(),
+            getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue()
+    )
+
+    return Transformation(t)
+}
+private fun getRandomMatrix4() = Matrix4(
+        getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue(),
+        getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue(),
+        getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue(),
+        getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue()
+)

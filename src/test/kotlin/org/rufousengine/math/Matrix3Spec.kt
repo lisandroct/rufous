@@ -58,16 +58,16 @@ object Matrix3Spec: Spek({
             }
         }
         on("Matrix3") {
-            val other = getRandomMatrix()
+            val other = getRandomMatrix3()
             val matrix = Matrix3(other)
             it("should be equal to other") {
                 assert(matrix).isEqualTo(other)
             }
         }
         on("columns") {
-            val column0 = getRandomVector()
-            val column1 = getRandomVector()
-            val column2 = getRandomVector()
+            val column0 = getRandomVector3()
+            val column1 = getRandomVector3()
+            val column2 = getRandomVector3()
             val matrix = Matrix3(column0, column1, column2)
             it("should have first column set") {
                 val column = matrix.getColumn0(MutableVector3())
@@ -137,7 +137,7 @@ object Matrix3Spec: Spek({
             }
         }
         on("Matrix3") {
-            val other = getRandomMatrix()
+            val other = getRandomMatrix3()
             val matrix = MutableMatrix3(other) { }
             it("should be equal to other") {
                 assert(matrix).isEqualTo(other)
@@ -147,9 +147,9 @@ object Matrix3Spec: Spek({
             }
         }
         on("columns") {
-            val column0 = getRandomVector()
-            val column1 = getRandomVector()
-            val column2 = getRandomVector()
+            val column0 = getRandomVector3()
+            val column1 = getRandomVector3()
+            val column2 = getRandomVector3()
             val matrix = MutableMatrix3(column0, column1, column2) { }
             it("should have first column set") {
                 val column = matrix.getColumn0(MutableVector3())
@@ -239,7 +239,7 @@ object Matrix3Spec: Spek({
     }
 
     given("a matrix") {
-        val matrix by memoized { getRandomMatrix() }
+        val matrix by memoized { getRandomMatrix3() }
 
         on("transpose (val)") {
             val transpose = matrix.transpose
@@ -413,8 +413,66 @@ object Matrix3Spec: Spek({
             }
         }
 
-        on("multiply") {
-            val vector = getRandomVector()
+        on("add") {
+            val other = getRandomMatrix3()
+            val add = matrix.add(other, MutableMatrix3())
+            it("should add componentwise") {
+                for (i in 0 until 3) {
+                    for(j in 0 until 3) {
+                        assert(add[i, j]).isCloseTo(matrix[i, j] + other[i, j])
+                    }
+                }
+            }
+        }
+
+        on("subtract") {
+            val other = getRandomMatrix3()
+            val subtract = matrix.subtract(other, MutableMatrix3())
+            it("should subtract componentwise") {
+                for (i in 0 until 3) {
+                    for(j in 0 until 3) {
+                        assert(subtract[i, j]).isCloseTo(matrix[i, j] - other[i, j])
+                    }
+                }
+            }
+        }
+
+        on("multiply (Matrix3)") {
+            val other = getRandomMatrix3()
+            val multiply = matrix.multiply(other, MutableMatrix3())
+            it("should has every (i, j) entry as a linear combination of A's i-row and B's j-column") {
+                for (i in 0 until 3) {
+                    for(j in 0 until 3) {
+                        var expected = 0f
+                        for(k in 0 until 3) {
+                            expected += matrix[i, k] * other[k, j]
+                        }
+
+                        assert(multiply[i, j]).isCloseTo(expected)
+                    }
+                }
+            }
+        }
+
+        on("multiplyLeft (Matrix3)") {
+            val other = getRandomMatrix3()
+            val multiply = matrix.multiplyLeft(other, MutableMatrix3())
+            it("should has every (i, j) entry as a linear combination of B's i-row and A's j-column") {
+                for (i in 0 until 3) {
+                    for(j in 0 until 3) {
+                        var expected = 0f
+                        for(k in 0 until 3) {
+                            expected += other[i, k] * matrix[k, j]
+                        }
+
+                        assert(multiply[i, j]).isCloseTo(expected)
+                    }
+                }
+            }
+        }
+
+        on("multiply (Vector3)") {
+            val vector = getRandomVector3()
             val new = matrix.multiply(vector, MutableVector3())
             it("should has every (i, j) entry as a linear combination of matrix' i-row and vector's components") {
                 for (i in 0 until 3) {
@@ -424,65 +482,6 @@ object Matrix3Spec: Spek({
                     }
 
                     assert(new[i]).isCloseTo(expected)
-                }
-            }
-        }
-    }
-
-    given("two matrices") {
-        val a by memoized { getRandomMatrix() }
-        val b by memoized { getRandomMatrix() }
-
-        on("add") {
-            val add = a.add(b, MutableMatrix3())
-            it("should add componentwise") {
-                for (i in 0 until 3) {
-                    for(j in 0 until 3) {
-                        assert(add[i, j]).isCloseTo(a[i, j] + b[i, j])
-                    }
-                }
-            }
-        }
-
-        on("subtract") {
-            val subtract = a.subtract(b, MutableMatrix3())
-            it("should subtract componentwise") {
-                for (i in 0 until 3) {
-                    for(j in 0 until 3) {
-                        assert(subtract[i, j]).isCloseTo(a[i, j] - b[i, j])
-                    }
-                }
-            }
-        }
-
-        on("multiply") {
-            val multiply = a.multiply(b, MutableMatrix3())
-            it("should has every (i, j) entry as a linear combination of A's i-row and B's j-column") {
-                for (i in 0 until 3) {
-                    for(j in 0 until 3) {
-                        var expected = 0f
-                        for(k in 0 until 3) {
-                            expected += a[i, k] * b[k, j]
-                        }
-
-                        assert(multiply[i, j]).isCloseTo(expected)
-                    }
-                }
-            }
-        }
-
-        on("multiplyLeft") {
-            val multiply = a.multiplyLeft(b, MutableMatrix3())
-            it("should has every (i, j) entry as a linear combination of B's i-row and A's j-column") {
-                for (i in 0 until 3) {
-                    for(j in 0 until 3) {
-                        var expected = 0f
-                        for(k in 0 until 3) {
-                            expected += b[i, k] * a[k, j]
-                        }
-
-                        assert(multiply[i, j]).isCloseTo(expected)
-                    }
                 }
             }
         }
@@ -603,7 +602,7 @@ object Matrix3Spec: Spek({
 
             on("Matrix3") {
                 counter = 0
-                val other = getRandomMatrix()
+                val other = getRandomMatrix3()
                 matrix.set(other)
                 it("should have notified once") {
                     assert(counter).isEqualTo(1)
@@ -615,9 +614,9 @@ object Matrix3Spec: Spek({
 
             on("columns") {
                 counter = 0
-                val column0 = getRandomVector()
-                val column1 = getRandomVector()
-                val column2 = getRandomVector()
+                val column0 = getRandomVector3()
+                val column1 = getRandomVector3()
+                val column2 = getRandomVector3()
                 matrix.set(column0, column1, column2)
                 it("should have notified once") {
                     assert(counter).isEqualTo(1)
@@ -736,7 +735,7 @@ object Matrix3Spec: Spek({
         describe("operators") {
             on("plusAssign") {
                 val original = matrix.copyMutable()
-                val other = getRandomMatrix()
+                val other = getRandomMatrix3()
                 matrix += other
                 it("should add and assign") {
                     assert(matrix).isEqualTo(original.add(other))
@@ -744,7 +743,7 @@ object Matrix3Spec: Spek({
             }
             on("minusAssign") {
                 val original = matrix.copyMutable()
-                val other = getRandomMatrix()
+                val other = getRandomMatrix3()
                 matrix -= other
                 it("should subtract and assign") {
                     assert(matrix).isEqualTo(original.subtract(other))
@@ -764,6 +763,14 @@ object Matrix3Spec: Spek({
                 matrix /= scalar
                 it("should scale and assign") {
                     assert(matrix).isEqualTo(original.scale(1 / scalar))
+                }
+            }
+            on("timesAssign (Matrix3)") {
+                val original = matrix.copyMutable()
+                val other = getRandomMatrix3()
+                matrix *= other
+                it("should scale and assign") {
+                    assert(matrix).isEqualTo(original.multiply(other))
                 }
             }
         }
@@ -805,6 +812,20 @@ object Matrix3Spec: Spek({
             }
         }
 
+        on("identity") {
+            matrix.identity()
+            it("should be the identity matrix") {
+                assert(matrix).isEqualTo(Matrix3.identity)
+            }
+        }
+
+        on("zero") {
+            matrix.zero()
+            it("should be the zero matrix") {
+                assert(matrix).isEqualTo(Matrix3.zero)
+            }
+        }
+
         on("transpose") {
             val original = matrix.copyImmutable()
             matrix.transpose()
@@ -838,7 +859,7 @@ object Matrix3Spec: Spek({
 
         on("add") {
             val original = matrix.copyImmutable()
-            val other = getRandomMatrix()
+            val other = getRandomMatrix3()
             matrix.add(other)
             it("should add and assign") {
                 val expected = original.add(other, MutableMatrix3())
@@ -849,7 +870,7 @@ object Matrix3Spec: Spek({
 
         on("subtract") {
             val original = matrix.copyImmutable()
-            val other = getRandomMatrix()
+            val other = getRandomMatrix3()
             matrix.subtract(other)
             it("should subtract and assign") {
                 val expected = original.subtract(other, MutableMatrix3())
@@ -860,7 +881,7 @@ object Matrix3Spec: Spek({
 
         on("multiply") {
             val original = matrix.copyImmutable()
-            val other = getRandomMatrix()
+            val other = getRandomMatrix3()
             matrix.multiply(other)
             it("should multiply and assign") {
                 val expected = original.multiply(other, MutableMatrix3())
@@ -871,7 +892,7 @@ object Matrix3Spec: Spek({
 
         on("multiplyLeft") {
             val original = matrix.copyImmutable()
-            val other = getRandomMatrix()
+            val other = getRandomMatrix3()
             matrix.multiplyLeft(other)
             it("should multiplyLeft and assign") {
                 val expected = original.multiplyLeft(other, MutableMatrix3())
@@ -883,8 +904,8 @@ object Matrix3Spec: Spek({
 })
 
 private fun getRandomValue() = random(-100f, 100f)
-private fun getRandomVector() = Vector3(getRandomValue(), getRandomValue(), getRandomValue())
-private fun getRandomMatrix() = Matrix3(
+private fun getRandomVector3() = Vector3(getRandomValue(), getRandomValue(), getRandomValue())
+private fun getRandomMatrix3() = Matrix3(
         getRandomValue(), getRandomValue(), getRandomValue(),
         getRandomValue(), getRandomValue(), getRandomValue(),
         getRandomValue(), getRandomValue(), getRandomValue()

@@ -126,6 +126,12 @@ class MutableQuaternion(x: Float = 0f, y: Float = 0f, z: Float = 0f, w: Float = 
         observer?.invoke(this)
     }
 
+    operator fun plusAssign(other: Quaternion) { add(other) }
+    operator fun minusAssign(other: Quaternion) { subtract(other) }
+    operator fun timesAssign(scalar: Float) { scale(scalar) }
+    operator fun divAssign(scalar: Float) { scale(1 / scalar) }
+    operator fun timesAssign(other: Quaternion) { multiply(other, this) }
+
     /**
      * Set this quaternion to represent the same rotation as [matrix].
      *
@@ -235,12 +241,6 @@ class MutableQuaternion(x: Float = 0f, y: Float = 0f, z: Float = 0f, w: Float = 
      * @return This quaternion for chaining.
      */
     fun inverse() = inverse(this)
-
-    operator fun plusAssign(other: Quaternion) { add(other) }
-    operator fun minusAssign(other: Quaternion) { subtract(other) }
-    operator fun timesAssign(scalar: Float) { scale(scalar) }
-    operator fun divAssign(scalar: Float) { scale(1 / scalar) }
-    operator fun timesAssign(other: Quaternion) { multiply(other, this) }
 
     /**
      * Scales this quaternion (i.e., multiplies each component with [scalar]).

@@ -10,6 +10,19 @@ import java.util.*
  * @constructor Creates the identity projection matrix.
  */
 open class Projection {
+    companion object {
+        val identity by lazy { Projection() }
+        val zero by lazy {
+            val projection = Projection()
+            projection.components[0] = 0f
+            projection.components[5] = 0f
+            projection.components[10] = 0f
+            projection.components[15] = 0f
+
+            projection
+        }
+    }
+
     /** The components of this matrix. Do not change its values directly unless you know what you're doing. */
     val components: FloatArray
 
@@ -20,17 +33,17 @@ open class Projection {
         components = other.components.copyOf()
     }
 
-    open val e00: Float
+    val e00: Float
         get() = components[0]
-    open val e11: Float
+    val e11: Float
         get() = components[5]
-    open val e22: Float
+    val e22: Float
         get() = components[10]
-    open val e23: Float
+    val e23: Float
         get() = components[11]
-    open val e32: Float
+    val e32: Float
         get() = components[14]
-    open val e33: Float
+    val e33: Float
         get() = components[15]
 
     /** The transpose of this matrix. It creates a new lazy Projection instance. */
@@ -59,9 +72,9 @@ open class Projection {
         }
 
     val isIdentity
-        get() = equals(Matrix4.identity)
+        get() = equals(identity)
     val isZero
-        get() = equals(Matrix4.zero)
+        get() = equals(zero)
     /** Whether the last row is (0, 0, 0, 1). */
     val isTransformation
         get() = e32.isZero() && e33.isOne()
@@ -163,6 +176,26 @@ open class Projection {
     fun getColumn3(out: MutableVector4) = out.set(0f, 0f, e23, e33)
 
     /**
+     * Returns the 3x3 submatrix of this matrix that excludes the [row] row and the [column] column.
+     *
+     * @param[row] The row to exclude.
+     * @param[column] The column to exclude.
+     * @param[out] The output matrix.
+     * @return The output matrix for chaining.
+     */
+    fun getSubmatrix(row: Int, column: Int, out: MutableMatrix3) : MutableMatrix3 {
+        for(i in 0 until 3) {
+            for(j in 0 until 3) {
+                val row = if(i >= row) i + 1 else i
+                val column = if(j >= column) j + 1 else j
+                out[i, j] = this[row, column]
+            }
+        }
+
+        return out
+    }
+
+    /**
      * Creates an immutable copy of this matrix.
      *
      * @return The new matrix for chaining.
@@ -194,83 +227,83 @@ open class Projection {
      * @return The output matrix for chaining.
      */
     fun inverse(out: MutableProjection) : MutableProjection {
-        if(isOrthogonal) {
-            transpose(out) // if M is orthogonal then inv(M) = conjugate(M)
-        } else {
-            if (isTransformation) {
-                val f = 1 / e22
-                out.set(
-                        1 / e00,
-                        1 / e11,
-                        1 * f, -e23 *f,
-                        0f, 1f
-                )
-            } else {
-                /*
-                val a = Cached.a
-                val b = Cached.b
-                val c = Cached.c
-                val d = Cached.d
-                val s = Cached.s
-                val v = Cached.v
-                val r0 = Cached.r0
-                val r1 = Cached.r1
-                val r2 = Cached.r2
-                val r3 = Cached.r3
-                val t0 = Cached.t0
-                val t1 = Cached.t1
+        return when {
+            isIdentity -> out.set(this)
+            isOrthogonal -> transpose(out) // if M is orthogonal then inv(M) = conjugate(M)
+            else -> {
+                if (isTransformation) {
+                    val f = 1 / e22
+                    out.set(
+                            1 / e00,
+                            1 / e11,
+                            1 * f, -e23 * f,
+                            0f, 1f
+                    )
+                } else {
+                    /*
+                    val a = Cached.a
+                    val b = Cached.b
+                    val c = Cached.c
+                    val d = Cached.d
+                    val s = Cached.s
+                    val v = Cached.v
+                    val r0 = Cached.r0
+                    val r1 = Cached.r1
+                    val r2 = Cached.r2
+                    val r3 = Cached.r3
+                    val t0 = Cached.t0
+                    val t1 = Cached.t1
 
-                a.set(e00, 0f, 0f)
-                b.set(0f, e11, 0f)
-                c.set(0f, 0f, e22)
-                d.set(0f, 0f, e23)
+                    a.set(e00, 0f, 0f)
+                    b.set(0f, e11, 0f)
+                    c.set(0f, 0f, e22)
+                    d.set(0f, 0f, e23)
 
-                val z = e32
-                val w = e33
+                    val z = e32
+                    val w = e33
 
-                // s = a.cross(b) = (0f, 0f, e00 * e11)
-                a.cross(b, s) // = (0f, 0f, e00 * e11)
-                // t = c.cross(d) = 0
-                // u = a.scale(y) - b.scale(x) = 0
-                // v = c.scale(w) - d.scale(z) = (0, 0, e22 * e33 - e23 * e32)
-                c.scale(w, t0) // = (e22 * e33)
-                d.scale(z, t1) // = (e23 * e32)
-                t0.subtract(t1, v) // = (0, 0, e22 * e33 - e23 * e32)
+                    // s = a.cross(b) = (0f, 0f, e00 * e11)
+                    a.cross(b, s) // = (0f, 0f, e00 * e11)
+                    // t = c.cross(d) = 0
+                    // u = a.scale(y) - b.scale(x) = 0
+                    // v = c.scale(w) - d.scale(z) = (0, 0, e22 * e33 - e23 * e32)
+                    c.scale(w, t0) // = (e22 * e33)
+                    d.scale(z, t1) // = (e23 * e32)
+                    t0.subtract(t1, v) // = (0, 0, e22 * e33 - e23 * e32)
 
-                // det = s.dot(v) + t.dot(u) = s.dot(v) = (e00 * e11) * (e22 * e33 - e23 * e32)
-                val invDet = 1 / (s dot v) // = 1 / ((e00 * e11) * (e22 * e33 - e23 * e32))
+                    // det = s.dot(v) + t.dot(u) = s.dot(v) = (e00 * e11) * (e22 * e33 - e23 * e32)
+                    val invDet = 1 / (s dot v) // = 1 / ((e00 * e11) * (e22 * e33 - e23 * e32))
 
-                s *= invDet // = (0f, 0f, 1 / (e22 * e33 - e23 * e32))
-                v *= invDet // = (0f, 0f, 1 / (e00 * e11))
+                    s *= invDet // = (0f, 0f, 1 / (e22 * e33 - e23 * e32))
+                    v *= invDet // = (0f, 0f, 1 / (e00 * e11))
 
-                // r0 = b.cross(v) + t.scale(y) = b.cross(v) = (1 / e00, 0f, 0f)
-                b.cross(v, r0) // = (1 / e00, 0f, 0f)
-                // r1 = v.cross(a) - t.scale(x) = v.cross(a) = (0f, 1 / e11, 0f)
-                v.cross(a, r1) // = (0f, 1 / e11, 0f)
-                // r2 = d.cross(u) + s.scale(w) = s.scale(w) = (0f, 0f, e33 / (e22 * e33 - e23 * e32))
-                s.scale(w, r2) // = (0f, 0f, e33 / (e22 * e33 - e23 * e32))
-                // r3 = u.cross(c) - s.scale(z) = -s.scale(z) = -(0f, 0f, e32 / (e22 * e33 - e23 * e32))
-                s.scale(z, r3).negate() // = -(0f, 0f, e32 / (e22 * e33 - e23 * e32))
+                    // r0 = b.cross(v) + t.scale(y) = b.cross(v) = (1 / e00, 0f, 0f)
+                    b.cross(v, r0) // = (1 / e00, 0f, 0f)
+                    // r1 = v.cross(a) - t.scale(x) = v.cross(a) = (0f, 1 / e11, 0f)
+                    v.cross(a, r1) // = (0f, 1 / e11, 0f)
+                    // r2 = d.cross(u) + s.scale(w) = s.scale(w) = (0f, 0f, e33 / (e22 * e33 - e23 * e32))
+                    s.scale(w, r2) // = (0f, 0f, e33 / (e22 * e33 - e23 * e32))
+                    // r3 = u.cross(c) - s.scale(z) = -s.scale(z) = -(0f, 0f, e32 / (e22 * e33 - e23 * e32))
+                    s.scale(z, r3).negate() // = -(0f, 0f, e32 / (e22 * e33 - e23 * e32))
 
-                out.set(
-                        r0.x,
-                        r1.y,
-                        r2.z, -(d dot s),
-                        r3.z, (c dot s)
-                )
-                */
+                    out.set(
+                            r0.x,
+                            r1.y,
+                            r2.z, -(d dot s),
+                            r3.z, (c dot s)
+                    )
+                    */
 
-                val f = 1 / (e22 * e33 - e23 * e32)
-                out.set(
-                        1 / e00,
-                        1 / e11,
-                        e33 * f, -e23 * f,
-                        -e32 * f, e22 * f
-                )
+                    val f = 1 / (e22 * e33 - e23 * e32)
+                    out.set(
+                            1 / e00,
+                            1 / e11,
+                            e33 * f, -e23 * f,
+                            -e32 * f, e22 * f
+                    )
+                }
             }
         }
-
-        return out
     }
 
     /**
@@ -301,6 +334,32 @@ open class Projection {
             e32 + other.e32, e33 + other.e33
     )
     /**
+     * Adds [other] to this matrix.
+     *
+     * @param[other] The other matrix.
+     * @param[out] The output matrix.
+     * @return The output matrix for chaining.
+     */
+    fun add(other: Transformation, out: MutableMatrix4) = out.set(
+            e00 + other.e00, other.e01, other.e02, other.e03,
+            other.e10, e11 + other.e11, other.e12, other.e13,
+            other.e20, other.e21, e22 + other.e22, e23 + other.e23,
+            0f, 0f, e32, e33 + 1f
+    )
+    /**
+     * Adds [other] to this matrix.
+     *
+     * @param[other] The other matrix.
+     * @param[out] The output matrix.
+     * @return The output matrix for chaining.
+     */
+    fun add(other: Matrix4, out: MutableMatrix4) = out.set(
+            e00 + other.e00, other.e01, other.e02, other.e03,
+            other.e10, e11 + other.e11, other.e12, other.e13,
+            other.e20, other.e21, e22 + other.e22, e23 + other.e23,
+            other.e30, other.e31, e32 + other.e32, e33 + other.e33
+    )
+    /**
      * Subtracts [other] from this matrix.
      *
      * @param[other] The other matrix.
@@ -312,6 +371,32 @@ open class Projection {
             e11 - other.e11,
             e22 - other.e22, e23 - other.e23,
             e32 - other.e32, e33 - other.e33
+    )
+    /**
+     * Subtracts [other] from this matrix.
+     *
+     * @param[other] The other matrix.
+     * @param[out] The output matrix.
+     * @return The output matrix for chaining.
+     */
+    fun subtract(other: Transformation, out: MutableMatrix4) = out.set(
+            e00 - other.e00, -other.e01, -other.e02, -other.e03,
+            -other.e10, e11 - other.e11, -other.e12, -other.e13,
+            -other.e20, -other.e21, e22 - other.e22, e23 - other.e23,
+            0f, 0f, e32, e33 - 1f
+    )
+    /**
+     * Subtracts [other] from this matrix.
+     *
+     * @param[other] The other matrix.
+     * @param[out] The output matrix.
+     * @return The output matrix for chaining.
+     */
+    fun subtract(other: Matrix4, out: MutableMatrix4) = out.set(
+            e00 - other.e00, -other.e01, -other.e02, -other.e03,
+            -other.e10, e11 - other.e11, -other.e12, -other.e13,
+            -other.e20, -other.e21, e22 - other.e22, e23 - other.e23,
+            -other.e30, -other.e31, e32 - other.e32, e33 - other.e33
     )
 
     /**
@@ -355,6 +440,58 @@ open class Projection {
      * @return The output matrix for chaining.
      */
     fun multiplyLeft(other: Projection, out: MutableProjection) = other.multiply(this, out)
+
+    /**
+     * Multiplies this matrix with [other].
+     *
+     * @param[other] The other matrix.
+     * @param[out] The output matrix.
+     * @return The output matrix for chaining.
+     */
+    fun multiply(other: Transformation, out: MutableMatrix4) : MutableMatrix4 {
+        if(isIdentity) {
+            return out.set(other)
+        }
+
+        if(other.isIdentity) {
+            return out.set(this)
+        }
+
+        val e00 = this.e00 * other.e00
+        val e01 = this.e00 * other.e01
+        val e02 = this.e00 * other.e02
+        val e03 = this.e00 * other.e03
+
+        val e10 = this.e11 * other.e10
+        val e11 = this.e11 * other.e11
+        val e12 = this.e11 * other.e12
+        val e13 = this.e11 * other.e13
+
+        val e20 = this.e22 * other.e20
+        val e21 = this.e22 * other.e21
+        val e22 = this.e22 * other.e22
+        val e23 = this.e22 * other.e23 + this.e23
+
+        val e30 = this.e32 * other.e20
+        val e31 = this.e32 * other.e21
+        val e32 = this.e32 * other.e22
+        val e33 = this.e32 * other.e23 + this.e33
+
+        return out.set(
+                e00, e01, e02, e03,
+                e10, e11, e12, e13,
+                e20, e21, e22, e23,
+                e30, e31, e32, e33
+        )
+    }
+    /**
+     * Multiplies [other] with this matrix.
+     *
+     * @param[other] The other matrix.
+     * @param[out] The output matrix.
+     * @return The output matrix for chaining.
+     */
+    fun multiplyLeft(other: Transformation, out: MutableMatrix4) = other.multiply(this, out)
 
     /**
      * Multiplies this matrix with [other].
@@ -488,6 +625,13 @@ open class Projection {
         return out.set(nx, ny, nz).scale(1 / nw)
     }
 
+    fun equals(other: Projection) = equals(other.e00, other.e11, other.e22, other.e23, other.e32, other.e33)
+    fun equals(other: Transformation) : Boolean {
+        return other.e01.isZero() && other.e02.isZero() && other.e03.isZero() &&
+                other.e10.isZero() && other.e12.isZero() && other.e13.isZero() &&
+                other.e20.isZero() && other.e21.isZero() &&
+                equals(other.e00, other.e11, other.e22, other.e23, 0f, 1f)
+    }
     fun equals(other: Matrix4) : Boolean {
         return other.e01.isZero() && other.e02.isZero() && other.e03.isZero() &&
                 other.e10.isZero() && other.e12.isZero() && other.e13.isZero() &&
@@ -495,7 +639,6 @@ open class Projection {
                 other.e30.isZero() && other.e31.isZero() &&
                 equals(other.e00, other.e11, other.e22, other.e23, other.e32, other.e33)
     }
-    fun equals(other: Projection) = equals(other.e00, other.e11, other.e22, other.e23, other.e32, other.e33)
     fun equals(e00: Float, e11: Float, e22: Float, e23: Float, e32: Float, e33: Float) : Boolean {
         return this.e00 isCloseTo e00 &&
                 this.e11 isCloseTo e11 &&
@@ -511,8 +654,9 @@ open class Projection {
         }
 
         return when(other) {
-            is Matrix4 -> equals(other)
             is Projection -> equals(other)
+            is Transformation -> equals(other)
+            is Matrix4 -> equals(other)
             else -> false
         }
     }

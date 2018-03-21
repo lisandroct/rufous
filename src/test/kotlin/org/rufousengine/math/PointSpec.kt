@@ -265,13 +265,94 @@ object PointSpec: Spek({
             }
         }
 
-        on("multiplyLeft (Matrix4)") {
-            val matrix = getRandomMatrix4()
-            val multiplied = point.multiplyLeft(matrix, MutablePoint())
-            it("should give the same results as Matrix4::multiply") {
-                val expected = matrix.multiply(point, MutablePoint())
+        on("distance") {
+            val other = getRandomPoint()
+            val distance = point.distance(other)
+            it("should return the magnitude of the vector between the two points") {
+                val vector = point.subtract(other, MutableVector3())
+                assert(distance).isCloseTo(vector.magnitude)
+            }
+        }
 
-                assert(multiplied).isEqualTo(expected)
+        on("distanceSquared") {
+            val other = getRandomPoint()
+            val distanceSquared = point.distanceSquared(other)
+            it("should return the square of the distance") {
+                val distance = point.distance(other)
+                val expected = distance * distance
+
+                assert(distanceSquared).isCloseTo(expected)
+            }
+        }
+
+        on("add (Point)") {
+            val other = getRandomPoint()
+            val add = point.add(other, MutablePoint())
+            it("should add componentwise") {
+                for (i in 0 until 3) {
+                    assert(add[i]).isCloseTo(point[i] + other[i])
+                }
+            }
+        }
+
+        on("add (Vector)") {
+            val vector = getRandomVector3()
+            val add = point.add(vector, MutablePoint())
+            it("should add componentwise") {
+                for (i in 0 until 3) {
+                    assert(add[i]).isCloseTo(point[i] + vector[i])
+                }
+            }
+        }
+
+        on("subtract (Point)") {
+            val other = getRandomPoint()
+            val subtract = point.subtract(other, MutablePoint())
+            it("should subtract componentwise") {
+                for (i in 0 until 3) {
+                    assert(subtract[i]).isCloseTo(point[i] - other[i])
+                }
+            }
+        }
+
+        on("subtract (Vector3)") {
+            val other = getRandomVector3()
+            val subtract = point.subtract(other, MutablePoint())
+            it("should subtract componentwise") {
+                for (i in 0 until 3) {
+                    assert(subtract[i]).isCloseTo(point[i] - other[i])
+                }
+            }
+        }
+
+        on("lerp") {
+            val other = getRandomPoint()
+            val progress = getRandomValue()
+            val interpolated = point.lerp(other, progress, MutablePoint())
+            it("should lerp componentwise") {
+                for (i in 0 until 3) {
+                    assert(interpolated[i]).isCloseTo(lerp(point[i], other[i], progress))
+                }
+            }
+        }
+
+        on("min") {
+            val other = getRandomPoint()
+            val min = point.min(other, MutablePoint())
+            it("should perform min componentwise") {
+                for (i in 0 until 3) {
+                    assert(min[i]).isCloseTo(min(point[i], other[i]))
+                }
+            }
+        }
+
+        on("max") {
+            val other = getRandomPoint()
+            val max = point.max(other, MutablePoint())
+            it("should perform max componentwise") {
+                for (i in 0 until 3) {
+                    assert(max[i]).isCloseTo(max(point[i], other[i]))
+                }
             }
         }
 
@@ -284,73 +365,24 @@ object PointSpec: Spek({
                 assert(multiplied).isEqualTo(expected)
             }
         }
-    }
 
-    given("two points") {
-        val a by memoized { getRandomPoint() }
-        val b by memoized { getRandomPoint() }
+        on("multiplyLeft (Transformation)") {
+            val matrix = getRandomTransformation()
+            val multiplied = point.multiplyLeft(matrix, MutablePoint())
+            it("should give the same results as Projection::multiply") {
+                val expected = matrix.multiply(point, MutablePoint())
 
-        on("distance") {
-            val distance = a.distance(b)
-            it("should return the magnitude of the vector between the two points") {
-                val vector = a.subtract(b, MutableVector3())
-                assert(distance).isCloseTo(vector.magnitude)
+                assert(multiplied).isEqualTo(expected)
             }
         }
 
-        on("distanceSquared") {
-            val distanceSquared = a.distanceSquared(b)
-            it("should return the square of the distance") {
-                val distance = a.distance(b)
-                val expected = distance * distance
+        on("multiplyLeft (Matrix4)") {
+            val matrix = getRandomMatrix4()
+            val multiplied = point.multiplyLeft(matrix, MutablePoint())
+            it("should give the same results as Matrix4::multiply") {
+                val expected = matrix.multiply(point, MutablePoint())
 
-                assert(distanceSquared).isCloseTo(expected)
-            }
-        }
-
-        on("add") {
-            val add = a.add(b, MutablePoint())
-            it("should add componentwise") {
-                for (i in 0 until 3) {
-                    assert(add[i]).isCloseTo(a[i] + b[i])
-                }
-            }
-        }
-
-        on("subtract") {
-            val subtract = a.subtract(b, MutablePoint())
-            it("should subtract componentwise") {
-                for (i in 0 until 3) {
-                    assert(subtract[i]).isCloseTo(a[i] - b[i])
-                }
-            }
-        }
-
-        on("lerp") {
-            val progress = getRandomValue()
-            val interpolated = a.lerp(b, progress, MutablePoint())
-            it("should lerp componentwise") {
-                for (i in 0 until 3) {
-                    assert(interpolated[i]).isCloseTo(lerp(a[i], b[i], progress))
-                }
-            }
-        }
-
-        on("min") {
-            val min = a.min(b, MutablePoint())
-            it("should perform min componentwise") {
-                for (i in 0 until 3) {
-                    assert(min[i]).isCloseTo(min(a[i], b[i]))
-                }
-            }
-        }
-
-        on("max") {
-            val max = a.max(b, MutablePoint())
-            it("should perform max componentwise") {
-                for (i in 0 until 3) {
-                    assert(max[i]).isCloseTo(max(a[i], b[i]))
-                }
+                assert(multiplied).isEqualTo(expected)
             }
         }
     }
@@ -681,9 +713,9 @@ object PointSpec: Spek({
             }
         }
 
-        on("multiplyLeft (Matrix4)") {
+        on("multiplyLeft (Projection)") {
             val original = point.copyImmutable()
-            val matrix = getRandomMatrix4()
+            val matrix = getRandomProjection()
             point.multiplyLeft(matrix)
             it("should multiplyLeft and assign") {
                 val expected = original.multiplyLeft(matrix, MutablePoint())
@@ -692,9 +724,20 @@ object PointSpec: Spek({
             }
         }
 
-        on("multiplyLeft (Projection)") {
+        on("multiplyLeft (Transformation)") {
             val original = point.copyImmutable()
-            val matrix = getRandomProjection()
+            val matrix = getRandomTransformation()
+            point.multiplyLeft(matrix)
+            it("should multiplyLeft and assign") {
+                val expected = original.multiplyLeft(matrix, MutablePoint())
+
+                assert(point).isEqualTo(expected)
+            }
+        }
+
+        on("multiplyLeft (Matrix4)") {
+            val original = point.copyImmutable()
+            val matrix = getRandomMatrix4()
             point.multiplyLeft(matrix)
             it("should multiplyLeft and assign") {
                 val expected = original.multiplyLeft(matrix, MutablePoint())
@@ -711,12 +754,6 @@ private fun getRandomVector2() = Vector2(getRandomValue(), getRandomValue())
 private fun getRandomVector3() = Vector3(getRandomValue(), getRandomValue(), getRandomValue())
 private fun getRandomVector4() = Vector4(getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue())
 private fun getRandomMutable(observer: ((Point) -> Unit)) = MutablePoint(getRandomValue(), getRandomValue(), getRandomValue(), observer)
-private fun getRandomMatrix4() = Matrix4(
-        getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue(),
-        getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue(),
-        getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue(),
-        getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue()
-)
 private fun getRandomProjection() : Projection {
     val p = MutableProjection()
     p.set(
@@ -728,3 +765,19 @@ private fun getRandomProjection() : Projection {
 
     return Projection(p)
 }
+private fun getRandomTransformation() : Transformation {
+    val t = MutableTransformation()
+    t.set(
+            getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue(),
+            getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue(),
+            getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue()
+    )
+
+    return Transformation(t)
+}
+private fun getRandomMatrix4() = Matrix4(
+        getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue(),
+        getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue(),
+        getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue(),
+        getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue()
+)

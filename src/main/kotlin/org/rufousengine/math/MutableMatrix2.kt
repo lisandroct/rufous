@@ -142,6 +142,20 @@ class MutableMatrix2(e00: Float, e01: Float, e10: Float, e11: Float, observer: (
     operator fun minusAssign(other: Matrix2) { subtract(other) }
     operator fun timesAssign(scalar: Float) { scale(scalar) }
     operator fun divAssign(scalar: Float) { scale(1 / scalar) }
+    operator fun timesAssign(other: Matrix2) { multiply(other) }
+
+    /**
+     * Sets this matrix to the identity.
+     *
+     * @return This matrix for chaining.
+     */
+    fun identity() = set(1f, 0f, 0f, 1f)
+    /**
+     * Sets every component to 0.
+     *
+     * @return This matrix for chaining.
+     */
+    fun zero() = set(0f, 0f, 0f, 0f)
 
     /**
      * Transposes this matrix.

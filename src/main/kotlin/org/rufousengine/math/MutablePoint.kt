@@ -208,19 +208,28 @@ class MutablePoint(x: Float = 0f, y: Float = 0f, z: Float = 0f, observer: ((Poin
     /**
      * Multiplies [matrix] with this point.
      *
+     * Wrapper to [Projection.multiply].
+     *
+     * @param[matrix] The matrix.
+     * @return This point for chaining.
+     */
+    fun multiplyLeft(matrix: Projection) = multiplyLeft(matrix, this)
+    /**
+     * Multiplies [matrix] with this point.
+     *
+     * Wrapper to [Transformation.multiply].
+     *
+     * @param[matrix] The matrix.
+     * @return This point for chaining.
+     */
+    fun multiplyLeft(matrix: Transformation) = multiplyLeft(matrix, this)
+    /**
+     * Multiplies [matrix] with this point.
+     *
      * Wrapper to [Matrix4.multiply].
      *
      * @param[matrix] The matrix.
      * @return This point for chaining.
      */
     fun multiplyLeft(matrix: Matrix4) = multiplyLeft(matrix, this)
-    /**
-     * Multiplies [projection] with this point.
-     *
-     * Wrapper to [Projection.multiply].
-     *
-     * @param[projection] The projection.
-     * @return This point for chaining.
-     */
-    fun multiplyLeft(projection: Projection) = multiplyLeft(projection, this)
 }

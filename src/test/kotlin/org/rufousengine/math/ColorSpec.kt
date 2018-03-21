@@ -5,7 +5,6 @@ import assertk.assert
 import assertk.assertions.*
 import org.jetbrains.spek.api.dsl.*
 import org.rufousengine.assertions.isCloseTo
-import kotlin.math.*
 
 object ColorSpec: Spek({
     describe("immutable constructors") {
@@ -165,14 +164,9 @@ object ColorSpec: Spek({
         }
     }
 
-    given("two colors") {
-        val a by memoized { getRandomColor() }
-        val b by memoized { getRandomColor() }
-    }
-
     given("a mutable color") {
         var counter = 0
-        val color by memoized { getRandomMutable { counter++ } }
+        val color by memoized { getRandomMutableColor { counter++ } }
 
         describe("seters") {
             on("r") {
@@ -291,4 +285,4 @@ object ColorSpec: Spek({
 
 private fun getRandomValue() = random(0f, 1f)
 private fun getRandomColor() = Color(getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue())
-private fun getRandomMutable(observer: ((Color) -> Unit)) = MutableColor(getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue(), observer)
+private fun getRandomMutableColor(observer: ((Color) -> Unit)) = MutableColor(getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue(), observer)

@@ -20,73 +20,6 @@ class MutableProjection : Projection {
         this.observer = observer
     }
 
-    override var e00: Float
-    get() = components[0]
-    set(value) {
-        if(value isCloseTo components[0]) {
-            return
-        }
-
-        components[0] = value
-
-        setDirty()
-    }
-    override var e11: Float
-        get() = components[5]
-        set(value) {
-            if(value isCloseTo components[5]) {
-                return
-            }
-
-            components[5] = value
-
-            setDirty()
-        }
-    override var e22: Float
-        get() = components[10]
-        set(value) {
-            if(value isCloseTo components[10]) {
-                return
-            }
-
-            components[10] = value
-
-            setDirty()
-        }
-    override var e23: Float
-        get() = components[11]
-        set(value) {
-            if(value isCloseTo components[11]) {
-                return
-            }
-
-            components[11] = value
-
-            setDirty()
-        }
-    override var e32: Float
-        get() = components[14]
-        set(value) {
-            if(value isCloseTo components[14]) {
-                return
-            }
-
-            components[14] = value
-
-            setDirty()
-        }
-    override var e33: Float
-        get() = components[15]
-        set(value) {
-            if(value isCloseTo components[15]) {
-                return
-            }
-
-            components[15] = value
-
-            setDirty()
-        }
-
     private var transposeDirty = true
     private val _transpose by lazy { MutableProjection() }
     /** The transpose of this matrix. It creates a new lazy Matrix4 instance. */
@@ -128,22 +61,32 @@ class MutableProjection : Projection {
         components[14] = e32
         components[15] = e33
 
-        setDirty()
-
-        return this
-    }
-
-    private fun setDirty() {
         transposeDirty = true
         inverseDirty = true
 
         observer?.invoke(this)
+
+        return this
     }
 
     operator fun plusAssign(other: Projection) { add(other) }
     operator fun minusAssign(other: Projection) { subtract(other) }
     operator fun timesAssign(scalar: Float) { scale(scalar) }
     operator fun divAssign(scalar: Float) { scale(1 / scalar) }
+    operator fun timesAssign(other: Projection) { multiply(other) }
+
+    /**
+     * Sets this matrix to the identity.
+     *
+     * @return This matrix for chaining.
+     */
+    fun identity() = set(1f, 1f, 1f, 0f, 0f, 1f)
+    /**
+     * Sets every component to 0.
+     *
+     * @return This matrix for chaining.
+     */
+    fun zero() = set(0f, 0f, 0f, 0f, 0f, 0f)
 
     /**
      * Transposes this matrix.
@@ -197,6 +140,12 @@ class MutableProjection : Projection {
 
     /**
      * Sets this matrix as a symmetric orthographic projection.
+     *
+     * @param[width] The width of the frustum in world units.
+     * @param[height] The height of the frustum in world units.
+     * @param[near] The distance to the near plane in world units. Must be positive.
+     * @param[far] The distance to the far plan in world units. Must be greater than [near].
+     * @return This matrix for chaining.
      */
     fun setOrthographic(width: Float, height: Float, near: Float, far: Float) : MutableProjection {
         if(width < 0f || height < 0f || near <= 0f) {
@@ -220,6 +169,12 @@ class MutableProjection : Projection {
 
     /**
      * Sets this matrix as a symmetric perspective projection.
+     *
+     * @param[fieldOfView] The vertical field of view in degrees.
+     * @param[aspectRatio] The aspect ratio.
+     * @param[near] The distance to the near plane in world units. Must be positive.
+     * @param[far] The distance to the far plan in world units. Must be greater than [near].
+     * @return This matrix for chaining.
      */
     fun setPerspective(fieldOfView: Float, aspectRatio: Float, near: Float, far: Float) : MutableProjection {
         if(fieldOfView <= 0f || fieldOfView > 180f) {
