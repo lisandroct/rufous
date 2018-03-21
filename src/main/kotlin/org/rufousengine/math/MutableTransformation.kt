@@ -1,5 +1,7 @@
 package org.rufousengine.math
 
+import kotlin.math.sqrt
+
 /**
  * A mutable 4x4 transformation matrix.
  *
@@ -185,6 +187,33 @@ class MutableTransformation : Transformation {
     /**
      * Sets this matrix as a rotation matrix through [angle] about [axis].
      *
+     * If [axis] is known to be a unit vector, [makeRotationSafe] is a cheaper alternative.
+     *
+     * @param[angle] The angle in degrees.
+     * @param[axis] The axis.
+     * @return This matrix for chaining.
+     */
+    fun makeRotationSafe(angle: Float, axis: Vector3) = makeRotationSafe(angle, axis.x, axis.y, axis.z)
+
+    /**
+     * Sets this matrix as a rotation matrix through [angle] about ([aX], [aY], [aZ]).
+     *
+     * If ([aX], [aY], [aZ]) is known to be a unit vector, [makeRotationSafe] is a cheaper alternative.
+     *
+     * @param[angle] The angle in degrees.
+     * @return This matrix for chaining.
+     */
+    fun makeRotationSafe(angle: Float, aX: Float, aY: Float, aZ: Float) : MutableTransformation {
+        val invMagnitude = 1f / sqrt(aX * aX + aY * aY + aZ * aZ)
+
+        return makeRotation(angle, aX * invMagnitude, aY * invMagnitude, aZ * invMagnitude)
+    }
+
+    /**
+     * Sets this matrix as a rotation matrix through [angle] about [axis].
+     *
+     * [axis] must be a unit vector.
+     *
      * @param[angle] The angle in degrees.
      * @param[axis] The axis.
      * @return This matrix for chaining.
@@ -193,6 +222,8 @@ class MutableTransformation : Transformation {
 
     /**
      * Sets this matrix as a rotation matrix through [angle] about ([aX], [aY], [aZ]).
+     *
+     * [axis] must be a unit vector.
      *
      * @param[angle] The angle in degrees.
      * @return This matrix for chaining.

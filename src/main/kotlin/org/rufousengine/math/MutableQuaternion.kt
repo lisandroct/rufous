@@ -379,8 +379,8 @@ class MutableQuaternion(x: Float = 0f, y: Float = 0f, z: Float = 0f, w: Float = 
 //    }
 
 
-//    fun makeRotation(axis: Vector3, angle: Float) = makeRotation(axis.x, axis.y, axis.z, angle)
-//    fun makeRotation(x: Float, y: Float, z: Float, angle: Float) : MutableQuaternion {
+//    fun makeRotationSafe(axis: Vector3, angle: Float) = makeRotationSafe(axis.x, axis.y, axis.z, angle)
+//    fun makeRotationSafe(x: Float, y: Float, z: Float, angle: Float) : MutableQuaternion {
 //        val halfAngle = angle * DEG_TO_RAD * 0.5f
 //        val s = sin(halfAngle)
 //
@@ -421,7 +421,7 @@ class MutableQuaternion(x: Float = 0f, y: Float = 0f, z: Float = 0f, w: Float = 
 //                Vector3.i.cross(from, c)
 //            }
 //            c.normalize()
-//            return makeRotation(c, 180f)
+//            return makeRotationSafe(c, 180f)
 //        }
 //
 //        val s = sqrt((1 + dot) * 2f)

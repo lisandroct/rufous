@@ -949,9 +949,20 @@ object Matrix3Spec: Spek({
             }
         }
 
-        on("makeRotationZ") {
+        on("makeRotationSafe") {
             val angle = getRandomValue()
             val axis = getRandomVector3()
+            matrix.makeRotationSafe(angle, axis)
+            it("should be equal to Matrix3::makeRotation with a unit vector") {
+                val expected = MutableMatrix3().makeRotation(angle, axis.normalize(MutableVector3()))
+
+                assert(matrix).isEqualTo(expected)
+            }
+        }
+
+        on("makeRotation") {
+            val angle = getRandomValue()
+            val axis = getRandomVector3().normalize(MutableVector3())
             matrix.makeRotation(angle, axis)
             it("should suffice the definition") {
                 assert(matrix.e00).isCloseTo(cos(angle) + (1 - cos(angle)) * axis.x.pow(2))

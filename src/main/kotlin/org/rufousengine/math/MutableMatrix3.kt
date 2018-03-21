@@ -1,5 +1,7 @@
 package org.rufousengine.math
 
+import kotlin.math.sqrt
+
 /**
  * A mutable 3x3 row-major matrix.
  *
@@ -332,6 +334,33 @@ class MutableMatrix3(e00: Float, e01: Float, e02: Float, e10: Float, e11: Float,
     /**
      * Sets this matrix as a rotation matrix through [angle] about [axis].
      *
+     * If [axis] is known to be a unit vector, [makeRotationSafe] is a cheaper alternative.
+     *
+     * @param[angle] The angle in degrees.
+     * @param[axis] The axis.
+     * @return This matrix for chaining.
+     */
+    fun makeRotationSafe(angle: Float, axis: Vector3) = makeRotationSafe(angle, axis.x, axis.y, axis.z)
+
+    /**
+     * Sets this matrix as a rotation matrix through [angle] about ([aX], [aY], [aZ]).
+     *
+     * If ([aX], [aY], [aZ]) is known to be a unit vector, [makeRotationSafe] is a cheaper alternative.
+     *
+     * @param[angle] The angle in degrees.
+     * @return This matrix for chaining.
+     */
+    fun makeRotationSafe(angle: Float, aX: Float, aY: Float, aZ: Float) : MutableMatrix3 {
+        val invMagnitude = 1f / sqrt(aX * aX + aY * aY + aZ * aZ)
+
+        return makeRotation(angle, aX * invMagnitude, aY * invMagnitude, aZ * invMagnitude)
+    }
+
+    /**
+     * Sets this matrix as a rotation matrix through [angle] about [axis].
+     *
+     * [axis] must be a unit vector.
+     *
      * @param[angle] The angle in degrees.
      * @param[axis] The axis.
      * @return This matrix for chaining.
@@ -340,6 +369,8 @@ class MutableMatrix3(e00: Float, e01: Float, e02: Float, e10: Float, e11: Float,
 
     /**
      * Sets this matrix as a rotation matrix through [angle] about ([aX], [aY], [aZ]).
+     *
+     * ([aX], [aY], [aZ]) must be a unit vector.
      *
      * @param[angle] The angle in degrees.
      * @return This matrix for chaining.
