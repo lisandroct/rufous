@@ -334,7 +334,7 @@ class MutableMatrix3(e00: Float, e01: Float, e02: Float, e10: Float, e11: Float,
     /**
      * Sets this matrix as a rotation matrix through [angle] about [axis].
      *
-     * If [axis] is known to be a unit vector, [makeRotationSafe] is a cheaper alternative.
+     * If [axis] is known to be a unit vector, [makeRotation] is a cheaper alternative.
      *
      * @param[angle] The angle in degrees.
      * @param[axis] The axis.
@@ -345,7 +345,7 @@ class MutableMatrix3(e00: Float, e01: Float, e02: Float, e10: Float, e11: Float,
     /**
      * Sets this matrix as a rotation matrix through [angle] about ([aX], [aY], [aZ]).
      *
-     * If ([aX], [aY], [aZ]) is known to be a unit vector, [makeRotationSafe] is a cheaper alternative.
+     * If ([aX], [aY], [aZ]) is known to be a unit vector, [makeRotation] is a cheaper alternative.
      *
      * @param[angle] The angle in degrees.
      * @return This matrix for chaining.
@@ -394,6 +394,112 @@ class MutableMatrix3(e00: Float, e01: Float, e02: Float, e10: Float, e11: Float,
                 c + x * aX, axay - saz, axaz + say,
                 axay + saz, c + y * aY, ayaz - sax,
                 axaz - say, ayaz + sax, c + z * aZ
+        )
+    }
+
+    /**
+     * Sets this matrix as a reflection matrix through the plane perpendicular to [axis].
+     *
+     * If [axis] is known to be a unit vector, [makeReflection] is a cheaper alternative.
+     *
+     * @param[axis] The vector perpendicular to the plane through which the reflection is made.
+     * @return This matrix for chaining.
+     */
+    fun makeReflectionSafe(axis: Vector3) = makeReflectionSafe(axis.x, axis.y, axis.z)
+    /**
+     * Sets this matrix as a reflection matrix through the plane perpendicular to ([aX], [aY], [aZ]).
+     *
+     * If ([aX], [aY], [aZ]) is known to be a unit vector, [makeReflection] is a cheaper alternative.
+     *
+     * @return This matrix for chaining.
+     */
+    fun makeReflectionSafe(aX: Float, aY: Float, aZ: Float) : MutableMatrix3 {
+        val invMagnitude = 1f / sqrt(aX * aX + aY * aY + aZ * aZ)
+
+        return makeReflection(aX * invMagnitude, aY * invMagnitude, aZ * invMagnitude)
+    }
+
+    /**
+     * Sets this matrix as a reflection matrix through the plane perpendicular to [axis].
+     *
+     * [axis] must be a unit vector.
+     *
+     * @param[axis] The vector perpendicular to the plane through which the reflection is made.
+     * @return This matrix for chaining.
+     */
+    fun makeReflection(axis: Vector3) = makeReflection(axis.x, axis.y, axis.z)
+    /**
+     * Sets this matrix as a reflection matrix through the plane perpendicular to ([aX], [aY], [aZ]).
+     *
+     * ([aX], [aY], [aZ]) must be a unit vector.
+     *
+     * @return This matrix for chaining.
+     */
+    fun makeReflection(aX: Float, aY: Float, aZ: Float) : MutableMatrix3 {
+        val x = aX * -2f
+        val y = aY * -2f
+        val z = aZ * -2f
+        val axay = x * aY
+        val axaz = x * aZ
+        val ayaz = y * aZ
+
+        return set(
+                x * aX + 1f, axay, axaz,
+                axay, y * aY + 1f, ayaz,
+                axaz, ayaz, z * aZ + 1f
+        )
+    }
+
+    /**
+     * Sets this matrix as an involution matrix through [axis].
+     *
+     * If [axis] is known to be a unit vector, [makeReflection] is a cheaper alternative.
+     *
+     * @param[axis] The vector perpendicular to the plane through which the reflection is made.
+     * @return This matrix for chaining.
+     */
+    fun makeInvolutionSafe(axis: Vector3) = makeInvolutionSafe(axis.x, axis.y, axis.z)
+    /**
+     * Sets this matrix as an involution matrix through ([aX], [aY], [aZ]).
+     *
+     * If ([aX], [aY], [aZ]) is known to be a unit vector, [makeReflection] is a cheaper alternative.
+     *
+     * @return This matrix for chaining.
+     */
+    fun makeInvolutionSafe(aX: Float, aY: Float, aZ: Float) : MutableMatrix3 {
+        val invMagnitude = 1f / sqrt(aX * aX + aY * aY + aZ * aZ)
+
+        return makeInvolution(aX * invMagnitude, aY * invMagnitude, aZ * invMagnitude)
+    }
+
+    /**
+     * Sets this matrix as an involution matrix through [axis].
+     *
+     * [axis] must be a unit vector.
+     *
+     * @param[axis] The vector perpendicular to the plane through which the reflection is made.
+     * @return This matrix for chaining.
+     */
+    fun makeInvolution(axis: Vector3) = makeInvolution(axis.x, axis.y, axis.z)
+    /**
+     * Sets this matrix as an involution matrix through ([aX], [aY], [aZ]).
+     *
+     * ([aX], [aY], [aZ]) must be a unit vector.
+     *
+     * @return This matrix for chaining.
+     */
+    fun makeInvolution(aX: Float, aY: Float, aZ: Float) : MutableMatrix3 {
+        val x = aX * 2f
+        val y = aY * 2f
+        val z = aZ * 2f
+        val axay = x * aY
+        val axaz = x * aZ
+        val ayaz = y * aZ
+
+        return set(
+                x * aX - 1f, axay, axaz,
+                axay, y * aY - 1f, ayaz,
+                axaz, ayaz, z * aZ - 1f
         )
     }
 }

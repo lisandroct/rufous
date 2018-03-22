@@ -639,6 +639,26 @@ object TransformationSpec: Spek({
                 assert(matrix).isEqualTo(expected)
             }
         }
+
+        on("makeReflectionSafe") {
+            val axis = getRandomVector3()
+            matrix.makeReflectionSafe(axis)
+            it("should give the same results as Matrix4::makeReflectionSafe") {
+                val expected = MutableMatrix4().makeReflectionSafe(axis)
+
+                assert(matrix).isEqualTo(expected)
+            }
+        }
+
+        on("makeReflection") {
+            val axis = getRandomVector3().normalize(MutableVector3())
+            matrix.makeReflection(axis)
+            it("should give the same results as Matrix4::makeReflection") {
+                val expected = MutableMatrix4().makeReflection(axis)
+
+                assert(matrix).isEqualTo(expected)
+            }
+        }
     }
 })
 

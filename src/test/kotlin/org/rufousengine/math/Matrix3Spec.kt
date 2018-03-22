@@ -978,6 +978,62 @@ object Matrix3Spec: Spek({
                 assert(matrix.e22).isCloseTo(cos(angle) + (1 - cos(angle)) * axis.z.pow(2))
             }
         }
+
+        on("makeReflectionSafe") {
+            val axis = getRandomVector3()
+            matrix.makeReflectionSafe(axis)
+            it("should be equal to Matrix3::makeReflection with a unit vector") {
+                val expected = MutableMatrix3().makeReflection(axis.normalize(MutableVector3()))
+
+                assert(matrix).isEqualTo(expected)
+            }
+        }
+
+        on("makeReflection") {
+            val axis = getRandomVector3().normalize(MutableVector3())
+            matrix.makeReflection(axis)
+            it("should suffice the definition") {
+                assert(matrix.e00).isCloseTo(1f - 2f * axis.x.pow(2))
+                assert(matrix.e01).isCloseTo(-2f * axis.x * axis.y)
+                assert(matrix.e02).isCloseTo(-2f * axis.x * axis.z)
+
+                assert(matrix.e10).isCloseTo(-2f * axis.x * axis.y)
+                assert(matrix.e11).isCloseTo(1f - 2f * axis.y.pow(2))
+                assert(matrix.e12).isCloseTo(-2f * axis.y * axis.z)
+
+                assert(matrix.e20).isCloseTo(-2f * axis.x * axis.z)
+                assert(matrix.e21).isCloseTo(-2f * axis.y * axis.z)
+                assert(matrix.e22).isCloseTo(1f - 2f * axis.z.pow(2))
+            }
+        }
+
+        on("makeInvolutionSafe") {
+            val axis = getRandomVector3()
+            matrix.makeInvolutionSafe(axis)
+            it("should be equal to Matrix3::makeInvolution with a unit vector") {
+                val expected = MutableMatrix3().makeInvolution(axis.normalize(MutableVector3()))
+
+                assert(matrix).isEqualTo(expected)
+            }
+        }
+
+        on("makeInvolution") {
+            val axis = getRandomVector3().normalize(MutableVector3())
+            matrix.makeInvolution(axis)
+            it("should suffice the definition") {
+                assert(matrix.e00).isCloseTo(2f * axis.x.pow(2) - 1f)
+                assert(matrix.e01).isCloseTo(2f * axis.x * axis.y)
+                assert(matrix.e02).isCloseTo(2f * axis.x * axis.z)
+
+                assert(matrix.e10).isCloseTo(2f * axis.x * axis.y)
+                assert(matrix.e11).isCloseTo(2f * axis.y.pow(2) - 1f)
+                assert(matrix.e12).isCloseTo(2f * axis.y * axis.z)
+
+                assert(matrix.e20).isCloseTo(2f * axis.x * axis.z)
+                assert(matrix.e21).isCloseTo(2f * axis.y * axis.z)
+                assert(matrix.e22).isCloseTo(2f * axis.z.pow(2) - 1f)
+            }
+        }
     }
 })
 

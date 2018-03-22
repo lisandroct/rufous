@@ -1686,6 +1686,78 @@ object Matrix4Spec: Spek({
                 assert(matrix.e33).isCloseTo(1f)
             }
         }
+
+        on("makeReflectionSafe") {
+            val axis = getRandomVector3()
+            matrix.makeReflectionSafe(axis)
+            it("should be equal to Matrix4::makeReflection with a unit vector") {
+                val expected = MutableMatrix4().makeReflection(axis.normalize(MutableVector3()))
+
+                assert(matrix).isEqualTo(expected)
+            }
+        }
+
+        on("makeReflection") {
+            val axis = getRandomVector3().normalize(MutableVector3())
+            matrix.makeReflection(axis)
+            it("should suffice the definition") {
+                assert(matrix.e00).isCloseTo(1f - 2f * axis.x.pow(2))
+                assert(matrix.e01).isCloseTo(-2f * axis.x * axis.y)
+                assert(matrix.e02).isCloseTo(-2f * axis.x * axis.z)
+                assert(matrix.e03).isCloseTo(0f)
+
+                assert(matrix.e10).isCloseTo(-2f * axis.x * axis.y)
+                assert(matrix.e11).isCloseTo(1f - 2f * axis.y.pow(2))
+                assert(matrix.e12).isCloseTo(-2f * axis.y * axis.z)
+                assert(matrix.e13).isCloseTo(0f)
+
+                assert(matrix.e20).isCloseTo(-2f * axis.x * axis.z)
+                assert(matrix.e21).isCloseTo(-2f * axis.y * axis.z)
+                assert(matrix.e22).isCloseTo(1f - 2f * axis.z.pow(2))
+                assert(matrix.e23).isCloseTo(0f)
+
+                assert(matrix.e30).isCloseTo(0f)
+                assert(matrix.e31).isCloseTo(0f)
+                assert(matrix.e32).isCloseTo(0f)
+                assert(matrix.e33).isCloseTo(1f)
+            }
+        }
+
+        on("makeInvolutionSafe") {
+            val axis = getRandomVector3()
+            matrix.makeInvolutionSafe(axis)
+            it("should be equal to Matrix4::makeInvolution with a unit vector") {
+                val expected = MutableMatrix4().makeInvolution(axis.normalize(MutableVector3()))
+
+                assert(matrix).isEqualTo(expected)
+            }
+        }
+
+        on("makeInvolution") {
+            val axis = getRandomVector3().normalize(MutableVector3())
+            matrix.makeInvolution(axis)
+            it("should suffice the definition") {
+                assert(matrix.e00).isCloseTo(2f * axis.x.pow(2) - 1f)
+                assert(matrix.e01).isCloseTo(2f * axis.x * axis.y)
+                assert(matrix.e02).isCloseTo(2f * axis.x * axis.z)
+                assert(matrix.e03).isCloseTo(0f)
+
+                assert(matrix.e10).isCloseTo(2f * axis.x * axis.y)
+                assert(matrix.e11).isCloseTo(2f * axis.y.pow(2) - 1f)
+                assert(matrix.e12).isCloseTo(2f * axis.y * axis.z)
+                assert(matrix.e13).isCloseTo(0f)
+
+                assert(matrix.e20).isCloseTo(2f * axis.x * axis.z)
+                assert(matrix.e21).isCloseTo(2f * axis.y * axis.z)
+                assert(matrix.e22).isCloseTo(2f * axis.z.pow(2) - 1f)
+                assert(matrix.e23).isCloseTo(0f)
+
+                assert(matrix.e30).isCloseTo(0f)
+                assert(matrix.e31).isCloseTo(0f)
+                assert(matrix.e32).isCloseTo(0f)
+                assert(matrix.e33).isCloseTo(1f)
+            }
+        }
     }
 })
 
