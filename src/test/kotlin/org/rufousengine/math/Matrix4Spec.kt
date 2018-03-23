@@ -1727,6 +1727,58 @@ object Matrix4Spec: Spek({
                 assert(reflected).isEqualTo(expected)
             }
         }
+
+        on("makeScale (uniform)") {
+            val factor = getRandomValue()
+            matrix.makeScale(factor)
+            it("should represent a uniform scale") {
+                val vector = getRandomVector3()
+                val scaled = vector.multiplyLeft(matrix, MutableVector3())
+                val expected = vector.scale(factor, MutableVector3())
+
+                assert(scaled).isEqualTo(expected)
+            }
+        }
+
+        on("makeScale (nonuniform)") {
+            val factorX = getRandomValue()
+            val factorY = getRandomValue()
+            val factorZ = getRandomValue()
+            matrix.makeScale(factorX, factorY, factorZ)
+            it("should represent a uniform scale") {
+                val vector = getRandomVector3()
+                val scaled = vector.multiplyLeft(matrix, MutableVector3())
+                val expected = Vector3(vector.x * factorX, vector.y * factorY, vector.z * factorZ)
+
+                assert(scaled).isEqualTo(expected)
+            }
+        }
+
+        on("makeScaleSafe") {
+            val factor = getRandomValue()
+            val axis = getRandomVector3()
+            matrix.makeScaleSafe(factor, axis)
+            it("should represent a scale by factor along axis") {
+                val vector = getRandomVector3()
+                val scaled = vector.multiplyLeft(matrix, MutableVector3())
+                val expected = vector.projectOnto(axis, MutableVector3()).scale(factor).add(vector.rejectFrom(axis, MutableVector3()))
+
+                assert(scaled).isEqualTo(expected)
+            }
+        }
+
+        on("makeScale") {
+            val factor = getRandomValue()
+            val axis = getRandomVector3().normalize(MutableVector3())
+            matrix.makeScale(factor, axis)
+            it("should represent a scale by factor along axis") {
+                val vector = getRandomVector3()
+                val scaled = vector.multiplyLeft(matrix, MutableVector3())
+                val expected = vector.projectOnto(axis, MutableVector3()).scale(factor).add(vector.rejectFrom(axis, MutableVector3()))
+
+                assert(scaled).isEqualTo(expected)
+            }
+        }
     }
 })
 

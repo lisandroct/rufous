@@ -758,7 +758,7 @@ class MutableMatrix4(e00: Float, e01: Float, e02: Float, e03: Float, e10: Float,
     /**
      * Sets this matrix as an involution matrix through [axis].
      *
-     * If [axis] is known to be a unit vector, [makeReflection] is a cheaper alternative.
+     * If [axis] is known to be a unit vector, [makeInvolution] is a cheaper alternative.
      *
      * @param[axis] The vector perpendicular to the plane through which the reflection is made.
      * @return This matrix for chaining.
@@ -767,7 +767,7 @@ class MutableMatrix4(e00: Float, e01: Float, e02: Float, e03: Float, e10: Float,
     /**
      * Sets this matrix as an involution matrix through ([aX], [aY], [aZ]).
      *
-     * If ([aX], [aY], [aZ]) is known to be a unit vector, [makeReflection] is a cheaper alternative.
+     * If ([aX], [aY], [aZ]) is known to be a unit vector, [makeInvolution] is a cheaper alternative.
      *
      * @return This matrix for chaining.
      */
@@ -805,6 +805,93 @@ class MutableMatrix4(e00: Float, e01: Float, e02: Float, e03: Float, e10: Float,
                 x * aX - 1f, axay, axaz, 0f,
                 axay, y * aY - 1f, ayaz, 0f,
                 axaz, ayaz, z * aZ - 1f, 0f,
+                0f, 0f, 0f, 1f
+        )
+    }
+
+    /**
+     * Sets this matrix as a uniform scale matrix by [factor].
+     *
+     * @param[factor] The factor of the scale.
+     * @return This matrix for chaining
+     */
+    fun makeScale(factor: Float) = set(
+            factor, 0f, 0f, 0f,
+            0f, factor, 0f, 0f,
+            0f, 0f, factor, 0f,
+            0f, 0f, 0f, 1f
+    )
+
+    /**
+     * Sets this matrix as a nonuniform scale matrix by [xFactor] along the x axis,
+     * [yFactor] along the y axis and [zFactor] along the z axis.
+     *
+     * @return This matrix for chaining
+     */
+    fun makeScale(xFactor: Float, yFactor: Float, zFactor: Float) = set(
+            xFactor, 0f, 0f, 0f,
+            0f, yFactor, 0f, 0f,
+            0f, 0f, zFactor, 0f,
+            0f, 0f, 0f, 1f
+    )
+
+    /**
+     * Sets this matrix as a scale matrix by [factor] along [axis].
+     *
+     * If [axis] is known to be a unit vector, [makeScale] is a cheaper alternative.
+     *
+     * @param[factor] The factor of the scale.
+     * @param[axis] The axis along the scale is made.
+     * @return This matrix for chaining
+     */
+    fun makeScaleSafe(factor: Float, axis: Vector3) = makeScaleSafe(factor, axis.x, axis.y, axis.z)
+    /**
+     * Sets this matrix as a scale matrix by [factor] along ([aX], [aY], [aZ]).
+     *
+     * If ([aX], [aY], [aZ]) is known to be a unit vector, [makeScale] is a cheaper alternative.
+     *
+     * @param[factor] The factor of the scale.
+     * @param[axis] The axis along the scale is made.
+     * @return This matrix for chaining
+     */
+    fun makeScaleSafe(factor: Float, aX: Float, aY: Float, aZ: Float) : MutableMatrix4 {
+        val invMagnitude = 1f / sqrt(aX * aX + aY * aY + aZ * aZ)
+
+        return makeScale(factor, aX * invMagnitude, aY * invMagnitude, aZ * invMagnitude)
+    }
+
+    /**
+     * Sets this matrix as a scale matrix by [factor] along [axis].
+     *
+     * [axis] must be a unit vector.
+     *
+     * @param[factor] The factor of the scale.
+     * @param[axis] The axis along the scale is made.
+     * @return This matrix for chaining
+     */
+    fun makeScale(factor: Float, axis: Vector3) = makeScale(factor, axis.x, axis.y, axis.z)
+    /**
+     * Sets this matrix as a scale matrix by [factor] along ([aX], [aY], [aZ]).
+     *
+     * ([aX], [aY], [aZ]) must be a unit vector.
+     *
+     * @param[factor] The factor of the scale.
+     * @return This matrix for chaining
+     */
+    fun makeScale(factor: Float, aX: Float, aY: Float, aZ: Float) : MutableMatrix4 {
+        val factor = factor - 1f
+
+        val x = aX * factor
+        val y = aY * factor
+        val z = aZ * factor
+        val axay = x * aY
+        val axaz = x * aZ
+        val ayaz = y * aZ
+
+        return set(
+                x * aX + 1f, axay, axaz, 0f,
+                axay, y * aY + 1f, ayaz, 0f,
+                axaz, ayaz, z * aZ + 1f, 0f,
                 0f, 0f, 0f, 1f
         )
     }

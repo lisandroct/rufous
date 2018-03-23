@@ -194,7 +194,6 @@ class MutableTransformation : Transformation {
      * @return This matrix for chaining.
      */
     fun makeRotationSafe(angle: Float, axis: Vector3) = makeRotationSafe(angle, axis.x, axis.y, axis.z)
-
     /**
      * Sets this matrix as a rotation matrix through [angle] about ([aX], [aY], [aZ]).
      *
@@ -219,7 +218,6 @@ class MutableTransformation : Transformation {
      * @return This matrix for chaining.
      */
     fun makeRotation(angle: Float, axis: Vector3) = makeRotation(angle, axis.x, axis.y, axis.z)
-
     /**
      * Sets this matrix as a rotation matrix through [angle] about ([aX], [aY], [aZ]).
      *
@@ -249,4 +247,28 @@ class MutableTransformation : Transformation {
                 axaz - say, ayaz + sax, c + z * aZ, 0f
         )
     }
+
+    /**
+     * Sets this matrix as a uniform scale matrix by [factor].
+     *
+     * @param[factor] The factor of the scale.
+     * @return This matrix for chaining
+     */
+    fun makeScale(factor: Float) = set(
+            factor, 0f, 0f, 0f,
+            0f, factor, 0f, 0f,
+            0f, 0f, factor, 0f
+    )
+
+    /**
+     * Sets this matrix as a nonuniform scale matrix by [xFactor] along the x axis,
+     * [yFactor] along the y axis and [zFactor] along the z axis.
+     *
+     * @return This matrix for chaining
+     */
+    fun makeScale(xFactor: Float, yFactor: Float, zFactor: Float) = set(
+            xFactor, 0f, 0f, 0f,
+            0f, yFactor, 0f, 0f,
+            0f, 0f, zFactor, 0f
+    )
 }

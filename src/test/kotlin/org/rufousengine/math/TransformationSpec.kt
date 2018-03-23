@@ -639,6 +639,28 @@ object TransformationSpec: Spek({
                 assert(matrix).isEqualTo(expected)
             }
         }
+
+        on("makeScale (uniform)") {
+            val factor = getRandomValue()
+            matrix.makeScale(factor)
+            it("should give the same results as Matrix4::makeScale") {
+                val expected = MutableMatrix4().makeScale(factor)
+
+                assert(matrix).isEqualTo(expected)
+            }
+        }
+
+        on("makeScale (nonuniform)") {
+            val factorX = getRandomValue()
+            val factorY = getRandomValue()
+            val factorZ = getRandomValue()
+            matrix.makeScale(factorX, factorY, factorZ)
+            it("should give the same results as Matrix4::makeScale") {
+                val expected = MutableMatrix4().makeScale(factorX, factorY, factorZ)
+
+                assert(matrix).isEqualTo(expected)
+            }
+        }
     }
 })
 
