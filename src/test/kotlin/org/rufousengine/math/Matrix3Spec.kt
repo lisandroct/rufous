@@ -953,10 +953,15 @@ object Matrix3Spec: Spek({
             val angle = getRandomValue()
             val axis = getRandomVector3()
             matrix.makeRotationSafe(angle, axis)
-            it("should be equal to Matrix3::makeRotation with a unit vector") {
-                val expected = MutableMatrix3().makeRotation(angle, axis.normalize(MutableVector3()))
+            it("should represent a rotation through angle about axis") {
+                val vector = getRandomVector3()
+                val rotated = vector.multiplyLeft(matrix, MutableVector3())
+                val unitAxis = axis.copyMutable().normalize()
+                val expected = vector.projectOnto(unitAxis, MutableVector3())
+                expected += vector.rejectFrom(unitAxis, MutableVector3()).scale(cos(angle))
+                expected += unitAxis.cross(vector, MutableVector3()).scale(sin(angle))
 
-                assert(matrix).isEqualTo(expected)
+                assert(rotated).isEqualTo(expected)
             }
         }
 
@@ -964,74 +969,62 @@ object Matrix3Spec: Spek({
             val angle = getRandomValue()
             val axis = getRandomVector3().normalize(MutableVector3())
             matrix.makeRotation(angle, axis)
-            it("should suffice the definition") {
-                assert(matrix.e00).isCloseTo(cos(angle) + (1 - cos(angle)) * axis.x.pow(2))
-                assert(matrix.e01).isCloseTo((1 - cos(angle)) * axis.x * axis.y - sin(angle) * axis.z)
-                assert(matrix.e02).isCloseTo((1 - cos(angle)) * axis.x * axis.z + sin(angle) * axis.y)
+            it("should represent a rotation through angle about axis") {
+                val vector = getRandomVector3()
+                val rotated = vector.multiplyLeft(matrix, MutableVector3())
+                val expected = vector.projectOnto(axis, MutableVector3())
+                expected += vector.rejectFrom(axis, MutableVector3()).scale(cos(angle))
+                expected += axis.cross(vector, MutableVector3()).scale(sin(angle))
 
-                assert(matrix.e10).isCloseTo((1 - cos(angle)) * axis.x * axis.y + sin(angle) * axis.z)
-                assert(matrix.e11).isCloseTo(cos(angle) + (1 - cos(angle)) * axis.y.pow(2))
-                assert(matrix.e12).isCloseTo((1 - cos(angle)) * axis.y * axis.z - sin(angle) * axis.x)
-
-                assert(matrix.e20).isCloseTo((1 - cos(angle)) * axis.x * axis.z - sin(angle) * axis.y)
-                assert(matrix.e21).isCloseTo((1 - cos(angle)) * axis.y * axis.z + sin(angle) * axis.x)
-                assert(matrix.e22).isCloseTo(cos(angle) + (1 - cos(angle)) * axis.z.pow(2))
+                assert(rotated).isEqualTo(expected)
             }
         }
 
         on("makeReflectionSafe") {
             val axis = getRandomVector3()
             matrix.makeReflectionSafe(axis)
-            it("should be equal to Matrix3::makeReflection with a unit vector") {
-                val expected = MutableMatrix3().makeReflection(axis.normalize(MutableVector3()))
+            it("should represent a reflection through a plane perpendicular to axis") {
+                val vector = getRandomVector3()
+                val reflected = vector.multiplyLeft(matrix, MutableVector3())
+                val expected = vector.rejectFrom(axis, MutableVector3()).subtract(vector.projectOnto(axis, MutableVector3()))
 
-                assert(matrix).isEqualTo(expected)
+                assert(reflected).isEqualTo(expected)
             }
         }
 
         on("makeReflection") {
             val axis = getRandomVector3().normalize(MutableVector3())
             matrix.makeReflection(axis)
-            it("should suffice the definition") {
-                assert(matrix.e00).isCloseTo(1f - 2f * axis.x.pow(2))
-                assert(matrix.e01).isCloseTo(-2f * axis.x * axis.y)
-                assert(matrix.e02).isCloseTo(-2f * axis.x * axis.z)
+            it("should represent a reflection through a plane perpendicular to axis") {
+                val vector = getRandomVector3()
+                val reflected = vector.multiplyLeft(matrix, MutableVector3())
+                val expected = vector.rejectFrom(axis, MutableVector3()).subtract(vector.projectOnto(axis, MutableVector3()))
 
-                assert(matrix.e10).isCloseTo(-2f * axis.x * axis.y)
-                assert(matrix.e11).isCloseTo(1f - 2f * axis.y.pow(2))
-                assert(matrix.e12).isCloseTo(-2f * axis.y * axis.z)
-
-                assert(matrix.e20).isCloseTo(-2f * axis.x * axis.z)
-                assert(matrix.e21).isCloseTo(-2f * axis.y * axis.z)
-                assert(matrix.e22).isCloseTo(1f - 2f * axis.z.pow(2))
+                assert(reflected).isEqualTo(expected)
             }
         }
 
         on("makeInvolutionSafe") {
             val axis = getRandomVector3()
             matrix.makeInvolutionSafe(axis)
-            it("should be equal to Matrix3::makeInvolution with a unit vector") {
-                val expected = MutableMatrix3().makeInvolution(axis.normalize(MutableVector3()))
+            it("should represent an involution through axis") {
+                val vector = getRandomVector3()
+                val reflected = vector.multiplyLeft(matrix, MutableVector3())
+                val expected = vector.projectOnto(axis, MutableVector3()).subtract(vector.rejectFrom(axis, MutableVector3()))
 
-                assert(matrix).isEqualTo(expected)
+                assert(reflected).isEqualTo(expected)
             }
         }
 
         on("makeInvolution") {
             val axis = getRandomVector3().normalize(MutableVector3())
             matrix.makeInvolution(axis)
-            it("should suffice the definition") {
-                assert(matrix.e00).isCloseTo(2f * axis.x.pow(2) - 1f)
-                assert(matrix.e01).isCloseTo(2f * axis.x * axis.y)
-                assert(matrix.e02).isCloseTo(2f * axis.x * axis.z)
+            it("should represent an involution through axis") {
+                val vector = getRandomVector3()
+                val reflected = vector.multiplyLeft(matrix, MutableVector3())
+                val expected = vector.projectOnto(axis, MutableVector3()).subtract(vector.rejectFrom(axis, MutableVector3()))
 
-                assert(matrix.e10).isCloseTo(2f * axis.x * axis.y)
-                assert(matrix.e11).isCloseTo(2f * axis.y.pow(2) - 1f)
-                assert(matrix.e12).isCloseTo(2f * axis.y * axis.z)
-
-                assert(matrix.e20).isCloseTo(2f * axis.x * axis.z)
-                assert(matrix.e21).isCloseTo(2f * axis.y * axis.z)
-                assert(matrix.e22).isCloseTo(2f * axis.z.pow(2) - 1f)
+                assert(reflected).isEqualTo(expected)
             }
         }
     }

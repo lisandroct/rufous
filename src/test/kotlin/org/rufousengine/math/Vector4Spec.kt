@@ -511,16 +511,20 @@ object Vector4Spec: Spek({
         on("projectOnto") {
             val other = getRandomVector4()
             val projected = vector.projectOnto(other, MutableVector4())
-            it("should be parallel to the vector projected onto") {
-                assert(projected.isParallel(other)).isTrue()
+            it("should project vector onto other") {
+                val expected = other.scale(vector.dot(other) / other.magnitudeSquared, MutableVector4())
+
+                assert(projected).isEqualTo(expected)
             }
         }
 
         on("rejectFrom") {
             val other = getRandomVector4()
             val rejected = vector.rejectFrom(other, MutableVector4())
-            it("should be orthogonal to the vector rejected from") {
-                assert(rejected.isOrthogonal(other)).isTrue()
+            it("should reject vector from other") {
+                val expected = vector.copyMutable().subtract(vector.projectOnto(other, MutableVector4()))
+
+                assert(rejected).isEqualTo(expected)
             }
         }
 

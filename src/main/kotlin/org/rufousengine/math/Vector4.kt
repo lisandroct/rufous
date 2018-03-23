@@ -287,7 +287,16 @@ open class Vector4(x: Float = 0f, y: Float = 0f, z: Float = 0f, w: Float = 0f) {
      * @param[out] The output vector.
      * @return The output vector for chaining.
      */
-    fun rejectFrom(x: Float, y: Float, z: Float, w: Float, out: MutableVector4) = out.set(this).subtract(projectOnto(x, y, z, w, out), out)
+    fun rejectFrom(x: Float, y: Float, z: Float, w: Float, out: MutableVector4) : MutableVector4 {
+        val oX = this.x
+        val oY = this.y
+        val oZ = this.z
+        val oW = this.w
+
+        projectOnto(x, y, z, w, out)
+
+        return out.set(oX - out.x, oY - out.y, oZ - out.z, oW - out.w)
+    }
 
     /**
      * Multiplies [projection] with this vector.

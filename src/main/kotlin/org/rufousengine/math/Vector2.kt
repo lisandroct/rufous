@@ -278,7 +278,14 @@ open class Vector2(x: Float = 0f, y: Float = 0f) {
      * @param[out] The output vector.
      * @return The output vector for chaining.
      */
-    fun rejectFrom(x: Float, y: Float, out: MutableVector2) = out.set(this).subtract(projectOnto(x, y, out))
+    fun rejectFrom(x: Float, y: Float, out: MutableVector2) : MutableVector2 {
+        val oX = this.x
+        val oY = this.y
+
+        projectOnto(x, y, out)
+
+        return out.set(oX - out.x, oY - out.y)
+    }
 
     /**
      * Multiplies [matrix] with this vector.
