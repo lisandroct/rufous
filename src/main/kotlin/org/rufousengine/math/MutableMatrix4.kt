@@ -895,4 +895,23 @@ class MutableMatrix4(e00: Float, e01: Float, e02: Float, e03: Float, e10: Float,
                 0f, 0f, 0f, 1f
         )
     }
+
+    /**
+     * Sets this matrix as a translation matrix to [point].
+     *
+     * @param[point] The point to translate to.
+     * @return This matrix for chaining.
+     */
+    fun makeTranslation(point: Point) = makeTranslation(point.x, point.y, point.z)
+    /**
+     * Sets this matrix as a translation matrix to ([x], [y], [z]).
+     *
+     * @return This matrix for chaining.
+     */
+    fun makeTranslation(x: Float, y: Float, z: Float) = set(
+            1f, 0f, 0f, x,
+            0f, 1f, 0f, y,
+            0f, 0f, 1f, z,
+            0f, 0f, 0f, 1f
+    )
 }

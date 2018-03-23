@@ -1779,6 +1779,18 @@ object Matrix4Spec: Spek({
                 assert(scaled).isEqualTo(expected)
             }
         }
+
+        on("makeTranslation") {
+            val point = getRandomPoint()
+            matrix.makeTranslation(point)
+            it("should translate") {
+                val p = getRandomPoint()
+                val translated = p.multiplyLeft(matrix, MutablePoint())
+                val expected = p.add(point, MutablePoint())
+
+                assert(translated).isEqualTo(expected)
+            }
+        }
     }
 })
 

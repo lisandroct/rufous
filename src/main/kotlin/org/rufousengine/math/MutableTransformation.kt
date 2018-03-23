@@ -271,4 +271,29 @@ class MutableTransformation : Transformation {
             0f, yFactor, 0f, 0f,
             0f, 0f, zFactor, 0f
     )
+
+    /**
+     * Sets this matrix as a translation matrix to [vector].
+     *
+     * @param[vector] The direction vector pointing to the position to translate to.
+     * @return This matrix for chaining.
+     */
+    fun makeTranslation(vector: Vector3) = makeTranslation(vector.x, vector.y, vector.z)
+    /**
+     * Sets this matrix as a translation matrix to [point].
+     *
+     * @param[point] The point to translate to.
+     * @return This matrix for chaining.
+     */
+    fun makeTranslation(point: Point) = makeTranslation(point.x, point.y, point.z)
+    /**
+     * Sets this matrix as a translation matrix to ([x], [y], [z]).
+     *
+     * @return This matrix for chaining.
+     */
+    fun makeTranslation(x: Float, y: Float, z: Float) = set(
+            1f, 0f, 0f, x,
+            0f, 1f, 0f, y,
+            0f, 0f, 1f, z
+    )
 }
