@@ -1,6 +1,7 @@
 package org.rufousengine.math
 
 import java.util.*
+import kotlin.math.sqrt
 
 /**
  * An immutable 3x3 row-major matrix.
@@ -330,6 +331,190 @@ open class Matrix3(e00: Float, e01: Float, e02: Float, e10: Float, e11: Float, e
         val nz = e20 * x + e21 * y + e22 * z
 
         return out.set(nx, ny, nz)
+    }
+
+    /**
+     * Left multiplies this matrix with a matrix that represents a rotation through [angle] about the x axis.
+     *
+     * @param[angle] The angle in degrees.
+     * @param[out] The output matrix.
+     * @return The output matrix for chaining.
+     */
+    fun rotateX(angle: Float, out: MutableMatrix3) : MutableMatrix3 {
+        if(angle.isZero()) {
+            return out.set(this)
+        }
+
+        val c = cos(angle)
+        val s = sin(angle)
+
+        val e10 = c * this.e10 + -s * this.e20
+        val e11 = c * this.e11 + -s * this.e21
+        val e12 = c * this.e12 + -s * this.e22
+
+        val e20 = s * this.e10 + c * this.e20
+        val e21 = s * this.e11 + c * this.e21
+        val e22 = s * this.e12 + c * this.e22
+
+        return out.set(
+                this.e00, this.e01, this.e02,
+                e10, e11, e12,
+                e20, e21, e22
+        )
+    }
+    /**
+     * Left multiplies this matrix with a matrix that represents a rotation through [angle] about the y axis.
+     *
+     * @param[angle] The angle in degrees.
+     * @param[out] The output matrix.
+     * @return The output matrix for chaining.
+     */
+    fun rotateY(angle: Float, out: MutableMatrix3) : MutableMatrix3 {
+        if(angle.isZero()) {
+            return out.set(this)
+        }
+
+        val c = cos(angle)
+        val s = sin(angle)
+
+        val e00 = c * this.e00 + s * this.e20
+        val e01 = c * this.e01 + s * this.e21
+        val e02 = c * this.e02 + s * this.e22
+
+        val e20 = -s * this.e00 + c * this.e20
+        val e21 = -s * this.e01 + c * this.e21
+        val e22 = -s * this.e02 + c * this.e22
+
+        return out.set(
+                e00, e01, e02,
+                this.e10, this.e11, this.e12,
+                e20, e21, e22
+        )
+    }
+    /**
+     * Left multiplies this matrix with a matrix that represents a rotation through [angle] about the z axis.
+     *
+     * @param[angle] The angle in degrees.
+     * @param[out] The output matrix.
+     * @return The output matrix for chaining.
+     */
+    fun rotateZ(angle: Float, out: MutableMatrix3) : MutableMatrix3 {
+        if(angle.isZero()) {
+            return out.set(this)
+        }
+
+        val c = cos(angle)
+        val s = sin(angle)
+
+        val e00 = c * this.e00 + -s * this.e10
+        val e01 = c * this.e01 + -s * this.e11
+        val e02 = c * this.e02 + -s * this.e12
+
+        val e10 = s * this.e00 + c * this.e10
+        val e11 = s * this.e01 + c * this.e11
+        val e12 = s * this.e02 + c * this.e12
+
+        return out.set(
+                e00, e01, e02,
+                e10, e11, e12,
+                this.e20, this.e21, this.e22
+        )
+    }
+    /**
+     * Left multiplies this matrix with a matrix that represents a rotation through [angle] about [axis].
+     *
+     * If [axis] is known to be a unit vector, [rotate] is a cheaper alternative.
+     *
+     * @param[angle] The angle in degrees.
+     * @param[axis] The axis.
+     * @param[out] The output matrix.
+     * @return The output matrix for chaining.
+     */
+    fun rotateSafe(angle: Float, axis: Vector3, out: MutableMatrix3) = rotateSafe(angle, axis.x, axis.y, axis.z, out)
+    /**
+     * Left multiplies this matrix with a matrix that represents a rotation through [angle] about ([aX], [aY], [aZ]).
+     *
+     * If ([aX], [aY], [aZ]) is known to be a unit vector, [rotate] is a cheaper alternative.
+     *
+     * @param[angle] The angle in degrees.
+     * @param[out] The output matrix.
+     * @return The output matrix for chaining.
+     */
+    fun rotateSafe(angle: Float, aX: Float, aY: Float, aZ: Float, out: MutableMatrix3) : MutableMatrix3 {
+        if(angle.isZero()) {
+            return out.set(this)
+        }
+
+        val invMagnitude = 1f / sqrt(aX * aX + aY * aY + aZ * aZ)
+
+        return rotate(angle, aX * invMagnitude, aY * invMagnitude, aZ * invMagnitude, out)
+    }
+    /**
+     * Left multiplies this matrix with a matrix that represents a rotation through [angle] about [axis].
+     *
+     * [axis] must be a unit vector.
+     *
+     * @param[angle] The angle in degrees.
+     * @param[axis] The unit axis.
+     * @param[out] The output matrix.
+     * @return The output matrix for chaining.
+     */
+    fun rotate(angle: Float, axis: Vector3, out: MutableMatrix3) = rotate(angle, axis.x, axis.y, axis.z, out)
+    /**
+     * Left multiplies this matrix with a matrix that represents a rotation through [angle] about ([aX], [aY], [aZ]).
+     *
+     * ([aX], [aY], [aZ]) must be a unit vector.
+     *
+     * @param[angle] The angle in degrees.
+     * @param[out] The output matrix.
+     * @return The output matrix for chaining.
+     */
+    fun rotate(angle: Float, aX: Float, aY: Float, aZ: Float, out: MutableMatrix3) : MutableMatrix3 {
+        if(angle.isZero()) {
+            return out.set(this)
+        }
+
+        val c = cos(angle)
+        val s = sin(angle)
+        val d = 1f - c
+
+        val x = aX * d
+        val y = aY * d
+        val z = aZ * d
+        val axay = x * aY
+        val axaz = x * aZ
+        val ayaz = y * aZ
+        val saz = s * aZ
+        val say = s * aY
+        val sax = s * aX
+
+        val r00 = c + x * aX
+        val r01 = axay - saz
+        val r02 = axaz + say
+        val r10 = axay + saz
+        val r11 = c + y * aY
+        val r12 = ayaz - sax
+        val r20 = axaz - say
+        val r21 = ayaz + sax
+        val r22 = c + z * aZ
+
+        val e00 = r00 * this.e00 + r01 * this.e10 + r02 * this.e20
+        val e01 = r00 * this.e01 + r01 * this.e11 + r02 * this.e21
+        val e02 = r00 * this.e02 + r01 * this.e12 + r02 * this.e22
+
+        val e10 = r10 * this.e00 + r11 * this.e10 + r12 * this.e20
+        val e11 = r10 * this.e01 + r11 * this.e11 + r12 * this.e21
+        val e12 = r10 * this.e02 + r11 * this.e12 + r12 * this.e22
+
+        val e20 = r20 * this.e00 + r21 * this.e10 + r22 * this.e20
+        val e21 = r20 * this.e01 + r21 * this.e11 + r22 * this.e21
+        val e22 = r20 * this.e02 + r21 * this.e12 + r22 * this.e22
+
+        return out.set(
+                e00, e01, e02,
+                e10, e11, e12,
+                e20, e21, e22
+        )
     }
     
     fun equals(other: Matrix3) = equals(other.e00, other.e01, other.e02, other.e10, other.e11, other.e12, other.e20, other.e21, other.e22)

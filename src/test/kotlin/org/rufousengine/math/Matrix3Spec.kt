@@ -485,6 +485,63 @@ object Matrix3Spec: Spek({
                 }
             }
         }
+
+        on("rotateX") {
+            val angle = getRandomValue()
+            val rotated = matrix.rotateX(angle, MutableMatrix3())
+            it("should be left multiplied by a rotation matrix") {
+                val rotation = MutableMatrix3().makeRotationX(angle)
+                val expected = matrix.multiplyLeft(rotation, MutableMatrix3())
+
+                assert(rotated).isEqualTo(expected)
+            }
+        }
+
+        on("rotateY") {
+            val angle = getRandomValue()
+            val rotated = matrix.rotateY(angle, MutableMatrix3())
+            it("should be left multiplied by a rotation matrix") {
+                val rotation = MutableMatrix3().makeRotationY(angle)
+                val expected = matrix.multiplyLeft(rotation, MutableMatrix3())
+
+                assert(rotated).isEqualTo(expected)
+            }
+        }
+
+        on("rotateZ") {
+            val angle = getRandomValue()
+            val rotated = matrix.rotateZ(angle, MutableMatrix3())
+            it("should be left multiplied by a rotation matrix") {
+                val rotation = MutableMatrix3().makeRotationZ(angle)
+                val expected = matrix.multiplyLeft(rotation, MutableMatrix3())
+
+                assert(rotated).isEqualTo(expected)
+            }
+        }
+
+        on("rotateSafe") {
+            val angle = getRandomValue()
+            val axis = getRandomVector3()
+            val rotated = matrix.rotateSafe(angle, axis, MutableMatrix3())
+            it("should be left multiplied by a rotation matrix") {
+                val rotation = MutableMatrix3().makeRotationSafe(angle, axis)
+                val expected = matrix.multiplyLeft(rotation, MutableMatrix3())
+
+                assert(rotated).isEqualTo(expected)
+            }
+        }
+
+        on("rotate") {
+            val angle = getRandomValue()
+            val axis = getRandomVector3().normalize(MutableVector3())
+            val rotated = matrix.rotate(angle, axis, MutableMatrix3())
+            it("should be left multiplied by a rotation matrix") {
+                val rotation = MutableMatrix3().makeRotation(angle, axis)
+                val expected = matrix.multiplyLeft(rotation, MutableMatrix3())
+
+                assert(rotated).isEqualTo(expected)
+            }
+        }
     }
 
     given("a mutable matrix") {
@@ -896,6 +953,63 @@ object Matrix3Spec: Spek({
             matrix.multiplyLeft(other)
             it("should multiplyLeft and assign") {
                 val expected = original.multiplyLeft(other, MutableMatrix3())
+
+                assert(matrix).isEqualTo(expected)
+            }
+        }
+
+        on("rotateX") {
+            val original = matrix.copyImmutable()
+            val angle = getRandomValue()
+            matrix.rotateX(angle)
+            it("should rotateX and assign") {
+                val expected = original.rotateX(angle, MutableMatrix3())
+
+                assert(matrix).isEqualTo(expected)
+            }
+        }
+
+        on("rotateY") {
+            val original = matrix.copyImmutable()
+            val angle = getRandomValue()
+            matrix.rotateY(angle)
+            it("should rotateY and assign") {
+                val expected = original.rotateY(angle, MutableMatrix3())
+
+                assert(matrix).isEqualTo(expected)
+            }
+        }
+
+        on("rotateZ") {
+            val original = matrix.copyImmutable()
+            val angle = getRandomValue()
+            matrix.rotateZ(angle)
+            it("should rotateZ and assign") {
+                val expected = original.rotateZ(angle, MutableMatrix3())
+
+                assert(matrix).isEqualTo(expected)
+            }
+        }
+
+        on("rotateSafe") {
+            val original = matrix.copyImmutable()
+            val angle = getRandomValue()
+            val axis = getRandomVector3()
+            matrix.rotateSafe(angle, axis)
+            it("should rotateSafe and assign") {
+                val expected = original.rotateSafe(angle, axis, MutableMatrix3())
+
+                assert(matrix).isEqualTo(expected)
+            }
+        }
+
+        on("rotate") {
+            val original = matrix.copyImmutable()
+            val angle = getRandomValue()
+            val axis = getRandomVector3().normalize(MutableVector3())
+            matrix.rotate(angle, axis)
+            it("should rotate and assign") {
+                val expected = original.rotate(angle, axis, MutableMatrix3())
 
                 assert(matrix).isEqualTo(expected)
             }

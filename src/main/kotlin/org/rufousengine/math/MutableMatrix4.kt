@@ -438,6 +438,66 @@ class MutableMatrix4(e00: Float, e01: Float, e02: Float, e03: Float, e10: Float,
     fun multiplyLeft(other: Matrix4) = multiplyLeft(other, this)
 
     /**
+     * Left multiplies this matrix with a matrix that represents a rotation through [angle] about the x axis.
+     *
+     * @param[angle] The angle in degrees.
+     * @return This matrix for chaining.
+     */
+    fun rotateX(angle: Float) = rotateX(angle, this)
+    /**
+     * Left multiplies this matrix with a matrix that represents a rotation through [angle] about the y axis.
+     *
+     * @param[angle] The angle in degrees.
+     * @return This matrix for chaining.
+     */
+    fun rotateY(angle: Float) = rotateY(angle, this)
+    /**
+     * Left multiplies this matrix with a matrix that represents a rotation through [angle] about the z axis.
+     *
+     * @param[angle] The angle in degrees.
+     * @return This matrix for chaining.
+     */
+    fun rotateZ(angle: Float) = rotateZ(angle, this)
+    /**
+     * Left multiplies this matrix with a matrix that represents a rotation through [angle] about [axis].
+     *
+     * If [axis] is known to be a unit vector, [rotate] is a cheaper alternative.
+     *
+     * @param[angle] The angle in degrees.
+     * @param[axis] The axis.
+     * @return This matrix for chaining.
+     */
+    fun rotateSafe(angle: Float, axis: Vector3) = rotateSafe(angle, axis, this)
+    /**
+     * Left multiplies this matrix with a matrix that represents a rotation through [angle] about ([aX], [aY], [aZ]).
+     *
+     * If ([aX], [aY], [aZ]) is known to be a unit vector, [rotate] is a cheaper alternative.
+     *
+     * @param[angle] The angle in degrees.
+     * @return This matrix for chaining.
+     */
+    fun rotateSafe(angle: Float, aX: Float, aY: Float, aZ: Float) = rotateSafe(angle, aX, aY, aZ, this)
+    /**
+     * Left multiplies this matrix with a matrix that represents a rotation through [angle] about [axis].
+     *
+     * [axis] must be a unit vector.
+     *
+     * @param[angle] The angle in degrees.
+     * @param[axis] The unit axis.
+     * @return This matrix for chaining.
+     */
+    fun rotate(angle: Float, axis: Vector3) = rotate(angle, axis, this)
+    /**
+     * Left multiplies this matrix with a matrix that represents a rotation through [angle] about ([aX], [aY], [aZ]).
+     *
+     * ([aX], [aY], [aZ]) must be a unit vector.
+     *
+     * @param[angle] The angle in degrees.
+     * @return This matrix for chaining.
+     */
+    fun rotate(angle: Float, aX: Float, aY: Float, aZ: Float) = rotate(angle, aX, aY, aZ, this)
+
+    /**
      * Sets this matrix as a symmetric orthographic projection.
      *
      * @param[width] The width of the frustum in world units.
@@ -583,6 +643,10 @@ class MutableMatrix4(e00: Float, e01: Float, e02: Float, e03: Float, e10: Float,
      * @return This matrix for chaining.
      */
     fun makeRotationX(angle: Float) : MutableMatrix4 {
+        if(angle.isZero()) {
+            return identity()
+        }
+
         val c = cos(angle)
         val s = sin(angle)
 
@@ -603,6 +667,10 @@ class MutableMatrix4(e00: Float, e01: Float, e02: Float, e03: Float, e10: Float,
      * @return This matrix for chaining.
      */
     fun makeRotationY(angle: Float) : MutableMatrix4 {
+        if(angle.isZero()) {
+            return identity()
+        }
+
         val c = cos(angle)
         val s = sin(angle)
 
@@ -623,6 +691,10 @@ class MutableMatrix4(e00: Float, e01: Float, e02: Float, e03: Float, e10: Float,
      * @return This matrix for chaining.
      */
     fun makeRotationZ(angle: Float) : MutableMatrix4 {
+        if(angle.isZero()) {
+            return identity()
+        }
+
         val c = cos(angle)
         val s = sin(angle)
 
@@ -654,6 +726,10 @@ class MutableMatrix4(e00: Float, e01: Float, e02: Float, e03: Float, e10: Float,
      * @return This matrix for chaining.
      */
     fun makeRotationSafe(angle: Float, aX: Float, aY: Float, aZ: Float) : MutableMatrix4 {
+        if(angle.isZero()) {
+            return identity()
+        }
+
         val invMagnitude = 1f / sqrt(aX * aX + aY * aY + aZ * aZ)
 
         return makeRotation(angle, aX * invMagnitude, aY * invMagnitude, aZ * invMagnitude)
@@ -679,6 +755,10 @@ class MutableMatrix4(e00: Float, e01: Float, e02: Float, e03: Float, e10: Float,
      * @return This matrix for chaining.
      */
     fun makeRotation(angle: Float, aX: Float, aY: Float, aZ: Float) : MutableMatrix4 {
+        if(angle.isZero()) {
+            return identity()
+        }
+
         val c = cos(angle)
         val s = sin(angle)
         val d = 1f - c
