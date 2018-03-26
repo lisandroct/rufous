@@ -498,6 +498,115 @@ class MutableMatrix4(e00: Float, e01: Float, e02: Float, e03: Float, e10: Float,
     fun rotate(angle: Float, aX: Float, aY: Float, aZ: Float) = rotate(angle, aX, aY, aZ, this)
 
     /**
+     * Left multiplies this matrix with a matrix that represents a reflection through a plane perpendicular to [axis].
+     *
+     * If [axis] is known to be a unit vector, [reflect] is a cheaper alternative.
+     *
+     * @param[axis] The unit vector.
+     * @return This matrix for chaining.
+     */
+    fun reflectSafe(axis: Vector3) = reflectSafe(axis, this)
+    /**
+     * Left multiplies this matrix with a matrix that represents a reflection through a plane perpendicular to ([aX], [aY], [aZ]).
+     *
+     * If ([aX], [aY], [aZ]) is known to be a unit vector, [reflect] is a cheaper alternative.
+     *
+     * @return This matrix for chaining.
+     */
+    fun reflectSafe(aX: Float, aY: Float, aZ: Float) = reflectSafe(aX, aY, aZ, this)
+    /**
+     * Left multiplies this matrix with a matrix that represents a reflection through a plane perpendicular to [axis].
+     *
+     * [axis] must be a unit vector.
+     *
+     * @param[axis] The unit vector.
+     * @return This matrix for chaining.
+     */
+    fun reflect(axis: Vector3) = reflect(axis, this)
+    /**
+     * Left multiplies this matrix with a matrix that represents a reflection through a plane perpendicular to ([aX], [aY], [aZ]).
+     *
+     * ([aX], [aY], [aZ]) must be a unit vector.
+     *
+     * @return This matrix for chaining.
+     */
+    fun reflect(aX: Float, aY: Float, aZ: Float) = reflect(aX, aY, aZ, this)
+
+    /**
+     * Left multiplies this matrix with a matrix that represents an involution through [axis].
+     *
+     * If [axis] is known to be a unit vector, [involute] is a cheaper alternative.
+     *
+     * @param[axis] The unit vector.
+     * @return This matrix for chaining.
+     */
+    fun involuteSafe(axis: Vector3) = involuteSafe(axis, this)
+    /**
+     * Left multiplies this matrix with a matrix that represents an involution through ([aX], [aY], [aZ]).
+     *
+     * If ([aX], [aY], [aZ]) is known to be a unit vector, [involute] is a cheaper alternative.
+     *
+     * @return This matrix for chaining.
+     */
+    fun involuteSafe(aX: Float, aY: Float, aZ: Float) = involuteSafe(aX, aY, aZ, this)
+    /**
+     * Left multiplies this matrix with a matrix that represents an involution through [axis].
+     *
+     * [axis] must be a unit vector.
+     *
+     * @param[axis] The unit vector.
+     * @return This matrix for chaining.
+     */
+    fun involute(axis: Vector3) = involute(axis, this)
+    /**
+     * Left multiplies this matrix with a matrix that represents an involution through ([aX], [aY], [aZ]).
+     *
+     * ([aX], [aY], [aZ]) must be a unit vector.
+     *
+     * @return This matrix for chaining.
+     */
+    fun involute(aX: Float, aY: Float, aZ: Float) = involute(aX, aY, aZ, this)
+
+    /**
+     * Left multiplies this matrix with a matrix that represents a non uniform scale by [factorX], [factorY] and [factorZ].
+     *
+     * @return This matrix for chaining.
+     */
+    fun scale(factorX: Float, factorY: Float, factorZ: Float) = scale(factorX, factorY, factorZ, this)
+    /**
+     * Left multiplies this matrix with a matrix that represents a scale by [factor] along [axis].
+     *
+     * If [axis] is known to be a unit vector, [scale] is a cheaper alternative.
+     *
+     * @return This matrix for chaining.
+     */
+    fun scaleSafe(factor: Float, axis: Vector3) = scaleSafe(factor, axis, this)
+    /**
+     * Left multiplies this matrix with a matrix that represents a scale by [factor] along ([aX], [aY], [aZ]).
+     *
+     * If ([aX], [aY], [aZ]) is known to be a unit vector, [scale] is a cheaper alternative.
+     *
+     * @return This matrix for chaining.
+     */
+    fun scaleSafe(factor: Float, aX: Float, aY: Float, aZ: Float) = scaleSafe(factor, aX, aY, aZ, this)
+    /**
+     * Left multiplies this matrix with a matrix that represents a scale by [factor] along [axis].
+     *
+     * [axis] must be a unit vector.
+     *
+     * @return This matrix for chaining.
+     */
+    fun scale(factor: Float, axis: Vector3) = scale(factor, axis, this)
+    /**
+     * Left multiplies this matrix with a matrix that represents a scale by [factor] along ([aX], [aY], [aZ]).
+     *
+     * ([aX], [aY], [aZ]) must be a unit vector.
+     *
+     * @return This matrix for chaining.
+     */
+    fun scale(factor: Float, aX: Float, aY: Float, aZ: Float) = scale(factor, aX, aY, aZ, this)
+
+    /**
      * Sets this matrix as a symmetric orthographic projection.
      *
      * @param[width] The width of the frustum in world units.

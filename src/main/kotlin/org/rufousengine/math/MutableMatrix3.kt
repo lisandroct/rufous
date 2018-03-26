@@ -335,6 +335,115 @@ class MutableMatrix3(e00: Float, e01: Float, e02: Float, e10: Float, e11: Float,
     fun rotate(angle: Float, aX: Float, aY: Float, aZ: Float) = rotate(angle, aX, aY, aZ, this)
 
     /**
+     * Left multiplies this matrix with a matrix that represents a reflection through a plane perpendicular to [axis].
+     *
+     * If [axis] is known to be a unit vector, [reflect] is a cheaper alternative.
+     *
+     * @param[axis] The unit vector.
+     * @return This matrix for chaining.
+     */
+    fun reflectSafe(axis: Vector3) = reflectSafe(axis, this)
+    /**
+     * Left multiplies this matrix with a matrix that represents a reflection through a plane perpendicular to ([aX], [aY], [aZ]).
+     *
+     * If ([aX], [aY], [aZ]) is known to be a unit vector, [reflect] is a cheaper alternative.
+     *
+     * @return This matrix for chaining.
+     */
+    fun reflectSafe(aX: Float, aY: Float, aZ: Float) = reflectSafe(aX, aY, aZ, this)
+    /**
+     * Left multiplies this matrix with a matrix that represents a reflection through a plane perpendicular to [axis].
+     *
+     * [axis] must be a unit vector.
+     *
+     * @param[axis] The unit vector.
+     * @return This matrix for chaining.
+     */
+    fun reflect(axis: Vector3) = reflect(axis, this)
+    /**
+     * Left multiplies this matrix with a matrix that represents a reflection through a plane perpendicular to ([aX], [aY], [aZ]).
+     *
+     * ([aX], [aY], [aZ]) must be a unit vector.
+     *
+     * @return This matrix for chaining.
+     */
+    fun reflect(aX: Float, aY: Float, aZ: Float) = reflect(aX, aY, aZ, this)
+
+    /**
+     * Left multiplies this matrix with a matrix that represents an involution through [axis].
+     *
+     * If [axis] is known to be a unit vector, [involute] is a cheaper alternative.
+     *
+     * @param[axis] The unit vector.
+     * @return This matrix for chaining.
+     */
+    fun involuteSafe(axis: Vector3) = involuteSafe(axis, this)
+    /**
+     * Left multiplies this matrix with a matrix that represents an involution through ([aX], [aY], [aZ]).
+     *
+     * If ([aX], [aY], [aZ]) is known to be a unit vector, [involute] is a cheaper alternative.
+     *
+     * @return This matrix for chaining.
+     */
+    fun involuteSafe(aX: Float, aY: Float, aZ: Float) = involuteSafe(aX, aY, aZ, this)
+    /**
+     * Left multiplies this matrix with a matrix that represents an involution through [axis].
+     *
+     * [axis] must be a unit vector.
+     *
+     * @param[axis] The unit vector.
+     * @return This matrix for chaining.
+     */
+    fun involute(axis: Vector3) = involute(axis, this)
+    /**
+     * Left multiplies this matrix with a matrix that represents an involution through ([aX], [aY], [aZ]).
+     *
+     * ([aX], [aY], [aZ]) must be a unit vector.
+     *
+     * @return This matrix for chaining.
+     */
+    fun involute(aX: Float, aY: Float, aZ: Float) = involute(aX, aY, aZ, this)
+
+    /**
+     * Left multiplies this matrix with a matrix that represents a non uniform scale by [factorX], [factorY] and [factorZ].
+     *
+     * @return This matrix for chaining.
+     */
+    fun scale(factorX: Float, factorY: Float, factorZ: Float) = scale(factorX, factorY, factorZ, this)
+    /**
+     * Left multiplies this matrix with a matrix that represents a scale by [factor] along [axis].
+     *
+     * If [axis] is known to be a unit vector, [scale] is a cheaper alternative.
+     *
+     * @return This matrix for chaining.
+     */
+    fun scaleSafe(factor: Float, axis: Vector3) = scaleSafe(factor, axis, this)
+    /**
+     * Left multiplies this matrix with a matrix that represents a scale by [factor] along ([aX], [aY], [aZ]).
+     *
+     * If ([aX], [aY], [aZ]) is known to be a unit vector, [scale] is a cheaper alternative.
+     *
+     * @return This matrix for chaining.
+     */
+    fun scaleSafe(factor: Float, aX: Float, aY: Float, aZ: Float) = scaleSafe(factor, aX, aY, aZ, this)
+    /**
+     * Left multiplies this matrix with a matrix that represents a scale by [factor] along [axis].
+     *
+     * [axis] must be a unit vector.
+     *
+     * @return This matrix for chaining.
+     */
+    fun scale(factor: Float, axis: Vector3) = scale(factor, axis, this)
+    /**
+     * Left multiplies this matrix with a matrix that represents a scale by [factor] along ([aX], [aY], [aZ]).
+     *
+     * ([aX], [aY], [aZ]) must be a unit vector.
+     *
+     * @return This matrix for chaining.
+     */
+    fun scale(factor: Float, aX: Float, aY: Float, aZ: Float) = scale(factor, aX, aY, aZ, this)
+
+    /**
      * Sets this matrix as a rotation matrix.
      *
      * Performs the rotation about the x axis.
@@ -343,6 +452,10 @@ class MutableMatrix3(e00: Float, e01: Float, e02: Float, e10: Float, e11: Float,
      * @return This matrix for chaining.
      */
     fun makeRotationX(angle: Float) : MutableMatrix3 {
+        if(angle.isZero()) {
+            return identity()
+        }
+
         val c = cos(angle)
         val s = sin(angle)
 
@@ -362,6 +475,10 @@ class MutableMatrix3(e00: Float, e01: Float, e02: Float, e10: Float, e11: Float,
      * @return This matrix for chaining.
      */
     fun makeRotationY(angle: Float) : MutableMatrix3 {
+        if(angle.isZero()) {
+            return identity()
+        }
+
         val c = cos(angle)
         val s = sin(angle)
 
@@ -381,6 +498,10 @@ class MutableMatrix3(e00: Float, e01: Float, e02: Float, e10: Float, e11: Float,
      * @return This matrix for chaining.
      */
     fun makeRotationZ(angle: Float) : MutableMatrix3 {
+        if(angle.isZero()) {
+            return identity()
+        }
+
         val c = cos(angle)
         val s = sin(angle)
 
@@ -411,6 +532,10 @@ class MutableMatrix3(e00: Float, e01: Float, e02: Float, e10: Float, e11: Float,
      * @return This matrix for chaining.
      */
     fun makeRotationSafe(angle: Float, aX: Float, aY: Float, aZ: Float) : MutableMatrix3 {
+        if(angle.isZero()) {
+            return identity()
+        }
+
         val invMagnitude = 1f / sqrt(aX * aX + aY * aY + aZ * aZ)
 
         return makeRotation(angle, aX * invMagnitude, aY * invMagnitude, aZ * invMagnitude)
@@ -436,6 +561,10 @@ class MutableMatrix3(e00: Float, e01: Float, e02: Float, e10: Float, e11: Float,
      * @return This matrix for chaining.
      */
     fun makeRotation(angle: Float, aX: Float, aY: Float, aZ: Float) : MutableMatrix3 {
+        if(angle.isZero()) {
+            return identity()
+        }
+
         val c = cos(angle)
         val s = sin(angle)
         val d = 1f - c

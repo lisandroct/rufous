@@ -188,6 +188,51 @@ class MutableTransformation : Transformation {
     fun rotate(angle: Float, aX: Float, aY: Float, aZ: Float) = rotate(angle, aX, aY, aZ, this)
 
     /**
+     * Left multiplies this matrix with a matrix that represents a uniform scale by [factor].
+     *
+     * @return This matrix for chaining.
+     */
+    fun scale(factor: Float) = scale(factor, this)
+    /**
+     * Left multiplies this matrix with a matrix that represents a non uniform scale by [factorX], [factorY] and [factorZ].
+     *
+     * @return This matrix for chaining.
+     */
+    fun scale(factorX: Float, factorY: Float, factorZ: Float) = scale(factorX, factorY, factorZ, this)
+    /**
+     * Left multiplies this matrix with a matrix that represents a scale by [factor] along [axis].
+     *
+     * If [axis] is known to be a unit vector, [scale] is a cheaper alternative.
+     *
+     * @return This matrix for chaining.
+     */
+    fun scaleSafe(factor: Float, axis: Vector3) = scaleSafe(factor, axis, this)
+    /**
+     * Left multiplies this matrix with a matrix that represents a scale by [factor] along ([aX], [aY], [aZ]).
+     *
+     * If ([aX], [aY], [aZ]) is known to be a unit vector, [scale] is a cheaper alternative.
+     *
+     * @return This matrix for chaining.
+     */
+    fun scaleSafe(factor: Float, aX: Float, aY: Float, aZ: Float) = scaleSafe(factor, aX, aY, aZ, this)
+    /**
+     * Left multiplies this matrix with a matrix that represents a scale by [factor] along [axis].
+     *
+     * [axis] must be a unit vector.
+     *
+     * @return This matrix for chaining.
+     */
+    fun scale(factor: Float, axis: Vector3) = scale(factor, axis, this)
+    /**
+     * Left multiplies this matrix with a matrix that represents a scale by [factor] along ([aX], [aY], [aZ]).
+     *
+     * ([aX], [aY], [aZ]) must be a unit vector.
+     *
+     * @return This matrix for chaining.
+     */
+    fun scale(factor: Float, aX: Float, aY: Float, aZ: Float) = scale(factor, aX, aY, aZ, this)
+
+    /**
      * Sets this matrix as a rotation matrix.
      *
      * Performs the rotation about the x axis.
@@ -196,6 +241,10 @@ class MutableTransformation : Transformation {
      * @return This matrix for chaining.
      */
     fun makeRotationX(angle: Float) : MutableTransformation {
+        if(angle.isZero()) {
+            return identity()
+        }
+
         val c = cos(angle)
         val s = sin(angle)
 
@@ -215,6 +264,10 @@ class MutableTransformation : Transformation {
      * @return This matrix for chaining.
      */
     fun makeRotationY(angle: Float) : MutableTransformation {
+        if(angle.isZero()) {
+            return identity()
+        }
+
         val c = cos(angle)
         val s = sin(angle)
 
@@ -234,6 +287,10 @@ class MutableTransformation : Transformation {
      * @return This matrix for chaining.
      */
     fun makeRotationZ(angle: Float) : MutableTransformation {
+        if(angle.isZero()) {
+            return identity()
+        }
+
         val c = cos(angle)
         val s = sin(angle)
 
@@ -263,6 +320,10 @@ class MutableTransformation : Transformation {
      * @return This matrix for chaining.
      */
     fun makeRotationSafe(angle: Float, aX: Float, aY: Float, aZ: Float) : MutableTransformation {
+        if(angle.isZero()) {
+            return identity()
+        }
+
         val invMagnitude = 1f / sqrt(aX * aX + aY * aY + aZ * aZ)
 
         return makeRotation(angle, aX * invMagnitude, aY * invMagnitude, aZ * invMagnitude)
@@ -287,6 +348,10 @@ class MutableTransformation : Transformation {
      * @return This matrix for chaining.
      */
     fun makeRotation(angle: Float, aX: Float, aY: Float, aZ: Float) : MutableTransformation {
+        if(angle.isZero()) {
+            return identity()
+        }
+
         val c = cos(angle)
         val s = sin(angle)
         val d = 1f - c

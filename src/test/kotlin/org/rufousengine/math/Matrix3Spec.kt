@@ -542,6 +542,87 @@ object Matrix3Spec: Spek({
                 assert(rotated).isEqualTo(expected)
             }
         }
+
+        on("reflectSafe") {
+            val axis = getRandomVector3()
+            val reflected = matrix.reflectSafe(axis, MutableMatrix3())
+            it("should be left multiplied by a reflection matrix") {
+                val reflection = MutableMatrix3().makeReflectionSafe(axis)
+                val expected = matrix.multiplyLeft(reflection, MutableMatrix3())
+
+                assert(reflected).isEqualTo(expected)
+            }
+        }
+
+        on("reflect") {
+            val axis = getRandomVector3().normalize(MutableVector3())
+            val reflected = matrix.reflect(axis, MutableMatrix3())
+            it("should be left multiplied by a reflection matrix") {
+                val reflection = MutableMatrix3().makeReflection(axis)
+                val expected = matrix.multiplyLeft(reflection, MutableMatrix3())
+
+                assert(reflected).isEqualTo(expected)
+            }
+        }
+
+        on("involuteSafe") {
+            val axis = getRandomVector3()
+            val involuted = matrix.involuteSafe(axis, MutableMatrix3())
+            it("should be left multiplied by an involution matrix") {
+                val involution = MutableMatrix3().makeInvolutionSafe(axis)
+                val expected = matrix.multiplyLeft(involution, MutableMatrix3())
+
+                assert(involuted).isEqualTo(expected)
+            }
+        }
+
+        on("involute") {
+            val axis = getRandomVector3().normalize(MutableVector3())
+            val involuted = matrix.involute(axis, MutableMatrix3())
+            it("should be left multiplied by an involution matrix") {
+                val involution = MutableMatrix3().makeInvolution(axis)
+                val expected = matrix.multiplyLeft(involution, MutableMatrix3())
+
+                assert(involuted).isEqualTo(expected)
+            }
+        }
+
+        on("scale (nonuniform)") {
+            val factorX = getRandomValue()
+            val factorY = getRandomValue()
+            val factorZ = getRandomValue()
+            val scaled = matrix.scale(factorX, factorY, factorZ, MutableMatrix3())
+            it("should be left multiplied by a scale matrix") {
+                val scale = MutableMatrix3().makeScale(factorX, factorY, factorZ)
+                val expected = matrix.multiplyLeft(scale, MutableMatrix3())
+
+                assert(scaled).isEqualTo(expected)
+            }
+        }
+
+        on("scaleSafe") {
+            val factor = getRandomValue()
+            val axis = getRandomVector3()
+            val scaled = matrix.scaleSafe(factor, axis, MutableMatrix3())
+            it("should be left multiplied by a scale matrix") {
+                val scale = MutableMatrix3().makeScaleSafe(factor, axis)
+                val expected = matrix.multiplyLeft(scale, MutableMatrix3())
+
+                assert(scaled).isEqualTo(expected)
+            }
+        }
+
+        on("scale (transformation)") {
+            val factor = getRandomValue()
+            val axis = getRandomVector3().normalize(MutableVector3())
+            val scaled = matrix.scale(factor, axis, MutableMatrix3())
+            it("should be left multiplied by a scale matrix") {
+                val scale = MutableMatrix3().makeScale(factor, axis)
+                val expected = matrix.multiplyLeft(scale, MutableMatrix3())
+
+                assert(scaled).isEqualTo(expected)
+            }
+        }
     }
 
     given("a mutable matrix") {
@@ -1010,6 +1091,85 @@ object Matrix3Spec: Spek({
             matrix.rotate(angle, axis)
             it("should rotate and assign") {
                 val expected = original.rotate(angle, axis, MutableMatrix3())
+
+                assert(matrix).isEqualTo(expected)
+            }
+        }
+
+        on("reflectSafe") {
+            val original = matrix.copyImmutable()
+            val axis = getRandomVector3()
+            matrix.reflectSafe(axis)
+            it("should reflectSafe and assign") {
+                val expected = original.reflectSafe(axis, MutableMatrix3())
+
+                assert(matrix).isEqualTo(expected)
+            }
+        }
+
+        on("reflect") {
+            val original = matrix.copyImmutable()
+            val axis = getRandomVector3().normalize(MutableVector3())
+            matrix.reflect(axis)
+            it("should reflect and assign") {
+                val expected = original.reflect(axis, MutableMatrix3())
+
+                assert(matrix).isEqualTo(expected)
+            }
+        }
+
+        on("involuteSafe") {
+            val original = matrix.copyImmutable()
+            val axis = getRandomVector3()
+            matrix.involuteSafe(axis)
+            it("should involuteSafe and assign") {
+                val expected = original.involuteSafe(axis, MutableMatrix3())
+
+                assert(matrix).isEqualTo(expected)
+            }
+        }
+
+        on("involute") {
+            val original = matrix.copyImmutable()
+            val axis = getRandomVector3().normalize(MutableVector3())
+            matrix.involute(axis)
+            it("should involute and assign") {
+                val expected = original.involute(axis, MutableMatrix3())
+
+                assert(matrix).isEqualTo(expected)
+            }
+        }
+
+        on("scale (nonuniform)") {
+            val original = matrix.copyImmutable()
+            val factorX = getRandomValue()
+            val factorY = getRandomValue()
+            val factorZ = getRandomValue()
+            matrix.scale(factorX, factorY, factorZ)
+            it("should scale and assign") {
+                val expected = original.scale(factorX, factorY, factorZ, MutableMatrix3())
+
+                assert(matrix).isEqualTo(expected)
+            }
+        }
+        on("scaleSafe") {
+            val original = matrix.copyImmutable()
+            val factor = getRandomValue()
+            val axis = getRandomVector3()
+            matrix.scaleSafe(factor, axis)
+            it("should scaleSafe and assign") {
+                val expected = original.scaleSafe(factor, axis, MutableMatrix3())
+
+                assert(matrix).isEqualTo(expected)
+            }
+        }
+        on("scale (transformation)") {
+            val original = matrix.copyImmutable()
+            val factor = getRandomValue()
+            val axis = getRandomVector3().normalize(MutableVector3())
+            matrix.scale(factor, axis)
+            it("should scale and assign") {
+                val expected = original.scale(factor, axis, MutableMatrix3())
 
                 assert(matrix).isEqualTo(expected)
             }

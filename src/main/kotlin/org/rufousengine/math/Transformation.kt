@@ -801,6 +801,136 @@ open class Transformation {
                 e20, e21, e22, e23
         )
     }
+    /**
+     * Left multiplies this matrix with a matrix that represents a uniform scale by [factor].
+     *
+     * @param[out] The output matrix.
+     * @return The output matrix for chaining.
+     */
+    fun scale(factor: Float, out: MutableTransformation) : MutableTransformation {
+        val e00 = factor * this.e00
+        val e01 = factor * this.e01
+        val e02 = factor * this.e02
+        val e03 = factor * this.e03
+
+        val e10 = factor * this.e10
+        val e11 = factor * this.e11
+        val e12 = factor * this.e12
+        val e13 = factor * this.e13
+
+        val e20 = factor * this.e20
+        val e21 = factor * this.e21
+        val e22 = factor * this.e22
+        val e23 = factor * this.e23
+
+        return out.set(
+                e00, e01, e02, e03,
+                e10, e11, e12, e13,
+                e20, e21, e22, e23
+        )
+    }
+    /**
+     * Left multiplies this matrix with a matrix that represents a non uniform scale by [factorX], [factorY] and [factorZ].
+     *
+     * @param[out] The output matrix.
+     * @return The output matrix for chaining.
+     */
+    fun scale(factorX: Float, factorY: Float, factorZ: Float, out: MutableTransformation) : MutableTransformation {
+        val e00 = factorX * this.e00
+        val e01 = factorX * this.e01
+        val e02 = factorX * this.e02
+        val e03 = factorX * this.e03
+
+        val e10 = factorY * this.e10
+        val e11 = factorY * this.e11
+        val e12 = factorY * this.e12
+        val e13 = factorY * this.e13
+
+        val e20 = factorZ * this.e20
+        val e21 = factorZ * this.e21
+        val e22 = factorZ * this.e22
+        val e23 = factorZ * this.e23
+
+        return out.set(
+                e00, e01, e02, e03,
+                e10, e11, e12, e13,
+                e20, e21, e22, e23
+        )
+    }
+    /**
+     * Left multiplies this matrix with a matrix that represents a scale by [factor] along [axis].
+     *
+     * If [axis] is known to be a unit vector, [scale] is a cheaper alternative.
+     *
+     * @param[out] The output matrix.
+     * @return The output matrix for chaining.
+     */
+    fun scaleSafe(factor: Float, axis: Vector3, out: MutableTransformation) = scaleSafe(factor, axis.x, axis.y, axis.z, out)
+    /**
+     * Left multiplies this matrix with a matrix that represents a scale by [factor] along ([aX], [aY], [aZ]).
+     *
+     * If ([aX], [aY], [aZ]) is known to be a unit vector, [scale] is a cheaper alternative.
+     *
+     * @param[out] The output matrix.
+     * @return The output matrix for chaining.
+     */
+    fun scaleSafe(factor: Float, aX: Float, aY: Float, aZ: Float, out: MutableTransformation) : MutableTransformation {
+        val invMagnitude = 1f / sqrt(aX * aX + aY * aY + aZ * aZ)
+
+        return scale(factor, aX * invMagnitude, aY * invMagnitude, aZ * invMagnitude, out)
+    }
+    /**
+     * Left multiplies this matrix with a matrix that represents a scale by [factor] along [axis].
+     *
+     * [axis] must be a unit vector.
+     *
+     * @param[out] The output matrix.
+     * @return The output matrix for chaining.
+     */
+    fun scale(factor: Float, axis: Vector3, out: MutableTransformation) = scale(factor, axis.x, axis.y, axis.z, out)
+    /**
+     * Left multiplies this matrix with a matrix that represents a scale by [factor] along ([aX], [aY], [aZ]).
+     *
+     * ([aX], [aY], [aZ]) must be a unit vector.
+     *
+     * @param[out] The output matrix.
+     * @return The output matrix for chaining.
+     */
+    fun scale(factor: Float, aX: Float, aY: Float, aZ: Float, out: MutableTransformation) : MutableTransformation {
+        val factor = factor - 1f
+
+        val x = aX * factor
+        val y = aY * factor
+        val z = aZ * factor
+        val axay = x * aY
+        val axaz = x * aZ
+        val ayaz = y * aZ
+
+        val r00 = x * aX + 1f
+        val r11 = y * aY + 1f
+        val r22 = z * aZ + 1f
+
+        val e00 = r00 * this.e00 + axay * this.e10 + axaz * this.e20
+        val e01 = r00 * this.e01 + axay * this.e11 + axaz * this.e21
+        val e02 = r00 * this.e02 + axay * this.e12 + axaz * this.e22
+        val e03 = r00 * this.e03 + axay * this.e13 + axaz * this.e23
+
+        val e10 = axay * this.e00 + r11 * this.e10 + ayaz * this.e20
+        val e11 = axay * this.e01 + r11 * this.e11 + ayaz * this.e21
+        val e12 = axay * this.e02 + r11 * this.e12 + ayaz * this.e22
+        val e13 = axay * this.e03 + r11 * this.e13 + ayaz * this.e23
+
+        val e20 = axaz * this.e00 + ayaz * this.e10 + r22 * this.e20
+        val e21 = axaz * this.e01 + ayaz * this.e11 + r22 * this.e21
+        val e22 = axaz * this.e02 + ayaz * this.e12 + r22 * this.e22
+        val e23 = axaz * this.e03 + ayaz * this.e13 + r22 * this.e23
+
+        return out.set(
+                e00, e01, e02, e03,
+                e10, e11, e12, e13,
+                e20, e21, e22, e23
+        )
+    }
 
     fun equals(other: Projection) = other.isTransformation && equals(other.e00, 0f, 0f, 0f, 0f, other.e11, 0f, 0f, 0f, 0f, other.e22, other.e23)
     fun equals(other: Transformation) = scales == other.scales && rotates == other.rotates && translates == other.translates && equals(other.e00, other.e01, other.e02, other.e03, other.e10, other.e11, other.e12, other.e13, other.e20, other.e21, other.e22, other.e23)

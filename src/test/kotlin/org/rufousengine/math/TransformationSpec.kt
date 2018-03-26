@@ -480,6 +480,50 @@ object TransformationSpec: Spek({
                 assert(rotated).isEqualTo(expected)
             }
         }
+
+        on("scale (uniform)") {
+            val factor = getRandomValue()
+            val scaled = matrix.scale(factor, MutableTransformation())
+            it("should be the same as Matrix4::scale") {
+                val expected = Matrix4(matrix).scale(factor, factor, factor, MutableMatrix4())
+
+                assert(scaled).isEqualTo(expected)
+            }
+        }
+
+        on("scale (nonuniform)") {
+            val factorX = getRandomValue()
+            val factorY = getRandomValue()
+            val factorZ = getRandomValue()
+            val scaled = matrix.scale(factorX, factorY, factorZ, MutableTransformation())
+            it("should be the same as Matrix4::scale") {
+                val expected = Matrix4(matrix).scale(factorX, factorY, factorZ, MutableMatrix4())
+
+                assert(scaled).isEqualTo(expected)
+            }
+        }
+
+        on("scaleSafe") {
+            val factor = getRandomValue()
+            val axis = getRandomVector3()
+            val scaled = matrix.scaleSafe(factor, axis, MutableTransformation())
+            it("should be the same as Matrix4::scaleSafe") {
+                val expected = Matrix4(matrix).scaleSafe(factor, axis, MutableMatrix4())
+
+                assert(scaled).isEqualTo(expected)
+            }
+        }
+
+        on("scale (transformation)") {
+            val factor = getRandomValue()
+            val axis = getRandomVector3().normalize(MutableVector3())
+            val scaled = matrix.scale(factor, axis, MutableTransformation())
+            it("should be the same as Matrix4::scale") {
+                val expected = Matrix4(matrix).scale(factor, axis, MutableMatrix4())
+
+                assert(scaled).isEqualTo(expected)
+            }
+        }
     }
     
     given("a mutable matrix") {
@@ -692,6 +736,51 @@ object TransformationSpec: Spek({
             matrix.rotate(angle, axis)
             it("should rotate and assign") {
                 val expected = original.rotate(angle, axis, MutableTransformation())
+
+                assert(matrix).isEqualTo(expected)
+            }
+        }
+
+        on("scale (uniform)") {
+            val original = matrix.copyImmutable()
+            val factor = getRandomValue()
+            matrix.scale(factor)
+            it("should scale and assign") {
+                val expected = original.scale(factor, MutableTransformation())
+
+                assert(matrix).isEqualTo(expected)
+            }
+        }
+        on("scale (nonuniform)") {
+            val original = matrix.copyImmutable()
+            val factorX = getRandomValue()
+            val factorY = getRandomValue()
+            val factorZ = getRandomValue()
+            matrix.scale(factorX, factorY, factorZ)
+            it("should scale and assign") {
+                val expected = original.scale(factorX, factorY, factorZ, MutableTransformation())
+
+                assert(matrix).isEqualTo(expected)
+            }
+        }
+        on("scaleSafe") {
+            val original = matrix.copyImmutable()
+            val factor = getRandomValue()
+            val axis = getRandomVector3()
+            matrix.scaleSafe(factor, axis)
+            it("should scaleSafe and assign") {
+                val expected = original.scaleSafe(factor, axis, MutableTransformation())
+
+                assert(matrix).isEqualTo(expected)
+            }
+        }
+        on("scale (transformation)") {
+            val original = matrix.copyImmutable()
+            val factor = getRandomValue()
+            val axis = getRandomVector3().normalize(MutableVector3())
+            matrix.scale(factor, axis)
+            it("should scale and assign") {
+                val expected = original.scale(factor, axis, MutableTransformation())
 
                 assert(matrix).isEqualTo(expected)
             }

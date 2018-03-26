@@ -516,6 +516,247 @@ open class Matrix3(e00: Float, e01: Float, e02: Float, e10: Float, e11: Float, e
                 e20, e21, e22
         )
     }
+
+    /**
+     * Left multiplies this matrix with a matrix that represents a reflection through a plane perpendicular to [axis].
+     *
+     * If [axis] is known to be a unit vector, [reflect] is a cheaper alternative.
+     *
+     * @param[axis] The unit vector.
+     * @param[out] The output matrix.
+     * @return The output matrix for chaining.
+     */
+    fun reflectSafe(axis: Vector3, out: MutableMatrix3) = reflectSafe(axis.x, axis.y, axis.z, out)
+    /**
+     * Left multiplies this matrix with a matrix that represents a reflection through a plane perpendicular to ([aX], [aY], [aZ]).
+     *
+     * If ([aX], [aY], [aZ]) is known to be a unit vector, [reflect] is a cheaper alternative.
+     *
+     * @param[out] The output matrix.
+     * @return The output matrix for chaining.
+     */
+    fun reflectSafe(aX: Float, aY: Float, aZ: Float, out: MutableMatrix3) : MutableMatrix3 {
+        val invMagnitude = 1f / sqrt(aX * aX + aY * aY + aZ * aZ)
+
+        return reflect(aX * invMagnitude, aY * invMagnitude, aZ * invMagnitude, out)
+    }
+    /**
+     * Left multiplies this matrix with a matrix that represents a reflection through a plane perpendicular to [axis].
+     *
+     * [axis] must be a unit vector.
+     *
+     * @param[axis] The unit vector.
+     * @param[out] The output matrix.
+     * @return The output matrix for chaining.
+     */
+    fun reflect(axis: Vector3, out: MutableMatrix3) = reflect(axis.x, axis.y, axis.z, out)
+    /**
+     * Left multiplies this matrix with a matrix that represents a reflection through a plane perpendicular to ([aX], [aY], [aZ]).
+     *
+     * ([aX], [aY], [aZ]) must be a unit vector.
+     *
+     * @param[out] The output matrix.
+     * @return The output matrix for chaining.
+     */
+    fun reflect(aX: Float, aY: Float, aZ: Float, out: MutableMatrix3) : MutableMatrix3 {
+        val x = aX * -2f
+        val y = aY * -2f
+        val z = aZ * -2f
+        val axay = x * aY
+        val axaz = x * aZ
+        val ayaz = y * aZ
+
+        val r00 = x * aX + 1f
+        val r11 = y * aY + 1f
+        val r22 = z * aZ + 1f
+
+        val e00 = r00 * this.e00 + axay * this.e10 + axaz * this.e20
+        val e01 = r00 * this.e01 + axay * this.e11 + axaz * this.e21
+        val e02 = r00 * this.e02 + axay * this.e12 + axaz * this.e22
+
+        val e10 = axay * this.e00 + r11 * this.e10 + ayaz * this.e20
+        val e11 = axay * this.e01 + r11 * this.e11 + ayaz * this.e21
+        val e12 = axay * this.e02 + r11 * this.e12 + ayaz * this.e22
+
+        val e20 = axaz * this.e00 + ayaz * this.e10 + r22 * this.e20
+        val e21 = axaz * this.e01 + ayaz * this.e11 + r22 * this.e21
+        val e22 = axaz * this.e02 + ayaz * this.e12 + r22 * this.e22
+
+        return out.set(
+                e00, e01, e02,
+                e10, e11, e12,
+                e20, e21, e22
+        )
+    }
+
+    /**
+     * Left multiplies this matrix with a matrix that represents an involution through [axis].
+     *
+     * If [axis] is known to be a unit vector, [involute] is a cheaper alternative.
+     *
+     * @param[axis] The unit vector.
+     * @param[out] The output matrix.
+     * @return The output matrix for chaining.
+     */
+    fun involuteSafe(axis: Vector3, out: MutableMatrix3) = involuteSafe(axis.x, axis.y, axis.z, out)
+    /**
+     * Left multiplies this matrix with a matrix that represents an involution through ([aX], [aY], [aZ]).
+     *
+     * If ([aX], [aY], [aZ]) is known to be a unit vector, [involute] is a cheaper alternative.
+     *
+     * @param[out] The output matrix.
+     * @return The output matrix for chaining.
+     */
+    fun involuteSafe(aX: Float, aY: Float, aZ: Float, out: MutableMatrix3) : MutableMatrix3 {
+        val invMagnitude = 1f / sqrt(aX * aX + aY * aY + aZ * aZ)
+
+        return involute(aX * invMagnitude, aY * invMagnitude, aZ * invMagnitude, out)
+    }
+    /**
+     * Left multiplies this matrix with a matrix that represents an involution through [axis].
+     *
+     * [axis] must be a unit vector.
+     *
+     * @param[axis] The unit vector.
+     * @param[out] The output matrix.
+     * @return The output matrix for chaining.
+     */
+    fun involute(axis: Vector3, out: MutableMatrix3) = involute(axis.x, axis.y, axis.z, out)
+    /**
+     * Left multiplies this matrix with a matrix that represents an involution through ([aX], [aY], [aZ]).
+     *
+     * ([aX], [aY], [aZ]) must be a unit vector.
+     *
+     * @param[out] The output matrix.
+     * @return The output matrix for chaining.
+     */
+    fun involute(aX: Float, aY: Float, aZ: Float, out: MutableMatrix3) : MutableMatrix3 {
+        val x = aX * 2f
+        val y = aY * 2f
+        val z = aZ * 2f
+        val axay = x * aY
+        val axaz = x * aZ
+        val ayaz = y * aZ
+
+        val r00 = x * aX - 1f
+        val r11 = y * aY - 1f
+        val r22 = z * aZ - 1f
+
+        val e00 = r00 * this.e00 + axay * this.e10 + axaz * this.e20
+        val e01 = r00 * this.e01 + axay * this.e11 + axaz * this.e21
+        val e02 = r00 * this.e02 + axay * this.e12 + axaz * this.e22
+
+        val e10 = axay * this.e00 + r11 * this.e10 + ayaz * this.e20
+        val e11 = axay * this.e01 + r11 * this.e11 + ayaz * this.e21
+        val e12 = axay * this.e02 + r11 * this.e12 + ayaz * this.e22
+
+        val e20 = axaz * this.e00 + ayaz * this.e10 + r22 * this.e20
+        val e21 = axaz * this.e01 + ayaz * this.e11 + r22 * this.e21
+        val e22 = axaz * this.e02 + ayaz * this.e12 + r22 * this.e22
+
+        return out.set(
+                e00, e01, e02,
+                e10, e11, e12,
+                e20, e21, e22
+        )
+    }
+
+    /**
+     * Left multiplies this matrix with a matrix that represents a non uniform scale by [factorX], [factorY] and [factorZ].
+     *
+     * @param[out] The output matrix.
+     * @return The output matrix for chaining.
+     */
+    fun scale(factorX: Float, factorY: Float, factorZ: Float, out: MutableMatrix3) : MutableMatrix3 {
+        val e00 = factorX * this.e00
+        val e01 = factorX * this.e01
+        val e02 = factorX * this.e02
+
+        val e10 = factorY * this.e10
+        val e11 = factorY * this.e11
+        val e12 = factorY * this.e12
+
+        val e20 = factorZ * this.e20
+        val e21 = factorZ * this.e21
+        val e22 = factorZ * this.e22
+
+        return out.set(
+                e00, e01, e02,
+                e10, e11, e12,
+                e20, e21, e22
+        )
+    }
+    /**
+     * Left multiplies this matrix with a matrix that represents a scale by [factor] along [axis].
+     *
+     * If [axis] is known to be a unit vector, [scale] is a cheaper alternative.
+     *
+     * @param[out] The output matrix.
+     * @return The output matrix for chaining.
+     */
+    fun scaleSafe(factor: Float, axis: Vector3, out: MutableMatrix3) = scaleSafe(factor, axis.x, axis.y, axis.z, out)
+    /**
+     * Left multiplies this matrix with a matrix that represents a scale by [factor] along ([aX], [aY], [aZ]).
+     *
+     * If ([aX], [aY], [aZ]) is known to be a unit vector, [scale] is a cheaper alternative.
+     *
+     * @param[out] The output matrix.
+     * @return The output matrix for chaining.
+     */
+    fun scaleSafe(factor: Float, aX: Float, aY: Float, aZ: Float, out: MutableMatrix3) : MutableMatrix3 {
+        val invMagnitude = 1f / sqrt(aX * aX + aY * aY + aZ * aZ)
+
+        return scale(factor, aX * invMagnitude, aY * invMagnitude, aZ * invMagnitude, out)
+    }
+    /**
+     * Left multiplies this matrix with a matrix that represents a scale by [factor] along [axis].
+     *
+     * [axis] must be a unit vector.
+     *
+     * @param[out] The output matrix.
+     * @return The output matrix for chaining.
+     */
+    fun scale(factor: Float, axis: Vector3, out: MutableMatrix3) = scale(factor, axis.x, axis.y, axis.z, out)
+    /**
+     * Left multiplies this matrix with a matrix that represents a scale by [factor] along ([aX], [aY], [aZ]).
+     *
+     * ([aX], [aY], [aZ]) must be a unit vector.
+     *
+     * @param[out] The output matrix.
+     * @return The output matrix for chaining.
+     */
+    fun scale(factor: Float, aX: Float, aY: Float, aZ: Float, out: MutableMatrix3) : MutableMatrix3 {
+        val factor = factor - 1f
+
+        val x = aX * factor
+        val y = aY * factor
+        val z = aZ * factor
+        val axay = x * aY
+        val axaz = x * aZ
+        val ayaz = y * aZ
+
+        val r00 = x * aX + 1f
+        val r11 = y * aY + 1f
+        val r22 = z * aZ + 1f
+
+        val e00 = r00 * this.e00 + axay * this.e10 + axaz * this.e20
+        val e01 = r00 * this.e01 + axay * this.e11 + axaz * this.e21
+        val e02 = r00 * this.e02 + axay * this.e12 + axaz * this.e22
+
+        val e10 = axay * this.e00 + r11 * this.e10 + ayaz * this.e20
+        val e11 = axay * this.e01 + r11 * this.e11 + ayaz * this.e21
+        val e12 = axay * this.e02 + r11 * this.e12 + ayaz * this.e22
+
+        val e20 = axaz * this.e00 + ayaz * this.e10 + r22 * this.e20
+        val e21 = axaz * this.e01 + ayaz * this.e11 + r22 * this.e21
+        val e22 = axaz * this.e02 + ayaz * this.e12 + r22 * this.e22
+
+        return out.set(
+                e00, e01, e02,
+                e10, e11, e12,
+                e20, e21, e22
+        )
+    }
     
     fun equals(other: Matrix3) = equals(other.e00, other.e01, other.e02, other.e10, other.e11, other.e12, other.e20, other.e21, other.e22)
     fun equals(e00: Float, e01: Float, e02: Float, e10: Float, e11: Float, e12: Float, e20: Float, e21: Float, e22: Float) : Boolean {
