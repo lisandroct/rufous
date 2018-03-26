@@ -607,6 +607,20 @@ class MutableMatrix4(e00: Float, e01: Float, e02: Float, e03: Float, e10: Float,
     fun scale(factor: Float, aX: Float, aY: Float, aZ: Float) = scale(factor, aX, aY, aZ, this)
 
     /**
+     * Left multiplies this matrix with a matrix that represents a translation to [point].
+     *
+     * @param[point] The point to translate to.
+     * @return This matrix for chaining.
+     */
+    fun translate(point: Point) = translate(point, this)
+    /**
+     * Left multiplies this matrix with a matrix that represents a translation to ([x], [y], [z]).
+     *
+     * @return This matrix for chaining.
+     */
+    fun translate(x: Float, y: Float, z: Float) = translate(x, y, z, this)
+
+    /**
      * Sets this matrix as a symmetric orthographic projection.
      *
      * @param[width] The width of the frustum in world units.

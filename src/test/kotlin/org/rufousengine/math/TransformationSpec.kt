@@ -524,6 +524,16 @@ object TransformationSpec: Spek({
                 assert(scaled).isEqualTo(expected)
             }
         }
+
+        on("translate") {
+            val point = getRandomPoint()
+            val translated = matrix.translate(point, MutableTransformation())
+            it("should be the same as Matrix4::translate") {
+                val expected = Matrix4(matrix).translate(point, MutableMatrix4())
+
+                assert(translated).isEqualTo(expected)
+            }
+        }
     }
     
     given("a mutable matrix") {
@@ -774,13 +784,24 @@ object TransformationSpec: Spek({
                 assert(matrix).isEqualTo(expected)
             }
         }
-        on("scale (transformation)") {
+        on("scale") {
             val original = matrix.copyImmutable()
             val factor = getRandomValue()
             val axis = getRandomVector3().normalize(MutableVector3())
             matrix.scale(factor, axis)
             it("should scale and assign") {
                 val expected = original.scale(factor, axis, MutableTransformation())
+
+                assert(matrix).isEqualTo(expected)
+            }
+        }
+
+        on("translate") {
+            val original = matrix.copyImmutable()
+            val point = getRandomPoint()
+            matrix.translate(point)
+            it("should translate and assign") {
+                val expected = original.translate(point, MutableTransformation())
 
                 assert(matrix).isEqualTo(expected)
             }

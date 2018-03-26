@@ -1168,6 +1168,43 @@ open class Matrix4(e00: Float, e01: Float, e02: Float, e03: Float, e10: Float, e
         )
     }
 
+    /**
+     * Left multiplies this matrix with a matrix that represents a translation to [point].
+     *
+     * @param[point] The point to translate to.
+     * @param[out] The output matrix.
+     * @return The output matrix for chaining.
+     */
+    fun translate(point: Point, out: MutableMatrix4) = translate(point.x, point.y, point.z, out)
+    /**
+     * Left multiplies this matrix with a matrix that represents a translation to ([x], [y], [z]).
+     *
+     * @param[out] The output matrix.
+     * @return The output matrix for chaining.
+     */
+    fun translate(x: Float, y: Float, z: Float, out: MutableMatrix4) : MutableMatrix4 {
+        val e00 = this.e00 + x * this.e30
+        val e01 = this.e01 + x * this.e31
+        val e02 = this.e02 + x * this.e32
+        val e03 = this.e03 + x * this.e33
+
+        val e10 = this.e10 + y * this.e30
+        val e11 = this.e11 + y * this.e31
+        val e12 = this.e12 + y * this.e32
+        val e13 = this.e13 + y * this.e33
+
+        val e20 = this.e20 + z * this.e30
+        val e21 = this.e21 + z * this.e31
+        val e22 = this.e22 + z * this.e32
+        val e23 = this.e23 + z * this.e33
+
+        return out.set(
+                e00, e01, e02, e03,
+                e10, e11, e12, e13,
+                e20, e21, e22, e23,
+                this.e30, this.e31, this.e32, this.e33
+        )
+    }
 /*
     fun ABBA(aX: Float, aY: Float, aZ: Float, out: MutableMatrix4) : MutableMatrix4 {
         val e00 = r00 * this.e00 + r01 * this.e10 + r02 * this.e20 + r03 * this.e30

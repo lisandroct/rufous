@@ -932,6 +932,43 @@ open class Transformation {
         )
     }
 
+    /**
+     * Left multiplies this matrix with a matrix that represents a translation to [point].
+     *
+     * @param[point] The point to translate to.
+     * @param[out] The output matrix.
+     * @return The output matrix for chaining.
+     */
+    fun translate(point: Point, out: MutableTransformation) = translate(point.x, point.y, point.z, out)
+    /**
+     * Left multiplies this matrix with a matrix that represents a translation to ([x], [y], [z]).
+     *
+     * @param[out] The output matrix.
+     * @return The output matrix for chaining.
+     */
+    fun translate(x: Float, y: Float, z: Float, out: MutableTransformation) : MutableTransformation {
+        val e00 = this.e00
+        val e01 = this.e01
+        val e02 = this.e02
+        val e03 = this.e03 + x
+
+        val e10 = this.e10
+        val e11 = this.e11
+        val e12 = this.e12
+        val e13 = this.e13 + y
+
+        val e20 = this.e20
+        val e21 = this.e21
+        val e22 = this.e22
+        val e23 = this.e23 + z
+
+        return out.set(
+                e00, e01, e02, e03,
+                e10, e11, e12, e13,
+                e20, e21, e22, e23
+        )
+    }
+
     fun equals(other: Projection) = other.isTransformation && equals(other.e00, 0f, 0f, 0f, 0f, other.e11, 0f, 0f, 0f, 0f, other.e22, other.e23)
     fun equals(other: Transformation) = scales == other.scales && rotates == other.rotates && translates == other.translates && equals(other.e00, other.e01, other.e02, other.e03, other.e10, other.e11, other.e12, other.e13, other.e20, other.e21, other.e22, other.e23)
     fun equals(other: Matrix4) = other.isTransformation && equals(other.e00, other.e01, other.e02, other.e03, other.e10, other.e11, other.e12, other.e13, other.e20, other.e21, other.e22, other.e23)
