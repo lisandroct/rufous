@@ -483,7 +483,7 @@ class MutableMatrix4(e00: Float, e01: Float, e02: Float, e03: Float, e10: Float,
      * [axis] must be a unit vector.
      *
      * @param[angle] The angle in degrees.
-     * @param[axis] The unit axis.
+     * @param[axis] The unit-length axis.
      * @return This matrix for chaining.
      */
     fun rotate(angle: Float, axis: Vector3) = rotate(angle, axis, this)
@@ -864,7 +864,7 @@ class MutableMatrix4(e00: Float, e01: Float, e02: Float, e03: Float, e10: Float,
      * [axis] must be a unit vector.
      *
      * @param[angle] The angle in degrees.
-     * @param[axis] The axis.
+     * @param[axis] The unit-length axis.
      * @return This matrix for chaining.
      */
     fun makeRotation(angle: Float, axis: Vector3) = makeRotation(angle, axis.x, axis.y, axis.z)
@@ -903,6 +903,14 @@ class MutableMatrix4(e00: Float, e01: Float, e02: Float, e03: Float, e10: Float,
                 0f, 0f, 0f, 1f
         )
     }
+
+    /**
+     * Sets this matrix as a rotation matrix representing the same rotation as [quaternion].
+     *
+     * @param[quaternion] The rotation quaternion.
+     * @return This matrix for chaining.
+     */
+    fun makeRotation(quaternion: Quaternion) = quaternion.getMatrixRepresentation(this)
 
     /**
      * Sets this matrix as a reflection matrix through the plane perpendicular to [axis].

@@ -455,7 +455,7 @@ open class Matrix3(e00: Float, e01: Float, e02: Float, e10: Float, e11: Float, e
      * [axis] must be a unit vector.
      *
      * @param[angle] The angle in degrees.
-     * @param[axis] The unit axis.
+     * @param[axis] The unit-length axis.
      * @param[out] The output matrix.
      * @return The output matrix for chaining.
      */

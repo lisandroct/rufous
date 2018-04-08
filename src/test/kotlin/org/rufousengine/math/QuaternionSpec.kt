@@ -315,6 +315,17 @@ object QuaternionSpec: Spek({
             }
         }
 
+        on("getMatrixRepresentation (Transformation)") {
+            val matrix = quaternion.getMatrixRepresentation(MutableTransformation())
+            val vector = getRandomVector3()
+            val rotated = matrix.multiply(vector, MutableVector3())
+            it("should give the same results as the quaternion") {
+                val expected = quaternion.transformSafe(vector, MutableVector3())
+
+                assert(rotated).isEqualTo(expected)
+            }
+        }
+
         on("scale") {
             val scalar = getRandomValue()
             val scaled = quaternion.scale(scalar, MutableQuaternion())
@@ -738,6 +749,82 @@ object QuaternionSpec: Spek({
                 val expected = original.multiplyLeft(other, MutableQuaternion())
 
                 assert(quaternion).isEqualTo(expected)
+            }
+        }
+
+        on("makeRotationX") {
+            val angle = getRandomValue()
+            quaternion.makeRotationX(angle)
+            it("should rotate about the x axis") {
+                val rotation = MutableQuaternion().makeRotation(angle, 1f, 0f, 0f)
+                val vector = getRandomVector3()
+                val rotated = vector.transform(quaternion, MutableVector3())
+                val expected = vector.transform(rotation, MutableVector3())
+
+                assert(rotated).isEqualTo(expected)
+            }
+        }
+
+        on("makeRotationY") {
+            val angle = getRandomValue()
+            quaternion.makeRotationY(angle)
+            it("should rotate about the x axis") {
+                val rotation = MutableQuaternion().makeRotation(angle, 0f, 1f, 0f)
+                val vector = getRandomVector3()
+                val rotated = vector.transform(quaternion, MutableVector3())
+                val expected = vector.transform(rotation, MutableVector3())
+
+                assert(rotated).isEqualTo(expected)
+            }
+        }
+
+        on("makeRotationZ") {
+            val angle = getRandomValue()
+            quaternion.makeRotationZ(angle)
+            it("should rotate about the x axis") {
+                val rotation = MutableQuaternion().makeRotation(angle, 0f, 0f, 1f)
+                val vector = getRandomVector3()
+                val rotated = vector.transform(quaternion, MutableVector3())
+                val expected = vector.transform(rotation, MutableVector3())
+
+                assert(rotated).isEqualTo(expected)
+            }
+        }
+
+        on("makeRotationSafe") {
+            val angle = getRandomValue()
+            val axis = getRandomVector3()
+            quaternion.makeRotationSafe(angle, axis)
+            it("should represent a rotation through angle about axis") {
+                val vector = getRandomVector3()
+                val rotated = vector.transform(quaternion, MutableVector3())
+                val unitAxis = axis.copyMutable().normalize()
+                val expected = vector.projectOnto(unitAxis, MutableVector3())
+                expected += vector.rejectFrom(unitAxis, MutableVector3()).scale(cos(angle))
+                expected += unitAxis.cross(vector, MutableVector3()).scale(sin(angle))
+
+                // FIXME("Huge loss of precision")
+                assert(rotated.x).isCloseTo(expected.x, 0.1f)
+                assert(rotated.y).isCloseTo(expected.y, 0.1f)
+                assert(rotated.z).isCloseTo(expected.z, 0.1f)
+            }
+        }
+
+        on("makeRotation") {
+            val angle = getRandomValue()
+            val axis = getRandomVector3().normalize(MutableVector3())
+            quaternion.makeRotation(angle, axis)
+            it("should represent a rotation through angle about axis") {
+                val vector = getRandomVector3()
+                val rotated = vector.transform(quaternion, MutableVector3())
+                val expected = vector.projectOnto(axis, MutableVector3())
+                expected += vector.rejectFrom(axis, MutableVector3()).scale(cos(angle))
+                expected += axis.cross(vector, MutableVector3()).scale(sin(angle))
+
+                // FIXME("Huge loss of precision")
+                assert(rotated.x).isCloseTo(expected.x, 0.1f)
+                assert(rotated.y).isCloseTo(expected.y, 0.1f)
+                assert(rotated.z).isCloseTo(expected.z, 0.1f)
             }
         }
     }

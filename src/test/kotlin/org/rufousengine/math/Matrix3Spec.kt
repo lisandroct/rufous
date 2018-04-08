@@ -1178,48 +1178,39 @@ object Matrix3Spec: Spek({
         on("makeRotationX") {
             val angle = getRandomValue()
             matrix.makeRotationX(angle)
-            it("should suffice the definition") {
-                assert(matrix.e00).isCloseTo(1f)
-                assert(matrix.e01).isCloseTo(0f)
-                assert(matrix.e02).isCloseTo(0f)
-                assert(matrix.e10).isCloseTo(0f)
-                assert(matrix.e11).isCloseTo(cos(angle))
-                assert(matrix.e12).isCloseTo(-sin(angle))
-                assert(matrix.e20).isCloseTo(0f)
-                assert(matrix.e21).isCloseTo(sin(angle))
-                assert(matrix.e22).isCloseTo(cos(angle))
+            it("should rotate about the x axis") {
+                val rotation = MutableMatrix4().makeRotation(angle, 1f, 0f, 0f)
+                val vector = getRandomVector3()
+                val rotated = vector.multiplyLeft(matrix, MutableVector3())
+                val expected = vector.multiplyLeft(rotation, MutableVector3())
+
+                assert(rotated).isEqualTo(expected)
             }
         }
 
         on("makeRotationY") {
             val angle = getRandomValue()
             matrix.makeRotationY(angle)
-            it("should suffice the definition") {
-                assert(matrix.e00).isCloseTo(cos(angle))
-                assert(matrix.e01).isCloseTo(0f)
-                assert(matrix.e02).isCloseTo(sin(angle))
-                assert(matrix.e10).isCloseTo(0f)
-                assert(matrix.e11).isCloseTo(1f)
-                assert(matrix.e12).isCloseTo(0f)
-                assert(matrix.e20).isCloseTo(-sin(angle))
-                assert(matrix.e21).isCloseTo(0f)
-                assert(matrix.e22).isCloseTo(cos(angle))
+            it("should rotate about the x axis") {
+                val rotation = MutableMatrix4().makeRotation(angle, 0f, 1f, 0f)
+                val vector = getRandomVector3()
+                val rotated = vector.multiplyLeft(matrix, MutableVector3())
+                val expected = vector.multiplyLeft(rotation, MutableVector3())
+
+                assert(rotated).isEqualTo(expected)
             }
         }
 
         on("makeRotationZ") {
             val angle = getRandomValue()
             matrix.makeRotationZ(angle)
-            it("should suffice the definition") {
-                assert(matrix.e00).isCloseTo(cos(angle))
-                assert(matrix.e01).isCloseTo(-sin(angle))
-                assert(matrix.e02).isCloseTo(0f)
-                assert(matrix.e10).isCloseTo(sin(angle))
-                assert(matrix.e11).isCloseTo(cos(angle))
-                assert(matrix.e12).isCloseTo(0f)
-                assert(matrix.e20).isCloseTo(0f)
-                assert(matrix.e21).isCloseTo(0f)
-                assert(matrix.e22).isCloseTo(1f)
+            it("should rotate about the x axis") {
+                val rotation = MutableMatrix4().makeRotation(angle, 0f, 0f, 1f)
+                val vector = getRandomVector3()
+                val rotated = vector.multiplyLeft(matrix, MutableVector3())
+                val expected = vector.multiplyLeft(rotation, MutableVector3())
+
+                assert(rotated).isEqualTo(expected)
             }
         }
 
@@ -1249,6 +1240,18 @@ object Matrix3Spec: Spek({
                 val expected = vector.projectOnto(axis, MutableVector3())
                 expected += vector.rejectFrom(axis, MutableVector3()).scale(cos(angle))
                 expected += axis.cross(vector, MutableVector3()).scale(sin(angle))
+
+                assert(rotated).isEqualTo(expected)
+            }
+        }
+
+        on("makeRotation") {
+            val quaternion = getRandomQuaternion()
+            matrix.makeRotation(quaternion)
+            it("should represent the same transformation as the quaternion") {
+                val vector = getRandomVector3()
+                val rotated = vector.multiplyLeft(matrix, MutableVector3())
+                val expected = vector.transform(quaternion, MutableVector3())
 
                 assert(rotated).isEqualTo(expected)
             }
@@ -1358,6 +1361,7 @@ object Matrix3Spec: Spek({
 
 private fun getRandomValue() = random(-100f, 100f)
 private fun getRandomVector3() = Vector3(getRandomValue(), getRandomValue(), getRandomValue())
+private fun getRandomQuaternion() = Quaternion(getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue())
 private fun getRandomMatrix3() = Matrix3(
         getRandomValue(), getRandomValue(), getRandomValue(),
         getRandomValue(), getRandomValue(), getRandomValue(),

@@ -92,9 +92,9 @@ fun Float.isZero(maxDifference: Float = TOLERANCE, maxUlpsDistance: Int = ULPS_T
 fun Float.isOne(maxDifference: Float = TOLERANCE, maxUlpsDistance: Int = ULPS_TOLERANCE) = this.isCloseTo(1f, maxDifference, maxUlpsDistance)
 
 infix fun Float.isCloseTo(other: Float) = this.isCloseTo(other, TOLERANCE, ULPS_TOLERANCE)
-fun Float.isCloseTo(other: Float, maxDifference: Float, maxUlpsDistance: Int) = close(this, other, maxDifference, maxUlpsDistance)
+fun Float.isCloseTo(other: Float, maxDifference: Float = TOLERANCE, maxUlpsDistance: Int = ULPS_TOLERANCE) = close(this, other, maxDifference, maxUlpsDistance)
 
-fun close(a: Float, b: Float, tolerance: Float, ulpsTolerance: Int) : Boolean {
+fun close(a: Float, b: Float, tolerance: Float = TOLERANCE, ulpsTolerance: Int = ULPS_TOLERANCE) : Boolean {
     val absDifference = abs(a - b)
     if(absDifference <= tolerance) {
         return true

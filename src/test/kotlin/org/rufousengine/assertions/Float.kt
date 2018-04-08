@@ -12,3 +12,19 @@ fun Assert<Float>.isCloseTo(expected: Float) {
 
     expected("to be ${show(expected)} but was ${show(actual)}")
 }
+
+fun Assert<Float>.isCloseTo(expected: Float, tolerance: Float) {
+    if(actual.isCloseTo(expected, tolerance)) {
+        return
+    }
+
+    expected("to be ${show(expected)} but was ${show(actual)}")
+}
+
+fun Assert<Float>.isCloseTo(expected: Float, tolerance: Float, ulpsTolerance: Int) {
+    if(actual.isCloseTo(expected, tolerance, ulpsTolerance)) {
+        return
+    }
+
+    expected("to be ${show(expected)} but was ${show(actual)}")
+}

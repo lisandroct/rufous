@@ -173,7 +173,7 @@ class MutableTransformation : Transformation {
      * [axis] must be a unit vector.
      *
      * @param[angle] The angle in degrees.
-     * @param[axis] The unit axis.
+     * @param[axis] The unit-length axis.
      * @return This matrix for chaining.
      */
     fun rotate(angle: Float, axis: Vector3) = rotate(angle, axis, this)
@@ -318,7 +318,7 @@ class MutableTransformation : Transformation {
     /**
      * Sets this matrix as a rotation matrix through [angle] about [axis].
      *
-     * If [axis] is known to be a unit vector, [makeRotationSafe] is a cheaper alternative.
+     * If [axis] is known to be a unit vector, [makeRotation] is a cheaper alternative.
      *
      * @param[angle] The angle in degrees.
      * @param[axis] The axis.
@@ -328,7 +328,7 @@ class MutableTransformation : Transformation {
     /**
      * Sets this matrix as a rotation matrix through [angle] about ([aX], [aY], [aZ]).
      *
-     * If ([aX], [aY], [aZ]) is known to be a unit vector, [makeRotationSafe] is a cheaper alternative.
+     * If ([aX], [aY], [aZ]) is known to be a unit vector, [makeRotation] is a cheaper alternative.
      *
      * @param[angle] The angle in degrees.
      * @return This matrix for chaining.
@@ -349,7 +349,7 @@ class MutableTransformation : Transformation {
      * [axis] must be a unit vector.
      *
      * @param[angle] The angle in degrees.
-     * @param[axis] The axis.
+     * @param[axis] The unit-length axis.
      * @return This matrix for chaining.
      */
     fun makeRotation(angle: Float, axis: Vector3) = makeRotation(angle, axis.x, axis.y, axis.z)
@@ -386,6 +386,14 @@ class MutableTransformation : Transformation {
                 axaz - say, ayaz + sax, c + z * aZ, 0f
         )
     }
+
+    /**
+     * Sets this matrix as a rotation matrix representing the same rotation as [quaternion].
+     *
+     * @param[quaternion] The rotation quaternion.
+     * @return This matrix for chaining.
+     */
+    fun makeRotation(quaternion: Quaternion) = quaternion.getMatrixRepresentation(this)
 
     /**
      * Sets this matrix as a uniform scale matrix by [factor].

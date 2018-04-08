@@ -859,6 +859,16 @@ object TransformationSpec: Spek({
             }
         }
 
+        on("makeRotation") {
+            val quaternion = getRandomQuaternion()
+            matrix.makeRotation(quaternion)
+            it("should give the same results as Matrix4::makeRotation") {
+                val expected = MutableMatrix4().makeRotation(quaternion)
+
+                assert(matrix).isEqualTo(expected)
+            }
+        }
+
         on("makeScale (uniform)") {
             val factor = getRandomValue()
             matrix.makeScale(factor)
@@ -896,6 +906,7 @@ object TransformationSpec: Spek({
 private fun getRandomValue() = random(-100f, 100f)
 private fun getRandomVector4() = Vector4(getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue())
 private fun getRandomVector3() = Vector3(getRandomValue(), getRandomValue(), getRandomValue())
+private fun getRandomQuaternion() = Quaternion(getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue())
 private fun getRandomPoint() = Point(getRandomValue(), getRandomValue(), getRandomValue())
 private fun getRandomProjection() : Projection {
     val p = MutableProjection()

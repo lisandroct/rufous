@@ -224,6 +224,19 @@ class MutableQuaternion(x: Float = 0f, y: Float = 0f, z: Float = 0f, w: Float = 
     }
 
     /**
+     * Sets this quaternion to the identity.
+     *
+     * @return This quaternion for chaining.
+     */
+    fun identity() = set(0f, 0f, 0f, 1f)
+    /**
+     * Sets this quaternion to the zero quaternion.
+     *
+     * @return This quaternion for chaining.
+     */
+    fun zero() = set(0f, 0f, 0f, 1f)
+
+    /**
      * Normalizes this quaternion.
      *
      * @return This quaternion for chaining.
@@ -305,135 +318,90 @@ class MutableQuaternion(x: Float = 0f, y: Float = 0f, z: Float = 0f, w: Float = 
      */
     fun multiplyLeft(x: Float, y: Float, z: Float, w: Float) = multiplyLeft(x, y, z, w, this)
 
-//    fun setFromMatrix(matrix: Matrix3) : MutableQuaternion {
-//        val m00 = matrix.e00
-//        val m11 = matrix.e11
-//        val m22 = matrix.e22
-//        val sum = m00 + m11 + m22
-//
-//        if(sum > 0f) {
-//            w = sqrt(sum + 1f) * 0.5f
-//            val f = 0.25f / w
-//            x = (matrix.e21 - matrix.e12) * f
-//            y = (matrix.e02 - matrix.e20) * f
-//            z = (matrix.e10 - matrix.e01) * f
-//        } else if(m00 > m11 && m00 > m22) {
-//            x = sqrt(m00 - m11 - m22 + 1f) * 0.5f
-//            val f = 0.25f / x
-//            y = (matrix.e10 + matrix.e01) * f
-//            z = (matrix.e02 + matrix.e20) * f
-//            w = (matrix.e21 - matrix.e12) * f
-//        } else if(m11 > m22) {
-//            y = sqrt(m11 - m00 - m22 + 1f) * 0.5f
-//            val f = 0.25f / x
-//            x = (matrix.e10 + matrix.e01) * f
-//            z = (matrix.e21 + matrix.e12) * f
-//            w = (matrix.e02 - matrix.e20) * f
-//        } else {
-//            z = sqrt(m22 - m00 - m22 + 1f) * 0.5f
-//            val f = 0.25f / x
-//            x = (matrix.e02 + matrix.e20) * f
-//            y = (matrix.e21 + matrix.e12) * f
-//            w = (matrix.e10 - matrix.e01) * f
-//        }
-//
-//        return this
-//    }
-//    fun setFromMatrix(matrix: Matrix4) : MutableQuaternion {
-//        if(!matrix.isTransformation) {
-//            throw IllegalArgumentException("matrix must be a transformation")
-//        }
-//
-//        val m00 = matrix.e00
-//        val m11 = matrix.e11
-//        val m22 = matrix.e22
-//        val sum = m00 + m11 + m22
-//
-//        if(sum > 0f) {
-//            w = sqrt(sum + 1f) * 0.5f
-//            val f = 0.25f / w
-//            x = (matrix.e21 - matrix.e12) * f
-//            y = (matrix.e02 - matrix.e20) * f
-//            z = (matrix.e10 - matrix.e01) * f
-//        } else if(m00 > m11 && m00 > m22) {
-//            x = sqrt(m00 - m11 - m22 + 1f) * 0.5f
-//            val f = 0.25f / x
-//            y = (matrix.e10 + matrix.e01) * f
-//            z = (matrix.e02 + matrix.e20) * f
-//            w = (matrix.e21 - matrix.e12) * f
-//        } else if(m11 > m22) {
-//            y = sqrt(m11 - m00 - m22 + 1f) * 0.5f
-//            val f = 0.25f / x
-//            x = (matrix.e10 + matrix.e01) * f
-//            z = (matrix.e21 + matrix.e12) * f
-//            w = (matrix.e02 - matrix.e20) * f
-//        } else {
-//            z = sqrt(m22 - m00 - m22 + 1f) * 0.5f
-//            val f = 0.25f / x
-//            x = (matrix.e02 + matrix.e20) * f
-//            y = (matrix.e21 + matrix.e12) * f
-//            w = (matrix.e10 - matrix.e01) * f
-//        }
-//
-//        return this
-//    }
+    /**
+     * Sets this quaternion as a rotation quaternion.
+     *
+     * Performs the rotation about the x axis.
+     *
+     * @param[angle] The angle in degrees.
+     * @return This quaternion for chaining.
+     */
+    fun makeRotationX(angle: Float) = makeRotation(angle, 1f, 0f, 0f)
 
+    /**
+     * Sets this quaternion as a rotation quaternion.
+     *
+     * Performs the rotation about the y axis.
+     *
+     * @param[angle] The angle in degrees.
+     * @return This quaternion for chaining.
+     */
+    fun makeRotationY(angle: Float) = makeRotation(angle, 0f, 1f, 0f)
 
-//    fun makeRotationSafe(axis: Vector3, angle: Float) = makeRotationSafe(axis.x, axis.y, axis.z, angle)
-//    fun makeRotationSafe(x: Float, y: Float, z: Float, angle: Float) : MutableQuaternion {
-//        val halfAngle = angle * DEG_TO_RAD * 0.5f
-//        val s = sin(halfAngle)
-//
-//        return set(x * s, y * s, z * s, cos(halfAngle))
-//    }
+    /**
+     * Sets this quaternion as a rotation quaternion.
+     *
+     * Performs the rotation about the z axis.
+     *
+     * @param[angle] The angle in degrees.
+     * @return This quaternion for chaining.
+     */
+    fun makeRotationZ(angle: Float) = makeRotation(angle, 0f, 0f, 1f)
 
-    /*
-    fun lookAtRotation(origin: Point, target: Point, up: Vector3 = Vector3.j) = lookAtRotation(target.subtract(origin, c), up)
-    fun lookAtRotation(direction: Vector3, up: Vector3 = Vector3.j) : Quaternion {
-        if (direction.isZero) {
-            return Quaternion.identity
+    /**
+     * Sets this quaternion as a rotation quaternion through [angle] about [axis].
+     *
+     * If [axis] is known to be a unit vector, [makeRotation] is a cheaper alternative.
+     *
+     * @param[angle] The angle in degrees.
+     * @param[axis] The axis.
+     * @return This quaternion for chaining.
+     */
+    fun makeRotationSafe(angle: Float, axis: Vector3) = makeRotationSafe(angle, axis.x, axis.y, axis.z)
+    /**
+     * Sets this quaternion as a rotation quaternion through [angle] about ([aX], [aY], [aZ]).
+     *
+     * If ([aX], [aY], [aZ]) is known to be a unit vector, [makeRotation] is a cheaper alternative.
+     *
+     * @param[angle] The angle in degrees.
+     * @return This quaternion for chaining.
+     */
+    fun makeRotationSafe(angle: Float, aX: Float, aY: Float, aZ: Float) : MutableQuaternion {
+        if(angle.isZero()) {
+            return identity()
         }
 
-        return if (up != direction) {
-            up.normalize(a)
-            b.set(direction).add(a.scale(a dot direction))
+        val invMagnitude = 1f / sqrt(aX * aX + aY * aY + aZ * aZ)
 
-            q.fromToRotation(Vector3.k, b)
-            fromToRotation(b, direction).multiply(q)
-        } else {
-            fromToRotation(Vector3.k, direction)
-        }
+        return makeRotation(angle, aX * invMagnitude, aY * invMagnitude, aZ * invMagnitude)
     }
-    */
 
-//    fun fromToRotation(from: Vector3, to: Vector3) : MutableQuaternion {
-//        a.set(from).normalize()
-//        b.set(to).normalize()
-//
-//        val dot = a dot b
-//
-//        if(dot.isGreaterOrEqualTo(1f)) {
-//            return this.set(Quaternion.identity)
-//        } else if(dot.isLessOrEqualTo(-1f)) {
-//            Vector3.i.cross(from, c)
-//            // pick another if colinear
-//            if (c.isZero) {
-//                Vector3.i.cross(from, c)
-//            }
-//            c.normalize()
-//            return makeRotationSafe(c, 180f)
-//        }
-//
-//        val s = sqrt((1 + dot) * 2f)
-//        val invs = 1 / s
-//
-//        from.cross(to, c)
-//
-//        x = c.x * invs
-//        y = c.y * invs
-//        z = c.z * invs
-//        w = s * 0.5f
-//
-//        return normalize()
-//    }
+    /**
+     * Sets this quaternion as a rotation quaternion through [angle] about [axis].
+     *
+     * [axis] must be a unit vector.
+     *
+     * @param[angle] The angle in degrees.
+     * @param[axis] The unit-length axis.
+     * @return This quaternion for chaining.
+     */
+    fun makeRotation(angle: Float, axis: Vector3) = makeRotationSafe(angle, axis.x, axis.y, axis.z)
+    /**
+     * Sets this quaternion as a rotation quaternion through [angle] about ([aX], [aY], [aZ]).
+     *
+     * [axis] must be a unit vector.
+     *
+     * @param[angle] The angle in degrees.
+     * @return This quaternion for chaining.
+     */
+    fun makeRotation(angle: Float, aX: Float, aY: Float, aZ: Float) : MutableQuaternion {
+        if(angle.isZero()) {
+            return identity()
+        }
+
+        val halfAngle = angle * 0.5f
+        val s = sin(halfAngle)
+
+        return set(aX * s, aY * s, aZ * s, cos(halfAngle))
+    }
 }
