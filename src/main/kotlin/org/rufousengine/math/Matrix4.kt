@@ -264,7 +264,7 @@ open class Matrix4(e00: Float, e01: Float, e02: Float, e03: Float, e10: Float, e
     fun inverse(out: MutableMatrix4) : MutableMatrix4 {
         return when {
             isIdentity -> out.set(this)
-            isOrthogonal -> transpose(out) // if M is orthogonal then inv(M) = conjugate(M)
+            isOrthogonal -> transpose(out) // if M is orthogonal then inv(M) = transpose(M)
             isTransformation -> {
                 val a = Cached.a
                 val b = Cached.b

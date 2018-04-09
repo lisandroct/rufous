@@ -229,7 +229,7 @@ open class Transformation {
     fun inverse(out: MutableTransformation) : MutableTransformation {
         return when {
             isIdentity -> out.set(this)
-            isOrthogonal -> out.set(e00, e10, e20, 0f, e01, e11, e21, 0f, e02, e12, e22, 0f) // if M is orthogonal then inv(M) = conjugate(M)
+            isOrthogonal -> out.set(e00, e10, e20, 0f, e01, e11, e21, 0f, e02, e12, e22, 0f) // if M is orthogonal then inv(M) = translate(M)
             scales && !rotates && !translates -> out.set(1 / e00, 0f, 0f, 0f, 0f, 1 / e11, 0f, 0f, 0f, 0f, 1 / e22, 0f)
             translates && !scales && !rotates -> out.set(1f, 0f, 0f, -e03, 0f, 1f, 0f, -e13, 0f, 0f, 1f, -e23)
             translates && scales && !rotates -> {
@@ -995,7 +995,7 @@ open class Transformation {
 
     override fun hashCode() = Arrays.hashCode(components)
 
-    private object Cached {
+    protected object Cached {
         val a by lazy { MutableVector3() }
         val b by lazy { MutableVector3() }
         val c by lazy { MutableVector3() }

@@ -901,6 +901,168 @@ object TransformationSpec: Spek({
             }
         }
     }
+
+    describe("rotates, scales, translates") {
+        on("rotation") {
+            val transformation = MutableTransformation().makeRotation(getRandomQuaternion())
+
+            it("should only rotate") {
+                assert(transformation.rotates).isTrue()
+                assert(transformation.scales).isFalse()
+                assert(transformation.translates).isFalse()
+            }
+
+            it("should compute inverse properly") {
+                val inverse = transformation.inverse(MutableTransformation())
+                val expected = MutableMatrix4(transformation).inverse()
+
+                assert(inverse).isEqualTo(expected)
+            }
+        }
+
+        on("scale") {
+            val transformation = MutableTransformation().makeScale(getRandomValue(), getRandomValue(), getRandomValue())
+
+            it("should only scale") {
+                assert(transformation.rotates).isFalse()
+                assert(transformation.scales).isTrue()
+                assert(transformation.translates).isFalse()
+            }
+
+            it("should compute inverse properly") {
+                val inverse = transformation.inverse(MutableTransformation())
+                val expected = MutableMatrix4(transformation).inverse()
+
+                assert(inverse).isEqualTo(expected)
+            }
+        }
+
+        on("translation") {
+            val transformation = MutableTransformation().makeTranslation(getRandomPoint())
+
+            it("should only translate") {
+                assert(transformation.rotates).isFalse()
+                assert(transformation.scales).isFalse()
+                assert(transformation.translates).isTrue()
+            }
+
+            it("should compute inverse properly") {
+                val inverse = transformation.inverse(MutableTransformation())
+                val expected = MutableMatrix4(transformation).inverse()
+
+                assert(inverse).isEqualTo(expected)
+            }
+        }
+
+        on("scale and translation") {
+            val scale = MutableTransformation().makeScale(getRandomValue(), getRandomValue(), getRandomValue())
+            val translation = MutableTransformation().makeTranslation(getRandomPoint())
+            val transformationA = scale.multiply(translation, MutableTransformation())
+            val transformationB = translation.multiply(scale, MutableTransformation())
+
+            it("should only scale and translate") {
+                assert(transformationA.rotates).isFalse()
+                assert(transformationA.scales).isTrue()
+                assert(transformationA.translates).isTrue()
+
+                assert(transformationB.rotates).isFalse()
+                assert(transformationB.scales).isTrue()
+                assert(transformationB.translates).isTrue()
+            }
+
+            it("should compute inverse properly") {
+                val inverseA = transformationA.inverse(MutableTransformation())
+                val expectedA = MutableMatrix4(transformationA).inverse()
+                val inverseB = transformationB.inverse(MutableTransformation())
+                val expectedB = MutableMatrix4(transformationB).inverse()
+
+                assert(inverseA).isEqualTo(expectedA)
+                assert(inverseB).isEqualTo(expectedB)
+            }
+        }
+
+        on("rotation and translation") {
+            val rotation = MutableTransformation().makeRotation(getRandomQuaternion())
+            val translation = MutableTransformation().makeTranslation(getRandomPoint())
+            val transformationA = rotation.multiply(translation, MutableTransformation())
+            val transformationB = translation.multiply(rotation, MutableTransformation())
+
+            it("should only rotate and translate") {
+                assert(transformationA.rotates).isTrue()
+                assert(transformationA.scales).isFalse()
+                assert(transformationA.translates).isTrue()
+
+                assert(transformationB.rotates).isTrue()
+                assert(transformationB.scales).isFalse()
+                assert(transformationB.translates).isTrue()
+            }
+
+            it("should compute inverse properly") {
+                val inverseA = transformationA.inverse(MutableTransformation())
+                val expectedA = MutableMatrix4(transformationA).inverse()
+                val inverseB = transformationB.inverse(MutableTransformation())
+                val expectedB = MutableMatrix4(transformationB).inverse()
+
+                assert(inverseA).isEqualTo(expectedA)
+                assert(inverseB).isEqualTo(expectedB)
+            }
+        }
+
+        on("rotation and scale") {
+            val rotation = MutableTransformation().makeRotation(getRandomQuaternion())
+            val scale = MutableTransformation().makeScale(getRandomValue(), getRandomValue(), getRandomValue())
+            val transformationA = rotation.multiply(scale, MutableTransformation())
+            val transformationB = scale.multiply(rotation, MutableTransformation())
+
+            it("should only rotate and translate") {
+                assert(transformationA.rotates).isTrue()
+                assert(transformationA.scales).isTrue()
+                assert(transformationA.translates).isFalse()
+
+                assert(transformationB.rotates).isTrue()
+                assert(transformationB.scales).isTrue()
+                assert(transformationB.translates).isFalse()
+            }
+        }
+
+        on("rotation, scale and translation") {
+            val rotation = MutableTransformation().makeRotation(getRandomQuaternion())
+            val scale = MutableTransformation().makeScale(getRandomValue(), getRandomValue(), getRandomValue())
+            val translation = MutableTransformation().makeTranslation(getRandomPoint())
+            val transformationA = rotation.multiply(scale, MutableTransformation()).multiply(translation)
+            val transformationB = rotation.multiply(translation, MutableTransformation()).multiply(scale)
+            val transformationC = scale.multiply(rotation, MutableTransformation()).multiply(translation)
+            val transformationD = scale.multiply(translation, MutableTransformation()).multiply(rotation)
+            val transformationE = translation.multiply(scale, MutableTransformation()).multiply(rotation)
+            val transformationF = translation.multiply(rotation, MutableTransformation()).multiply(scale)
+
+            it("should only rotate and translate") {
+                assert(transformationA.rotates).isTrue()
+                assert(transformationA.scales).isTrue()
+                assert(transformationA.translates).isTrue()
+
+                assert(transformationB.rotates).isTrue()
+                assert(transformationB.scales).isTrue()
+                assert(transformationB.translates).isTrue()
+
+                assert(transformationC.rotates).isTrue()
+                assert(transformationC.scales).isTrue()
+                assert(transformationC.translates).isTrue()
+
+                assert(transformationD.rotates).isTrue()
+                assert(transformationD.scales).isTrue()
+                assert(transformationD.translates).isTrue()
+
+                assert(transformationE.rotates).isTrue()
+                assert(transformationE.scales).isTrue()
+                assert(transformationE.translates).isTrue()
+
+                assert(transformationF.rotates).isTrue()
+                assert(transformationF.scales).isTrue()
+                assert(transformationF.translates).isTrue()
+            }
+        }
+    }
 })
 
 private fun getRandomValue() = random(-100f, 100f)

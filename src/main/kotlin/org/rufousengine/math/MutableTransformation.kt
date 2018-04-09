@@ -83,10 +83,21 @@ class MutableTransformation : Transformation {
         components[10] = e22
         components[11] = e23
 
-        // FIXME("scales will be true when only rotation")
-        this.scales = !e00.isOne() || !e11.isOne() || !e22.isOne()
-        this.rotates = !e01.isZero() || !e02.isZero() || !e10.isZero() || !e12.isZero() || !e20.isZero() || !e21.isZero()
-        this.translates = !e03.isZero() || !e13.isZero() || !e23.isZero()
+        rotates = !e01.isZero() || !e02.isZero() || !e10.isZero() || !e12.isZero() || !e20.isZero() || !e21.isZero()
+        if(!rotates) {
+            scales = !e00.isOne() || !e11.isOne() || !e22.isOne()
+        } else {
+            val a = Cached.a
+            val b = Cached.b
+            val c = Cached.c
+
+            a.set(e00, e01, e02)
+            b.set(e10, e11, e12)
+            c.set(e20, e21, e22)
+
+            scales = !a.isUnit || !b.isUnit || !c.isUnit
+        }
+        translates = !e03.isZero() || !e13.isZero() || !e23.isZero()
 
         transposeDirty = true
         inverseDirty = true
