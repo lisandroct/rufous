@@ -333,6 +333,13 @@ class MutableMatrix3(e00: Float, e01: Float, e02: Float, e10: Float, e11: Float,
      * @return This matrix for chaining.
      */
     fun rotate(angle: Float, aX: Float, aY: Float, aZ: Float) = rotate(angle, aX, aY, aZ, this)
+    /**
+     * Left multiplies this matrix with a matrix that represents the same rotation as [quaternion].
+     *
+     * @param[quaternion] The rotation quaternion.
+     * @return This matrix for chaining.
+     */
+    fun rotate(quaternion: Quaternion) = rotate(quaternion, this)
 
     /**
      * Left multiplies this matrix with a matrix that represents a reflection through a plane perpendicular to [axis].

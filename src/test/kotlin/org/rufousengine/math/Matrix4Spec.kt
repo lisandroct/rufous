@@ -844,6 +844,17 @@ object Matrix4Spec: Spek({
             }
         }
 
+        on("rotate (Quaternion)") {
+            val quaternion = getRandomQuaternion()
+            val rotated = matrix.rotate(quaternion, MutableMatrix4())
+            it("should be left multiplied by a rotation matrix") {
+                val rotation = MutableMatrix4().makeRotation(quaternion)
+                val expected = matrix.multiplyLeft(rotation, MutableMatrix4())
+
+                assert(rotated).isEqualTo(expected)
+            }
+        }
+
         on("reflectSafe") {
             val axis = getRandomVector3()
             val reflected = matrix.reflectSafe(axis, MutableMatrix4())
@@ -1708,6 +1719,17 @@ object Matrix4Spec: Spek({
             }
         }
 
+        on("rotate (Quaternion)") {
+            val original = matrix.copyImmutable()
+            val quaternion = getRandomQuaternion()
+            matrix.rotate(quaternion)
+            it("should rotate and assign") {
+                val expected = original.rotate(quaternion, MutableMatrix4())
+
+                assert(matrix).isEqualTo(expected)
+            }
+        }
+
         on("reflectSafe") {
             val original = matrix.copyImmutable()
             val axis = getRandomVector3()
@@ -1946,13 +1968,13 @@ object Matrix4Spec: Spek({
             }
         }
 
-        on("makeRotation") {
+        on("makeRotation (Quaternion)") {
             val quaternion = getRandomQuaternion()
             matrix.makeRotation(quaternion)
             it("should represent the same transformation as the quaternion") {
                 val vector = getRandomVector3()
                 val rotated = vector.multiplyLeft(matrix, MutableVector3())
-                val expected = vector.transform(quaternion, MutableVector3())
+                val expected = vector.transform(quaternion.normalize(MutableQuaternion()), MutableVector3())
 
                 assert(rotated).isEqualTo(expected)
             }

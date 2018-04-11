@@ -481,6 +481,16 @@ object TransformationSpec: Spek({
             }
         }
 
+        on("rotate (Quaternion)") {
+            val quaternion = getRandomQuaternion()
+            val rotated = matrix.rotate(quaternion,  MutableTransformation())
+            it("should be the same as Matrix4::rotate") {
+                val expected = Matrix4(matrix).rotate(quaternion, MutableMatrix4())
+
+                assert(rotated).isEqualTo(expected)
+            }
+        }
+
         on("scale (uniform)") {
             val factor = getRandomValue()
             val scaled = matrix.scale(factor, MutableTransformation())
@@ -751,6 +761,17 @@ object TransformationSpec: Spek({
             }
         }
 
+        on("rotate (Quaternion)") {
+            val original = matrix.copyImmutable()
+            val quaternion = getRandomQuaternion()
+            matrix.rotate(quaternion)
+            it("should rotate and assign") {
+                val expected = original.rotate(quaternion, MutableTransformation())
+
+                assert(matrix).isEqualTo(expected)
+            }
+        }
+
         on("scale (uniform)") {
             val original = matrix.copyImmutable()
             val factor = getRandomValue()
@@ -859,7 +880,7 @@ object TransformationSpec: Spek({
             }
         }
 
-        on("makeRotation") {
+        on("makeRotation (Quaternion)") {
             val quaternion = getRandomQuaternion()
             matrix.makeRotation(quaternion)
             it("should give the same results as Matrix4::makeRotation") {

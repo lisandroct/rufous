@@ -197,6 +197,13 @@ class MutableTransformation : Transformation {
      * @return This matrix for chaining.
      */
     fun rotate(angle: Float, aX: Float, aY: Float, aZ: Float) = rotate(angle, aX, aY, aZ, this)
+    /**
+     * Left multiplies this matrix with a matrix that represents the same rotation as [quaternion].
+     *
+     * @param[quaternion] The rotation quaternion.
+     * @return This matrix for chaining.
+     */
+    fun rotate(quaternion: Quaternion) = rotate(quaternion, this)
 
     /**
      * Left multiplies this matrix with a matrix that represents a uniform scale by [factor].

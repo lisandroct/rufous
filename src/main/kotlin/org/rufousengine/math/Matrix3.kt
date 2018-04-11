@@ -516,6 +516,68 @@ open class Matrix3(e00: Float, e01: Float, e02: Float, e10: Float, e11: Float, e
                 e20, e21, e22
         )
     }
+    /**
+     * Left multiplies this matrix with a matrix that represents the same rotation as [quaternion].
+     *
+     * @param[quaternion] The rotation quaternion.
+     * @param[out] The output matrix.
+     * @return The output matrix for chaining.
+     */
+    fun rotate(quaternion: Quaternion, out: MutableMatrix3) : MutableMatrix3 {
+        if(isIdentity) {
+            return quaternion.getMatrixRepresentation(out)
+        }
+
+        if(quaternion.isIdentity) {
+            return out.set(this)
+        }
+
+        val invMagnitude = 1 / quaternion.magnitude
+        val x = quaternion.x * invMagnitude
+        val y = quaternion.y * invMagnitude
+        val z = quaternion.z * invMagnitude
+        val w = quaternion.w * invMagnitude
+
+        val x2 = x * x
+        val y2 = y * y
+        val z2 = z * z
+        val xy = x * y
+        val xz = x * z
+        val yz = y * z
+        val wx = w * x
+        val wy = w * y
+        val wz = w * z
+
+        val r00 = 1f - 2f * (y2 + z2)
+        val r01 = 2f * (xy - wz)
+        val r02 = 2f * (xz + wy)
+
+        val r10 = 2f * (xy + wz)
+        val r11 = 1f - 2f * (x2 + z2)
+        val r12 = 2f * (yz - wx)
+
+        val r20 = 2f * (xz - wy)
+        val r21 = 2f * (yz + wx)
+        val r22 = 1f - 2f * (x2 + y2)
+
+        val e00 = r00 * this.e00 + r01 * this.e10 + r02 * this.e20
+        val e01 = r00 * this.e01 + r01 * this.e11 + r02 * this.e21
+        val e02 = r00 * this.e02 + r01 * this.e12 + r02 * this.e22
+
+        val e10 = r10 * this.e00 + r11 * this.e10 + r12 * this.e20
+        val e11 = r10 * this.e01 + r11 * this.e11 + r12 * this.e21
+        val e12 = r10 * this.e02 + r11 * this.e12 + r12 * this.e22
+
+        val e20 = r20 * this.e00 + r21 * this.e10 + r22 * this.e20
+        val e21 = r20 * this.e01 + r21 * this.e11 + r22 * this.e21
+        val e22 = r20 * this.e02 + r21 * this.e12 + r22 * this.e22
+
+        return out.set(
+                e00, e01, e02,
+                e10, e11, e12,
+                e20, e21, e22
+        )
+    }
 
     /**
      * Left multiplies this matrix with a matrix that represents a reflection through a plane perpendicular to [axis].
