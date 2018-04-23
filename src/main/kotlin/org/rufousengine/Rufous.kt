@@ -4,10 +4,10 @@ import org.lwjgl.glfw.GLFW.*
 import org.lwjgl.opengl.GL.createCapabilities
 import org.lwjgl.opengl.GL11.*
 import org.lwjgl.opengl.GL13.GL_MULTISAMPLE
-import org.lwjgl.system.MemoryUtil
+import org.rufousengine.context.Window
 
-class Rufous {
-    private val window: Long
+class Rufous(width: Int, height: Int) {
+    private val window: Window
 
     init {
         glfwInit()
@@ -18,21 +18,18 @@ class Rufous {
         glfwWindowHint(GLFW_SAMPLES, 4)
 
         // For Mac
-        //glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+        //glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE)
 
-        window = glfwCreateWindow(1280, 720, "Rufous Application", MemoryUtil.NULL, MemoryUtil.NULL)
-        if (window == MemoryUtil.NULL) {
-            throw Exception("Failed to create GLFW window")
-        }
+        window = Window(width, height, "Rufous Application")
 
         // Make the OpenGL context current
-        glfwMakeContextCurrent(window)
+        glfwMakeContextCurrent(window.id)
         // Enable v-sync
         glfwSwapInterval(1)
 
         createCapabilities()
 
-        glViewport(0, 0, 1280, 720)
+        glViewport(0, 0, width, height)
 
         run()
     }
@@ -55,23 +52,18 @@ class Rufous {
     }
 
     private fun mainLoop() {
-        while(!glfwWindowShouldClose(window)) {
-            // input
-            processInput(window)
+        while(!window.shouldClose) {
+            if(window.isKeyPressed(GLFW_KEY_ESCAPE)) {
+                window.shouldClose = true
+            }
 
             // check and call events and swap the buffers
-            glfwSwapBuffers(window)
+            glfwSwapBuffers(window.id)
             glfwPollEvents()
-        }
-    }
-
-    private fun processInput(window: Long) {
-        if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
-            glfwSetWindowShouldClose(window, true)
         }
     }
 }
 
 fun main(args: Array<String>) {
-    Rufous()
+    Rufous(1280, 720)
 }
