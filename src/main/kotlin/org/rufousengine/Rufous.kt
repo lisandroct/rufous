@@ -1,43 +1,27 @@
 package org.rufousengine
 
 import org.lwjgl.glfw.GLFW.*
-import org.lwjgl.opengl.GL.createCapabilities
 import org.lwjgl.opengl.GL11.*
-import org.lwjgl.opengl.GL13.GL_MULTISAMPLE
-import org.rufousengine.context.Window
+import org.rufousengine.lowlevel.graphics.Graphics
+import org.rufousengine.lowlevel.windowing.Window
+import org.rufousengine.lowlevel.windowing.*
 
 class Rufous(width: Int, height: Int) {
-    private val window: Window
+    private val window = Window(width, height, "Rufous Application")
 
     init {
-        glfwInit()
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4)
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2)
-        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE)
-        glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE)
-        glfwWindowHint(GLFW_SAMPLES, 4)
+        Context.setCurrent(window)
+        Context.enableVSync()
 
-        // For Mac
-        //glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE)
-
-        window = Window(width, height, "Rufous Application")
-
-        // Make the OpenGL context current
-        glfwMakeContextCurrent(window.id)
-        // Enable v-sync
-        glfwSwapInterval(1)
-
-        createCapabilities()
-
-        glViewport(0, 0, width, height)
+        Graphics.setViewport(0, 0, width, height)
 
         run()
     }
 
     private fun run() {
-        glEnable(GL_BLEND)
-        glEnable(GL_CULL_FACE)
-        glEnable(GL_MULTISAMPLE)
+        Graphics.enableBlend()
+        Graphics.enableFaceCulling()
+        Graphics.enableMultisample()
 
         glDepthFunc(GL_LESS)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
@@ -48,7 +32,7 @@ class Rufous(width: Int, height: Int) {
             println(e.message)
         }
 
-        glfwTerminate()
+        Context.terminate()
     }
 
     private fun mainLoop() {
@@ -58,7 +42,7 @@ class Rufous(width: Int, height: Int) {
             }
 
             // check and call events and swap the buffers
-            glfwSwapBuffers(window.id)
+            Context.swapBuffers(window)
             glfwPollEvents()
         }
     }
