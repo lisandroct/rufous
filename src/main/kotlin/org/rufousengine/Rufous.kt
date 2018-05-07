@@ -2,13 +2,15 @@ package org.rufousengine
 
 import org.lwjgl.glfw.GLFW.*
 import org.lwjgl.opengl.GL11.*
-import org.rufousengine.files.Files
 import org.rufousengine.graphics.Graphics
 import org.rufousengine.windowing.Window
 import org.rufousengine.windowing.*
 
-class Rufous(width: Int, height: Int) {
-    private val window = Window(width, height, "Rufous Application")
+class Rufous {
+    private val width = 1280
+    private val height = 720
+    private val applicationName = "Rufous Application"
+    private val window = Window(width, height, applicationName)
 
     init {
         Context.setCurrent(window)
@@ -50,5 +52,5 @@ class Rufous(width: Int, height: Int) {
 }
 
 fun main(args: Array<String>) {
-    Rufous(1280, 720)
+    Rufous()
 }

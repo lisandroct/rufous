@@ -4,10 +4,13 @@ import org.lwjgl.glfw.GLFW.*
 import org.lwjgl.system.MemoryUtil.NULL
 
 object Context {
+    private val glVersionMajor = 4
+    private val glVersionMinor = 2
+
     init {
         glfwInit()
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4)
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2)
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, glVersionMajor)
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, glVersionMinor)
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE)
 
         // For Mac
