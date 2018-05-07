@@ -1,4 +1,4 @@
-package org.rufousengine.lowlevel.windowing
+package org.rufousengine.windowing
 
 import org.lwjgl.glfw.GLFW.*
 import org.lwjgl.system.MemoryUtil.NULL

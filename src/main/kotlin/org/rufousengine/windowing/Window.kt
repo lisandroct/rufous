@@ -1,7 +1,6 @@
-package org.rufousengine.lowlevel.windowing
+package org.rufousengine.windowing
 
 import org.lwjgl.glfw.GLFW.*
-import org.lwjgl.system.MemoryUtil.NULL
 
 class Window(width: Int, height: Int, title: String, samples: Int = 4, resizable: Boolean = false) {
     val id = Context.createWindow(width, height, samples, resizable, title)

@@ -1,4 +1,4 @@
-package org.rufousengine.lowlevel.graphics
+package org.rufousengine.graphics
 
 import org.lwjgl.opengl.GL.createCapabilities
 import org.lwjgl.opengl.GL11.*

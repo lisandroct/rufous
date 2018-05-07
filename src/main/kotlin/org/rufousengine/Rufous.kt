@@ -2,9 +2,10 @@ package org.rufousengine
 
 import org.lwjgl.glfw.GLFW.*
 import org.lwjgl.opengl.GL11.*
-import org.rufousengine.lowlevel.graphics.Graphics
-import org.rufousengine.lowlevel.windowing.Window
-import org.rufousengine.lowlevel.windowing.*
+import org.rufousengine.files.Files
+import org.rufousengine.graphics.Graphics
+import org.rufousengine.windowing.Window
+import org.rufousengine.windowing.*
 
 class Rufous(width: Int, height: Int) {
     private val window = Window(width, height, "Rufous Application")
