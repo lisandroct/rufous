@@ -40,7 +40,7 @@ class File(fileName: String, fileType: FileType) {
         type = fileType
     }
 
-    fun createNew() {
+    fun new() {
         if(readonly) {
             throw IOException("File is readonly.")
         }

@@ -28,14 +28,4 @@ object Files {
     fun external(fileName: String): File {
         return File(fileName, FileType.External)
     }
-
-    /*
-    private fun readText(fileName: String): String {
-        return internal(fileName).readText()
-    }
-
-    private fun readBytes(fileName: String): ByteArray {
-        return internal(fileName).readBytes()
-    }
-    */
 }
