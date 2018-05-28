@@ -10,7 +10,7 @@ object ColorSpec: Spek({
     describe("immutable constructors") {
         on("empty") {
             val color = Color()
-            it("should be the transparent black color") {
+            it("should be the transparent black Color") {
                 assert(color).isEqualTo(Color.transparentBlack)
             }
         }
@@ -45,7 +45,7 @@ object ColorSpec: Spek({
     describe("mutable constructors") {
         on("empty") {
             val color = MutableColor { }
-            it("should be the transparent black color") {
+            it("should be the transparent black Color") {
                 assert(color).isEqualTo(Color.transparentBlack)
             }
             it("should have the observer set") {
@@ -134,7 +134,7 @@ object ColorSpec: Spek({
         }
     }
 
-    given("a color") {
+    given("a Color") {
         val color by memoized { getRandomColor() }
 
         on("copyImmutable") {
@@ -164,7 +164,7 @@ object ColorSpec: Spek({
         }
     }
 
-    given("a mutable color") {
+    given("a mutable Color") {
         var counter = 0
         val color by memoized { getRandomMutableColor { counter++ } }
 

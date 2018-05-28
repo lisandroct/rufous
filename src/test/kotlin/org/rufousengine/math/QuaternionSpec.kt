@@ -359,7 +359,7 @@ object QuaternionSpec: Spek({
         on("multiply") {
             val other = getRandomQuaternion()
             val multiply = quaternion.multiply(other, MutableQuaternion())
-            it("should satisfy the equation q1q2 = v1 x v2 + s1v2 + s2v1 + s1s2 - v1 · v2") {
+            it("should satisfy the equation q1q2 = v1 x p2 + s1v2 + s2v1 + s1s2 - v1 · p2") {
                 val va = quaternion.getVectorPart(MutableVector3())
                 val sa = quaternion.w
                 val vb = other.getVectorPart(MutableVector3())
@@ -377,7 +377,7 @@ object QuaternionSpec: Spek({
         on("multiplyLeft") {
             val other = getRandomQuaternion()
             val multiply = quaternion.multiplyLeft(other, MutableQuaternion())
-            it("should satisfy the equation q2q1 = v2 x v1 + s2v1 + s1v2 + s2s1 - v2 · v1") {
+            it("should satisfy the equation q2q1 = p2 x v1 + s2v1 + s1v2 + s2s1 - p2 · v1") {
                 val vb = other.getVectorPart(MutableVector3())
                 val sb = other.w
                 val va = quaternion.getVectorPart(MutableVector3())

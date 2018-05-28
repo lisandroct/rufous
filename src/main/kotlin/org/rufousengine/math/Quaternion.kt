@@ -12,338 +12,76 @@ import kotlin.math.sqrt
  * @property[w] The w component.
  * @constructor Creates a quaternion.
  */
-open class Quaternion(x: Float = 0f, y: Float = 0f, z: Float = 0f, w: Float = 1f) {
-    companion object {
-        val identity = Quaternion()
-        val zero = Quaternion(0f, 0f, 0f, 0f)
-    }
-
-    /** The components of this quaternion. Do not change its values directly unless you know what you're doing. */
+class Quaternion(x: Float = 0f, y: Float = 0f, z: Float = 0f, w: Float = 1f) {
     val components = floatArrayOf(x, y, z, w)
 
-    constructor(v: Vector3, s: Float) : this(v.x, v.y, v.z, s)
-    constructor(other: Quaternion) : this(other.components)
-    constructor(components: FloatArray) : this(components[0], components[1], components[2], components[3])
+    constructor(other: Quaternion) : this(other.x, other.y, other.z, other.w)
 
-    open val x: Float
+    inline var x: Float
         get() = components[0]
-    open val y: Float
+        set(value) { components[0] = value }
+    inline var y: Float
         get() = components[1]
-    open val z: Float
+        set(value) { components[1] = value }
+    inline var z: Float
         get() = components[2]
-    open val w: Float
+        set(value) { components[2] = value }
+    inline var w: Float
         get() = components[3]
+        set(value) { components[3] = value }
 
-    /** The conjugate of this quaternion. It creates a new lazy Quaternion instance. */
-    open val conjugate : Quaternion by lazy { conjugate(MutableQuaternion()) }
-    /** The inverse of this quaternion. It creates a new lazy Quaternion instance. */
-    open val inverse : Quaternion by lazy { inverse(MutableQuaternion()) }
+    operator fun component1() = get(0)
+    operator fun component2() = get(1)
+    operator fun component3() = get(2)
+    operator fun component4() = get(3)
 
-    val magnitude: Float
-        get() = sqrt(magnitudeSquared)
-    val magnitudeSquared: Float
-        get() = x * x + y * y + z * z + w * w
-
-    /** Whether this quaternion is a unit quaternion. */
-    val isUnit: Boolean
-        get() = magnitudeSquared.isOne()
-    /** Whether this quaternion is the identity quaternion. */
-    val isIdentity: Boolean
-        get() = equals(identity)
-    /** Whether this quaternion is the zero quaternion. */
-    val isZero: Boolean
-        get() = equals(zero)
-
-    operator fun get(index: Int) = components[index]
-
-    /**
-     * Creates an immutable copy of this quaternion.
-     *
-     * @return The new quaternion for chaining.
-     */
-    fun copyImmutable() = Quaternion(this)
-    /**
-     * Creates a mutable copy of this quaternion.
-     *
-     * @return The new quaternion for chaining.
-     */
-    fun copyMutable() = MutableQuaternion(this)
-
-    /**
-     * Normalizes this quaternion.
-     *
-     * @param[out] The output quaternion.
-     * @return The output quaternion for chaining.
-     */
-    fun normalize(out: MutableQuaternion) = scale(1 / magnitude, out)
-    /**
-     * Conjugates this quaternion (i.e., it negates the vector part).
-     *
-     * @param[out] The output quaternion.
-     * @return The output quaternion for chaining.
-     */
-    fun conjugate(out: MutableQuaternion) = out.set(-x, -y, -z, w)
-    /**
-     * Inverts this quaternion.
-     *
-     * @param[out] The output quaternion.
-     * @return The output quaternion for chaining.
-     */
-    fun inverse(out: MutableQuaternion) = conjugate(out).scale(1 / magnitudeSquared)
-
-    fun getVectorPart(out: MutableVector3) = out.set(x, y, z)
-
-    /**
-     * Returns a matrix that represents the same rotation as this quaternion.
-     *
-     * @param[out] The output matrix.
-     * @return The output matrix for chaining.
-     */
-    fun getMatrixRepresentation(out: MutableMatrix3) : MutableMatrix3 {
-        val invMagnitude = 1 / magnitude
-        val x = x * invMagnitude
-        val y = y * invMagnitude
-        val z = z * invMagnitude
-        val w = w * invMagnitude
-
-        val x2 = x * x
-        val y2 = y * y
-        val z2 = z * z
-        val xy = x * y
-        val xz = x * z
-        val yz = y * z
-        val wx = w * x
-        val wy = w * y
-        val wz = w * z
-
-        return out.set(
-                1f - 2f * (y2 + z2), 2f * (xy - wz), 2f * (xz + wy),
-                2f * (xy + wz), 1f - 2f * (x2 + z2), 2f * (yz - wx),
-                2f * (xz - wy), 2f * (yz + wx), 1f - 2f * (x2 + y2)
-        )
-    }
-    /**
-     * Returns a matrix that represents the same rotation as this quaternion.
-     *
-     * @param[out] The output matrix.
-     * @return The output matrix for chaining.
-     */
-    fun getMatrixRepresentation(out: MutableMatrix4) : MutableMatrix4 {
-        val invMagnitude = 1 / magnitude
-        val x = x * invMagnitude
-        val y = y * invMagnitude
-        val z = z * invMagnitude
-        val w = w * invMagnitude
-
-        val x2 = x * x
-        val y2 = y * y
-        val z2 = z * z
-        val xy = x * y
-        val xz = x * z
-        val yz = y * z
-        val wx = w * x
-        val wy = w * y
-        val wz = w * z
-
-        return out.set(
-                1f - 2f * (y2 + z2), 2f * (xy - wz), 2f * (xz + wy), 0f,
-                2f * (xy + wz), 1f - 2f * (x2 + z2), 2f * (yz - wx), 0f,
-                2f * (xz - wy), 2f * (yz + wx), 1f - 2f * (x2 + y2), 0f,
-                0f, 0f, 0f, 1f
-        )
-    }
-    /**
-     * Returns a matrix that represents the same rotation as this quaternion.
-     *
-     * @param[out] The output matrix.
-     * @return The output matrix for chaining.
-     */
-    fun getMatrixRepresentation(out: MutableTransformation) : MutableTransformation {
-        val invMagnitude = 1 / magnitude
-        val x = x * invMagnitude
-        val y = y * invMagnitude
-        val z = z * invMagnitude
-        val w = w * invMagnitude
-
-        val x2 = x * x
-        val y2 = y * y
-        val z2 = z * z
-        val xy = x * y
-        val xz = x * z
-        val yz = y * z
-        val wx = w * x
-        val wy = w * y
-        val wz = w * z
-
-        return out.set(
-                1f - 2f * (y2 + z2), 2f * (xy - wz), 2f * (xz + wy), 0f,
-                2f * (xy + wz), 1f - 2f * (x2 + z2), 2f * (yz - wx), 0f,
-                2f * (xz - wy), 2f * (yz + wx), 1f - 2f * (x2 + y2), 0f
-        )
+    operator fun get(index: Int) = when(index) {
+        0 -> x
+        1 -> y
+        2 -> z
+        3 -> w
+        else -> throw IllegalArgumentException("index must be in 0..3")
     }
 
-    /**
-     * Scales this quaternion (i.e., multiplies each component with [scalar]).
-     *
-     * @param[scalar] The scalar to multiply the quaternion with.
-     * @param[out] The output quaternion.
-     * @return The output quaternion for chaining.
-     */
-    fun scale(scalar: Float, out: MutableQuaternion) = out.set(x * scalar, y * scalar, z * scalar, w * scalar)
-
-    /**
-     * Adds [other] to this quaternion.
-     *
-     * @param[other] The other quaternion.
-     * @param[out] The output quaternion.
-     * @return The output quaternion for chaining.
-     */
-    fun add(other: Quaternion, out: MutableQuaternion) = add(other.x, other.y, other.z, other.w, out)
-    /**
-     * Adds ([x], [y], [z], [w]) to this quaternion.
-     *
-     * @param[out] The output quaternion.
-     * @return The output quaternion for chaining.
-     */
-    fun add(x: Float, y: Float, z: Float, w: Float, out: MutableQuaternion) = out.set(this.x + x, this.y + y, this.z + z, this.w + w)
-
-    /**
-     * Subtracts [other] from this quaternion.
-     *
-     * @param[other] The other quaternion.
-     * @param[out] The output quaternion.
-     * @return The output quaternion for chaining.
-     */
-    fun subtract(other: Quaternion, out: MutableQuaternion) = subtract(other.x, other.y, other.z, other.w, out)
-    /**
-     * Subtracts ([x], [y], [z], [w]) from this quaternion.
-     *
-     * @param[out] The output quaternion.
-     * @return The output quaternion for chaining.
-     */
-    fun subtract(x: Float, y: Float, z: Float, w: Float, out: MutableQuaternion) = out.set(this.x - x, this.y - y, this.z - z, this.w - w)
-
-    /**
-     * Multiplies this quaternion with [other].
-     *
-     * @param[other] The other quaternion.
-     * @param[out] The output quaternion.
-     * @return The output quaternion for chaining.
-     */
-    fun multiply(other: Quaternion, out: MutableQuaternion) = multiply(other.x, other.y, other.z, other.w, out)
-    /**
-     * Multiplies this quaternion with ([x], [y], [z], [w]).
-     *
-     * @param[out] The output quaternion.
-     * @return The output quaternion for chaining.
-     */
-    fun multiply(x: Float, y: Float, z: Float, w: Float, out: MutableQuaternion) = out.set(
-            this.w * x + this.x * w + this.y * z - this.z * y,
-            this.w * y - this.x * z + this.y * w + this.z * x,
-            this.w * z + this.x * y - this.y * x + this.z * w,
-            this.w * w - this.x * x - this.y * y - this.z * z
-    )
-    /**
-     * Multiplies [other] with this quaternion.
-     *
-     * @param[other] The other quaternion.
-     * @param[out] The output quaternion.
-     * @return The output quaternion for chaining.
-     */
-    fun multiplyLeft(other: Quaternion, out: MutableQuaternion) = multiplyLeft(other.x, other.y, other.z, other.w, out)
-    /**
-     * Multiplies ([x], [y], [z], [w]) with this quaternion.
-     *
-     * @param[out] The output quaternion.
-     * @return The output quaternion for chaining.
-     */
-    fun multiplyLeft(x: Float, y: Float, z: Float, w: Float, out: MutableQuaternion) = out.set(
-            w * this.x + x * this.w + y * this.z - z * this.y,
-            w * this.y - x * this.z + y * this.w + z * this.x,
-            w * this.z + x * this.y - y * this.x + z * this.w,
-            w * this.w - x * this.x - y * this.y - z * this.z
-    )
-
-    /**
-     * Rotates [vector] using this quaternion.
-     *
-     * If this quaternion is known to be a unit quaternion, [transform] is a cheaper alternative.
-     *
-     * @param[vector] The vector to transform.
-     * @param[out] The output vector.
-     * @return The output vector for chaining.
-     */
-    fun transformSafe(vector: Vector3, out: MutableVector3) = transformSafe(vector.x, vector.y, vector.z, out)
-    /**
-     * Rotates ([x], [y], [z]) using this quaternion.
-     *
-     * If this quaternion is known to be a unit quaternion, [transform] is a cheaper alternative.
-     *
-     * @param[out] The output vector.
-     * @return The output vector for chaining.
-     */
-    fun transformSafe(x: Float, y: Float, z: Float, out: MutableVector3) : MutableVector3 {
-        transform(x, y, z, out)
-
-        return out.scale(1 / magnitudeSquared)
+    operator fun set(index: Int, value: Float) = when(index) {
+        0 -> x = value
+        1 -> y = value
+        2 -> z = value
+        3 -> w = value
+        else -> throw IllegalArgumentException("index must be in 0..3")
     }
 
-    /**
-     * Rotates [vector] using this quaternion.
-     *
-     * This quaternion must be unit.
-     *
-     * @param[vector] The vector to transform.
-     * @param[out] The output vector.
-     * @return The output vector for chaining.
-     */
-    fun transform(vector: Vector3, out: MutableVector3) = transform(vector.x, vector.y, vector.z, out)
-    /**
-     * Rotates ([x], [y], [z]) using this quaternion.
-     *
-     * This quaternion must be unit.
-     *
-     * @param[out] The output vector.
-     * @return The output vector for chaining.
-     */
-    fun transform(x: Float, y: Float, z: Float, out: MutableVector3) : MutableVector3 {
-        val a = Cached.a
-        val b = Cached.b
+    fun set(other: Quaternion) = set(other.x, other.y, other.z, other.w)
+    fun set(x: Float = this.x, y: Float = this.y, z: Float = this.z, w: Float = this.w): Quaternion {
+        this.x = x
+        this.y = y
+        this.z = z
+        this.w = w
 
-        getVectorPart(a)
-        a.cross(x, y, z, b)
-
-        val s0 = w * w - a.magnitudeSquared
-        val s1 = a.dot(x, y, z) * 2f
-        val s2 = w * 2f
-
-        a.scale(s1)
-        b.scale(s2)
-
-        return out.set(x, y, z).scale(s0).add(a).add(b)
+        return this
     }
 
-    fun equals(other: Quaternion) = equals(other.x, other.y, other.z, other.w)
-    fun equals(x: Float, y: Float, z: Float, w: Float) = this.x isCloseTo x && this.y isCloseTo y && this.z isCloseTo z && this.w isCloseTo w
+    fun copy() = Quaternion(this)
 
-    override fun toString() = "($x, $y, $z, $w)"
+    override fun toString() = components.joinToString(prefix = "(", postfix = ")")
 
     override fun equals(other: Any?): Boolean {
         if(this === other) {
             return true
         }
 
-        if(other !is Quaternion) {
+        if(other !is Vector) {
             return false
         }
 
-        return equals(other)
+        for(i in 0..3) {
+            if(this[i] isNotCloseTo other[i]) {
+                return false
+            }
+        }
+
+        return true
     }
 
     override fun hashCode() = Arrays.hashCode(components)
-
-    private object Cached {
-        val a by lazy { MutableVector3() }
-        val b by lazy { MutableVector3() }
-    }
 }

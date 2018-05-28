@@ -2,256 +2,33 @@ package org.rufousengine.math
 
 import java.util.*
 import kotlin.math.max
-import kotlin.math.min
-import kotlin.math.sqrt
-import kotlin.math.floor
-import kotlin.math.ceil
-import kotlin.math.abs
 
 /**
- * An immutable point in space.
+ * An abstract point.
  *
- * The purpose of the Point classes is to represent positions. To represent directions, use [Vector2], [Vector3] or [Vector4] instead.
+ * The purpose of the [Point] classes is to represent positions. To represent directions, use [Vector] instead.
  *
- * @property[x] The x component.
- * @property[y] The y component.
- * @property[z] The z component.
- * @constructor Creates a point in (x, y, z).
+ * @property[components] The components.
+ * @constructor Creates a point at ([components].[0], [components].[1], ..., [components].[size - 1]).
  */
-open class Point(x: Float = 0f, y: Float = 0f, z: Float = 0f) {
-    companion object {
-        /** Point(0, 0, 0) */
-        val origin = Point()
+sealed class Point(val components: FloatArray) {
+    abstract val dimensions: Int
+
+    operator fun component1() = get(0)
+    operator fun component2() = get(1)
+    operator fun component3() = get(2)
+
+    operator fun get(index: Int) = when {
+        index < 0 -> throw IllegalArgumentException("index must be positive")
+        index >= dimensions -> 0f
+        else -> components[index]
     }
 
-    /** The components of this point. Do not change its values directly unless you know what you're doing. */
-    val components = floatArrayOf(x, y, z)
+    operator fun set(index: Int, value: Float) = if(index >= 0 || index < dimensions)
+        components[index] = value
+    else throw IllegalArgumentException("index must be in 0..${ dimensions - 1}")
 
-    constructor(other: Point) : this(other.components)
-    constructor(vector: Vector2) : this(vector.x, vector.y, 0f)
-    constructor(vector: Vector3) : this(vector.components)
-    constructor(vector: Vector4) : this(vector.x / vector.w, vector.y / vector.w, vector.z / vector.w)
-    constructor(components: FloatArray) : this(components[0], components[1], components[2])
-
-    open val x: Float
-        get() = components[0]
-    open val y: Float
-        get() = components[1]
-    open val z: Float
-        get() = components[2]
-
-    /** Whether this point is the origin point. */
-    val isOrigin: Boolean
-        get() = equals(origin)
-
-    operator fun get(index: Int) = components[index]
-
-    /**
-     * Creates an immutable copy of this point.
-     *
-     * @return The new point for chaining.
-     */
-    fun copyImmutable() = Point(this)
-    /**
-     * Creates a mutable copy of this point.
-     *
-     * @return The new point for chaining.
-     */
-    fun copyMutable() = MutablePoint(this)
-
-    /**
-     * Rounds each component to the largest Float value that is smaller than the given value and is a mathematical integer.
-     *
-     * @param[out] The output point.
-     * @return The output point for chaining.
-     */
-    fun floor(out: MutablePoint) = out.set(floor(x), floor(y), floor(z))
-    /**
-     * Rounds each component to the smallest Float value that is larger than the given value and is a mathematical integer.
-     *
-     * @param[out] The output point.
-     * @return The output point for chaining.
-     */
-    fun ceil(out: MutablePoint) = out.set(ceil(x), ceil(y), ceil(z))
-    /**
-     * Applies the absolute value to each component.
-     *
-     * @param[out] The output point.
-     * @return The output point for chaining.
-     */
-    fun abs(out: MutablePoint) = out.set(abs(x), abs(y), abs(z))
-    /**
-     * Scales this point (i.e., multiplies each component with [scalar]).
-     *
-     * @param[scalar] The scalar to multiply the point with.
-     * @param[out] The output point.
-     * @return The output point for chaining.
-     */
-    fun scale(scalar: Float, out: MutablePoint) = out.set(x * scalar, y * scalar, z * scalar)
-
-    /** Returns the distance between this point and [other]. */
-    fun distance(other: Point) = distance(other.x, other.y, other.z)
-    /** Returns the distance between this point and ([x], [y], [z]). */
-    fun distance(x: Float, y: Float, z: Float) = sqrt(distanceSquared(x, y, z))
-    /** Returns the squared distance between this point and [other]. */
-    fun distanceSquared(other: Point) = distanceSquared(other.x, other.y, other.z)
-    /** Returns the squared distance between this point and ([x], [y], [z]). */
-    fun distanceSquared(x: Float, y: Float, z: Float) : Float {
-        val x = this.x - x
-        val y = this.y - y
-        val z = this.z - z
-
-        return x * x + y * y + z * z
-    }
-
-    /**
-     * Adds [other] to this point.
-     *
-     * @param[other] The other point.
-     * @param[out] The output point.
-     * @return The output point for chaining.
-     */
-    fun add(other: Point, out: MutablePoint) = add(other.x, other.y, other.z, out)
-    /**
-     * Moves this point towards the direction of [vector].
-     *
-     * @param[vector] The direction vector.
-     * @param[out] The output point.
-     * @return The output point for chaining.
-     */
-    fun add(vector: Vector3, out: MutablePoint) = add(vector.x, vector.y, vector.z, out)
-    /**
-     * Adds ([x], [y], [z]) to this point.
-     *
-     * @param[out] The output point.
-     * @return The output point for chaining.
-     */
-    fun add(x: Float, y: Float, z: Float, out: MutablePoint) = out.set(this.x + x, this.y + y, this.z + z)
-
-    /**
-     * Subtracts [other] from this point.
-     *
-     * @param[other] The other point.
-     * @param[out] The output point.
-     * @return The output point for chaining.
-     */
-    fun subtract(other: Point, out: MutablePoint) = subtract(other.x, other.y, other.z, out)
-    /**
-     * Moves this point towards the direction of -[vector].
-     *
-     * @param[vector] The direction vector.
-     * @param[out] The output point.
-     * @return The output point for chaining.
-     */
-    fun subtract(vector: Vector3, out: MutablePoint) = subtract(vector.x, vector.y, vector.z, out)
-    /**
-     * Subtracts ([x], [y], [z]) from this point.
-     *
-     * @param[out] The output point.
-     * @return The output point for chaining.
-     */
-    fun subtract(x: Float, y: Float, z: Float, out: MutablePoint) = out.set(this.x - x, this.y - y, this.z - z)
-
-    /**
-     * Returns the direction vector pointing from [other] towards this point.
-     *
-     * @param[other] The other point.
-     * @param[out] The output vector.
-     * @return The output vector for chaining.
-     */
-    fun subtract(other: Point, out: MutableVector3) = subtract(other.x, other.y, other.z, out)
-    /**
-     * Returns the direction vector pointing from ([x], [y], [z]) towards this point.
-     *
-     * @param[out] The output vector.
-     * @return The output vector for chaining.
-     */
-    fun subtract(x: Float, y: Float, z: Float, out: MutableVector3) = out.set(this.x - x, this.y - y, this.z - z)
-
-    /**
-     * Linearly interpolates between this point to [other] on [progress] position.
-     *
-     * @param[other] The other point.
-     * @param[progress] The interpolation progress. If it is in between 0 and 1, the resulting point will be in between this point and [other].
-     * @param[out] The output point.
-     * @return The output point for chaining.
-     */
-    fun lerp(other: Point, progress: Float, out: MutablePoint) = lerp(other.x, other.y, other.z, progress, out)
-    /**
-     * Linearly interpolates between this point to ([x], [y], [z]) on [progress] position.
-     *
-     * @param[progress] The interpolation progress. If it is in between 0 and 1, the resulting point will be in between this point and ([x], [y], [z]).
-     * @param[out] The output point.
-     * @return The output point for chaining.
-     */
-    fun lerp(x: Float, y: Float, z: Float, progress: Float, out: MutablePoint) = out.set(lerp(this.x, x, progress), lerp(this.y, y, progress), lerp(this.z, z, progress))
-
-    /**
-     * Returns the point composed of the smallest components between this point and [other].
-     *
-     * @param[other] The other point.
-     * @param[out] The output point.
-     * @return The output point for chaining.
-     */
-    fun min(other: Point, out: MutablePoint) = min(other.x, other.y, other.z, out)
-    /**
-     * Returns the point composed of the smallest components between this point and ([x], [y], [z]).
-     *
-     * @param[out] The output point.
-     * @return The output point for chaining.
-     */
-    fun min(x: Float, y: Float, z: Float, out: MutablePoint) = out.set(min(this.x, x), min(this.y, y), min(this.z, z))
-    /**
-     * Returns the point composed of the largest components between this point and [other].
-     *
-     * @param[other] The other point.
-     * @param[out] The output point.
-     * @return The output point for chaining.
-     */
-    fun max(other: Point, out: MutablePoint) = max(other.x, other.y, other.z, out)
-    /**
-     * Returns the point composed of the largest components between this point and ([x], [y], [z]).
-     *
-     * @param[out] The output point.
-     * @return The output point for chaining.
-     */
-    fun max(x: Float, y: Float, z: Float, out: MutablePoint) = out.set(max(this.x, x), max(this.y, y), max(this.z, z))
-
-    /**
-     * Multiplies [matrix] with this point.
-     *
-     * Wrapper to [Projection.multiply].
-     *
-     * @param[matrix] The matrix.
-     * @param[out] The output point.
-     * @return The output point for chaining.
-     */
-    fun multiplyLeft(matrix: Projection, out: MutablePoint) = matrix.multiply(this, out)
-    /**
-     * Multiplies [matrix] with this point.
-     *
-     * Wrapper to [Transformation.multiply].
-     *
-     * @param[matrix] The matrix.
-     * @param[out] The output point.
-     * @return The output point for chaining.
-     */
-    fun multiplyLeft(matrix: Transformation, out: MutablePoint) = matrix.multiply(this, out)
-    /**
-     * Multiplies [matrix] with this point.
-     *
-     * Wrapper to [Matrix4.multiply].
-     *
-     * @param[matrix] The matrix.
-     * @param[out] The output point.
-     * @return The output point for chaining.
-     */
-    fun multiplyLeft(matrix: Matrix4, out: MutablePoint) = matrix.multiply(this, out)
-
-    fun equals(other: Point) = equals(other.x, other.y, other.z)
-    fun equals(x: Float, y: Float, z: Float) = this.x isCloseTo x && this.y isCloseTo y && this.z isCloseTo z
-
-    override fun toString() = "($x, $y, $z)"
+    override fun toString() = components.joinToString(prefix = "(", postfix = ")")
 
     override fun equals(other: Any?): Boolean {
         if(this === other) {
@@ -262,8 +39,88 @@ open class Point(x: Float = 0f, y: Float = 0f, z: Float = 0f) {
             return false
         }
 
-        return equals(other)
+        val dimensions = max(dimensions, other.dimensions)
+
+        for(i in 0 until dimensions) {
+            if(this[i] isNotCloseTo other[i]) {
+                return false
+            }
+        }
+
+        return true
     }
 
     override fun hashCode() = Arrays.hashCode(components)
+}
+
+/**
+ * A 2D point.
+ *
+ * The purpose of the [Point] classes is to represent positions. To represent directions, use [Vector] instead.
+ *
+ * @property[x] The x component.
+ * @property[y] The y component.
+ * @constructor Creates a point at ([x], [y]).
+ */
+class Point2D(x: Float = 0f, y: Float = 0f): Point(floatArrayOf(x, y)) {
+    override val dimensions = 2
+
+    constructor(other: Point2D) : this(other.x, other.y)
+
+    inline var x: Float
+        get() = components[0]
+        set(value) { components[0] = value }
+    inline var y: Float
+        get() = components[1]
+        set(value) { components[1] = value }
+    inline val z: Float
+        get() = 0f
+
+    fun set(other: Point2D) = set(other.x, other.y)
+    fun set(x: Float = this.x, y: Float = this.y): Point2D {
+        this.x = x
+        this.y = y
+
+        return this
+    }
+
+    fun copy() = Point2D(this)
+}
+
+/**
+ * A 3D point.
+ *
+ * The purpose of the [Point] classes is to represent positions. To represent directions, use [Vector] instead.
+ *
+ * @property[x] The x component.
+ * @property[y] The y component.
+ * @property[z] The y component.
+ * @constructor Creates a point at ([x], [y], [z]).
+ */
+class Point3D(x: Float = 0f, y: Float = 0f, z: Float = 0f): Point(floatArrayOf(x, y, z)) {
+    override val dimensions = 3
+
+    constructor(other: Point2D) : this(other.x, other.y, 0f)
+    constructor(other: Point3D) : this(other.x, other.y, other.z)
+
+    inline var x: Float
+        get() = components[0]
+        set(value) { components[0] = value }
+    inline var y: Float
+        get() = components[1]
+        set(value) { components[1] = value }
+    inline var z: Float
+        get() = components[2]
+        set(value) { components[2] = value }
+
+    fun set(other: Point3D) = set(other.x, other.y, other.z)
+    fun set(x: Float = this.x, y: Float = this.y, z: Float = this.z): Point3D {
+        this.x = x
+        this.y = y
+        this.z = z
+
+        return this
+    }
+
+    fun copy() = Point3D(this)
 }

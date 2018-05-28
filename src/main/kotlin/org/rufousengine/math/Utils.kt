@@ -94,6 +94,9 @@ fun Float.isOne(maxDifference: Float = TOLERANCE, maxUlpsDistance: Int = ULPS_TO
 infix fun Float.isCloseTo(other: Float) = this.isCloseTo(other, TOLERANCE, ULPS_TOLERANCE)
 fun Float.isCloseTo(other: Float, maxDifference: Float = TOLERANCE, maxUlpsDistance: Int = ULPS_TOLERANCE) = close(this, other, maxDifference, maxUlpsDistance)
 
+infix fun Float.isNotCloseTo(other: Float) = !isCloseTo(other)
+fun Float.isNotCloseTo(other: Float, maxDifference: Float = TOLERANCE, maxUlpsDistance: Int = ULPS_TOLERANCE) = !isCloseTo(other, maxDifference, maxUlpsDistance)
+
 fun close(a: Float, b: Float, tolerance: Float = TOLERANCE, ulpsTolerance: Int = ULPS_TOLERANCE) : Boolean {
     val absDifference = abs(a - b)
     if(absDifference <= tolerance) {
@@ -237,6 +240,9 @@ fun randomTriangular(min: Float, max: Float, mode: Float): Float {
 // ---
 
 /** Linearly interpolates between [fromValue] to [toValue] on [progress] position. */
+fun lerp(fromValue: Int, toValue: Int, progress: Int) = fromValue + (toValue - fromValue) * progress
+/** Linearly interpolates between [fromValue] to [toValue] on [progress] position. */
 fun lerp(fromValue: Float, toValue: Float, progress: Float) = fromValue + (toValue - fromValue) * progress
 
+fun clamp(value: Int, a: Int, b: Int) = max(min(value, b), a)
 fun clamp(value: Float, a: Float, b: Float) = max(min(value, b), a)

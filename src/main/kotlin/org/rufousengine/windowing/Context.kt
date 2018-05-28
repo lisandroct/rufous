@@ -17,9 +17,7 @@ object Context {
         //glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE)
     }
 
-    fun terminate() {
-        glfwTerminate()
-    }
+    fun terminate() = glfwTerminate()
 
     fun createWindow(width: Int, height: Int, samples: Int, resizable: Boolean, title: String) : Long {
         glfwWindowHint(GLFW_SAMPLES, samples)
@@ -34,23 +32,13 @@ object Context {
         return id
     }
 
-    fun windowShouldClose(window: Window) : Boolean {
-        return glfwWindowShouldClose(window.id)
-    }
+    fun windowShouldClose(window: Window) = glfwWindowShouldClose(window.id)
 
-    fun windowSetShouldClose(window: Window, value: Boolean) {
-        glfwSetWindowShouldClose(window.id, value)
-    }
+    fun windowSetShouldClose(window: Window, value: Boolean) = glfwSetWindowShouldClose(window.id, value)
 
-    fun setCurrent(window: Window) {
-        glfwMakeContextCurrent(window.id)
-    }
+    fun setCurrent(window: Window) = glfwMakeContextCurrent(window.id)
 
-    fun enableVSync() {
-        glfwSwapInterval(1)
-    }
+    fun enableVSync() = glfwSwapInterval(1)
 
-    fun swapBuffers(window: Window) {
-        glfwSwapBuffers(window.id)
-    }
+    fun swapBuffers(window: Window) = glfwSwapBuffers(window.id)
 }
