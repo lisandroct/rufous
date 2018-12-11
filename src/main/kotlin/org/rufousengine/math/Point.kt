@@ -19,14 +19,14 @@ sealed class Point(val components: FloatArray) {
     operator fun component3() = get(2)
 
     operator fun get(index: Int) = when {
-        index < 0 -> throw IllegalArgumentException("index must be positive")
+        index < 0 || index >= 3 -> throw IllegalArgumentException("index must be in 0..2")
         index >= dimensions -> 0f
         else -> components[index]
     }
 
-    operator fun set(index: Int, value: Float) = if(index >= 0 || index < dimensions)
+    operator fun set(index: Int, value: Float) = if(index in 0..(dimensions - 1))
         components[index] = value
-    else throw IllegalArgumentException("index must be in 0..${ dimensions - 1}")
+    else throw IllegalArgumentException("index must be in 0..${ dimensions - 1 }")
 
     override fun toString() = components.joinToString(prefix = "(", postfix = ")")
 
@@ -66,6 +66,11 @@ class Point2D(x: Float = 0f, y: Float = 0f): Point(floatArrayOf(x, y)) {
     override val dimensions = 2
 
     constructor(other: Point2D) : this(other.x, other.y)
+    constructor(init: (Int) -> Float) : this() {
+        repeat(dimensions) { i ->
+            this[i] = init(i)
+        }
+    }
 
     inline var x: Float
         get() = components[0]
@@ -80,6 +85,13 @@ class Point2D(x: Float = 0f, y: Float = 0f): Point(floatArrayOf(x, y)) {
     fun set(x: Float = this.x, y: Float = this.y): Point2D {
         this.x = x
         this.y = y
+
+        return this
+    }
+    fun set(init: (Int) -> Float): Point2D {
+        repeat(dimensions) { i ->
+            this[i] = init(i)
+        }
 
         return this
     }
@@ -102,6 +114,11 @@ class Point3D(x: Float = 0f, y: Float = 0f, z: Float = 0f): Point(floatArrayOf(x
 
     constructor(other: Point2D) : this(other.x, other.y, 0f)
     constructor(other: Point3D) : this(other.x, other.y, other.z)
+    constructor(init: (Int) -> Float) : this() {
+        repeat(dimensions) { i ->
+            this[i] = init(i)
+        }
+    }
 
     inline var x: Float
         get() = components[0]
@@ -113,11 +130,19 @@ class Point3D(x: Float = 0f, y: Float = 0f, z: Float = 0f): Point(floatArrayOf(x
         get() = components[2]
         set(value) { components[2] = value }
 
+    fun set(other: Point2D) = set(other.x, other.y, 0f)
     fun set(other: Point3D) = set(other.x, other.y, other.z)
     fun set(x: Float = this.x, y: Float = this.y, z: Float = this.z): Point3D {
         this.x = x
         this.y = y
         this.z = z
+
+        return this
+    }
+    fun set(init: (Int) -> Float): Point3D {
+        repeat(dimensions) { i ->
+            this[i] = init(i)
+        }
 
         return this
     }

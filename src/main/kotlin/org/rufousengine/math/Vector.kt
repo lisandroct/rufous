@@ -12,7 +12,7 @@ import kotlin.math.*
  * @constructor Creates a vector pointing towards ([components].[0], [components].[1], ..., [components].[size - 1]).
  */
 sealed class Vector(val components: FloatArray) {
-    abstract val dimensions: Int
+    val dimensions = components.size
 
     operator fun component1() = get(0)
     operator fun component2() = get(1)
@@ -20,12 +20,12 @@ sealed class Vector(val components: FloatArray) {
     operator fun component4() = get(3)
 
     operator fun get(index: Int) = when {
-        index < 0 -> throw IllegalArgumentException("index must be positive")
+        index < 0 || index >= 4 -> throw IllegalArgumentException("index must be in 0..3")
         index >= dimensions -> 0f
         else -> components[index]
     }
 
-    operator fun set(index: Int, value: Float) = if(index >= 0 || index < dimensions)
+    operator fun set(index: Int, value: Float) = if(index in 0..(dimensions - 1))
         components[index] = value
     else throw IllegalArgumentException("index must be in 0..${ dimensions - 1 }")
 
@@ -64,9 +64,12 @@ sealed class Vector(val components: FloatArray) {
  * @constructor Creates a two-dimensional vector pointing towards ([x], [y]).
  */
 class Vector2(x: Float = 0f, y: Float = 0f): Vector(floatArrayOf(x, y)) {
-    override val dimensions = 2
-
     constructor(other: Vector2) : this(other.x, other.y)
+    constructor(init: (Int) -> Float) : this() {
+        repeat(dimensions) { i ->
+            this[i] = init(i)
+        }
+    }
 
     inline var x: Float
         get() = components[0]
@@ -86,6 +89,13 @@ class Vector2(x: Float = 0f, y: Float = 0f): Vector(floatArrayOf(x, y)) {
 
         return this
     }
+    fun set(init: (Int) -> Float): Vector2 {
+        repeat(dimensions) { i ->
+            this[i] = init(i)
+        }
+
+        return this
+    }
 
     fun copy() = Vector2(this)
 }
@@ -101,10 +111,13 @@ class Vector2(x: Float = 0f, y: Float = 0f): Vector(floatArrayOf(x, y)) {
  * @constructor Creates a three-dimensional vector pointing towards ([x], [y], [z]).
  */
 class Vector3(x: Float = 0f, y: Float = 0f, z: Float = 0f): Vector(floatArrayOf(x, y, z)) {
-    override val dimensions = 3
-
     constructor(other: Vector2) : this(other.x, other.y)
     constructor(other: Vector3) : this(other.x, other.y, other.z)
+    constructor(init: (Int) -> Float) : this() {
+        repeat(dimensions) { i ->
+            this[i] = init(i)
+        }
+    }
 
     inline var x: Float
         get() = components[0]
@@ -127,6 +140,13 @@ class Vector3(x: Float = 0f, y: Float = 0f, z: Float = 0f): Vector(floatArrayOf(
 
         return this
     }
+    fun set(init: (Int) -> Float): Vector3 {
+        repeat(dimensions) { i ->
+            this[i] = init(i)
+        }
+
+        return this
+    }
 
     fun copy() = Vector3(this)
 }
@@ -143,11 +163,14 @@ class Vector3(x: Float = 0f, y: Float = 0f, z: Float = 0f): Vector(floatArrayOf(
  * @constructor Creates a four-dimensional vector pointing towards ([x], [y], [z], [w]).
  */
 class Vector4(x: Float = 0f, y: Float = 0f, z: Float = 0f, w: Float = 0f): Vector(floatArrayOf(x, y, z, w)) {
-    override val dimensions = 4
-
     constructor(other: Vector2) : this(other.x, other.y)
     constructor(other: Vector3) : this(other.x, other.y, other.z)
     constructor(other: Vector4) : this(other.x, other.y, other.z, other.w)
+    constructor(init: (Int) -> Float) : this() {
+        repeat(dimensions) { i ->
+            this[i] = init(i)
+        }
+    }
 
     inline var x: Float
         get() = components[0]
@@ -170,6 +193,13 @@ class Vector4(x: Float = 0f, y: Float = 0f, z: Float = 0f, w: Float = 0f): Vecto
         this.y = y
         this.z = z
         this.w = w
+
+        return this
+    }
+    fun set(init: (Int) -> Float): Vector4 {
+        repeat(dimensions) { i ->
+            this[i] = init(i)
+        }
 
         return this
     }

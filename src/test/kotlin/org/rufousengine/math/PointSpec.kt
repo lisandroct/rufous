@@ -1,398 +1,999 @@
 package org.rufousengine.math
 
-import assertk.assert
-import assertk.assertions.*
-import org.jetbrains.spek.api.Spek
-import org.jetbrains.spek.api.dsl.describe
-import org.jetbrains.spek.api.dsl.given
-import org.jetbrains.spek.api.dsl.it
-import org.jetbrains.spek.api.dsl.on
-import org.rufousengine.assertions.isCloseTo
+import org.rufousengine.assertions.*
+import org.spekframework.spek2.Spek
+import org.spekframework.spek2.style.specification.describe
 import kotlin.math.*
 
-object PointSpec: Spek({
-    describe("constructors") {
-        on("empty") {
-            val point = Point3D()
-            it("should be the origin point") {
-                assert(point.isOrigin).isTrue()
+object PointsSpec: Spek({
+    setRandomSeed(5815762546420015104L)
+
+    repeat(100) {
+        val p = rPoint2D()
+        describe("Point2D: $p") {
+            val point by memoized { p.copy() }
+
+            for (i in -1..3) {
+                describe("Get $i index") {
+                    when {
+                        i < 0 || i >= 3 -> it("throws an IllegalArgumentException") {
+                            assert(IllegalArgumentException::class).isThrownBy { point[i] }
+                        }
+                        i >= point.dimensions -> it("returns 0") {
+                            assert(point[i]).isZero()
+                        }
+                        else -> it("returns the component value") {
+                            assert(point[i]).isEqualTo(point.components[i])
+                        }
+                    }
+                }
             }
-        }
-        on("primary") {
-            val x = getRandomValue()
-            val y = getRandomValue()
-            val z = getRandomValue()
-            val point = Point3D(x, y, z)
-            it("should have x set") {
-                assert(point.x).isCloseTo(x)
+
+            for (i in -1..3) {
+                describe("Set $i index") {
+                    val value = rScalar()
+                    when {
+                        i < 0 || i >= point.dimensions -> it("throws an IllegalArgumentException") {
+                            assert(IllegalArgumentException::class).isThrownBy { point[i] = value }
+                        }
+                        else -> it("changes the component value") {
+                            point[i] = value
+                            assert(point[i]).isEqualTo(value)
+                        }
+                    }
+                }
             }
-            it("should have y set") {
-                assert(point.y).isCloseTo(y)
+
+            describe("Negate") {
+                val result by memoized { negate(point) }
+
+                for (i in 0 until point.dimensions) {
+                    it("should negate the $i component") {
+                        assert(result[i]).isEqualTo(-point[i])
+                    }
+                }
             }
-            it("should have z set") {
-                assert(point.z).isCloseTo(z)
+
+            describe("Floor") {
+                val result by memoized { floor(point) }
+
+                for (i in 0 until point.dimensions) {
+                    it("should compute the floor of the $i component") {
+                        assert(result[i]).isEqualTo(floor(point[i]))
+                    }
+                }
             }
-        }
-        on("Point") {
-            val vector = getRandomPoint3D()
-            val point = Point3D(vector)
-            it("should have x set") {
-                assert(point.x).isCloseTo(vector.x)
+
+            describe("Ceil") {
+                val result by memoized { ceil(point) }
+
+                for (i in 0 until point.dimensions) {
+                    it("should compute the ceil of the $i component") {
+                        assert(result[i]).isEqualTo(ceil(point[i]))
+                    }
+                }
             }
-            it("should have y set") {
-                assert(point.y).isCloseTo(vector.y)
+
+            describe("Abs") {
+                val result by memoized { abs(point) }
+
+                for (i in 0 until point.dimensions) {
+                    it("should compute the absolute value of the $i component") {
+                        assert(result[i]).isEqualTo(abs(point[i]))
+                    }
+                }
             }
-            it("should have z set") {
-                assert(point.z).isCloseTo(vector.z)
+
+            describe("Scale") {
+                val scalar = rScalar()
+                val result by memoized { scale(point, scalar) }
+
+                for (i in 0 until point.dimensions) {
+                    it("should scale the $i component") {
+                        assert(result[i]).isEqualTo(point[i] * scalar)
+                    }
+                }
+            }
+
+            describe("Operators") {
+                describe("UnaryPlus") {
+                    val result by memoized { +point }
+
+                    it("should be equal to point") {
+                        assert(result).isEqualTo(point)
+                    }
+                }
+
+                describe("UnaryMinus") {
+                    val result by memoized { -point }
+
+                    it("should be equal to point negated") {
+                        assert(result).isEqualTo(negate(point))
+                    }
+                }
+
+                describe("Plus") {
+                    val vector = rVector2()
+                    val result by memoized { point + vector }
+
+                    it("should be equal to the added points") {
+                        assert(result).isEqualTo(add(point, vector))
+                    }
+                }
+
+                describe("Plus") {
+                    val vector = rVector3()
+                    val result by memoized { point + vector }
+
+                    it("should be equal to the added points") {
+                        assert(result).isEqualTo(add(point, vector))
+                    }
+                }
+
+                describe("Minus") {
+                    val vector = rVector2()
+                    val result by memoized { point - vector }
+
+                    it("should be equal to the subtracted points") {
+                        assert(result).isEqualTo(subtract(point, vector))
+                    }
+                }
+
+                describe("Minus") {
+                    val vector = rVector3()
+                    val result by memoized { point - vector }
+
+                    it("should be equal to the subtracted points") {
+                        assert(result).isEqualTo(subtract(point, vector))
+                    }
+                }
+
+                describe("Minus") {
+                    val other = rPoint2D()
+                    val result by memoized { point - other }
+
+                    it("should be equal to the subtracted points") {
+                        assert(result).isEqualTo(subtract(point, other))
+                    }
+                }
+
+                describe("Minus") {
+                    val other = rPoint3D()
+                    val result by memoized { point - other }
+
+                    it("should be equal to the subtracted points") {
+                        assert(result).isEqualTo(subtract(point, other))
+                    }
+                }
+
+                describe("Times") {
+                    val scalar = rScalar()
+                    val result by memoized { point * scalar }
+
+                    it("should be equal to the scaled point") {
+                        assert(result).isEqualTo(scale(point, scalar))
+                    }
+                }
+
+                describe("Div") {
+                    val scalar = rScalar()
+                    val result by memoized { point / scalar }
+
+                    it("should be equal to the scaled point") {
+                        assert(result).isEqualTo(scale(point, 1 / scalar))
+                    }
+                }
+
+                describe("PlusAssign") {
+                    val other = rVector2()
+
+                    it("should update point to be equal to the added points") {
+                        val expected = point + other
+
+                        point += other
+                        assert(point).isEqualTo(expected)
+                    }
+                }
+
+                describe("MinusAssign") {
+                    val other = rVector2()
+
+                    it("should update point to be equal to the subtracted points") {
+                        val expected = point - other
+
+                        point -= other
+                        assert(point).isEqualTo(expected)
+                    }
+                }
+
+                describe("TimesAssign") {
+                    val scalar = rScalar()
+
+                    it("should update point to be equal to the scaled point") {
+                        val expected = point * scalar
+
+                        point *= scalar
+                        assert(point).isEqualTo(expected)
+                    }
+                }
+
+                describe("DivAssign") {
+                    val scalar = rScalar()
+
+                    it("should update point to be equal to the scaled point") {
+                        val expected = point / scalar
+
+                        point /= scalar
+                        assert(point).isEqualTo(expected)
+                    }
+                }
+            }
+
+            describe("Extension functions") {
+                describe("Negate") {
+                    it("should update point to be equal to the negated point") {
+                        val expected = negate(point)
+
+                        point.negate()
+                        assert(point).isEqualTo(expected)
+                    }
+                }
+
+                describe("Floor") {
+                    it("should update point to be equal to the floor point") {
+                        val expected = floor(point)
+
+                        point.floor()
+                        assert(point).isEqualTo(expected)
+                    }
+                }
+
+                describe("Ceil") {
+                    it("should update point to be equal to the ceil point") {
+                        val expected = ceil(point)
+
+                        point.ceil()
+                        assert(point).isEqualTo(expected)
+                    }
+                }
+
+                describe("Abs") {
+                    it("should update point to be equal to the abs point") {
+                        val expected = abs(point)
+
+                        point.abs()
+                        assert(point).isEqualTo(expected)
+                    }
+                }
+
+                describe("Scale") {
+                    val scalar = rScalar()
+
+                    it("should update point to be equal to the scaled point") {
+                        val expected = scale(point, scalar)
+
+                        point.scale(scalar)
+                        assert(point).isEqualTo(expected)
+                    }
+                }
+
+                describe("Add") {
+                    val other = rVector2()
+
+                    it("should update point to be equal to the added points") {
+                        val expected = add(point, other)
+
+                        point.add(other)
+                        assert(point).isEqualTo(expected)
+                    }
+                }
+
+                describe("Subtract") {
+                    val other = rVector2()
+
+                    it("should update point to be equal to the subtracted points") {
+                        val expected = subtract(point, other)
+
+                        point.subtract(other)
+                        assert(point).isEqualTo(expected)
+                    }
+                }
+
+                describe("Lerp") {
+                    val progress = rScalar()
+                    val other = rPoint2D()
+
+                    it("should update point to be equal to the lerp between the two points") {
+                        val expected = lerp(point, other, progress)
+
+                        point.lerp(other, progress)
+                        assert(point).isEqualTo(expected)
+                    }
+                }
+
+                describe("Min") {
+                    val other = rPoint2D()
+
+                    it("should update point to be equal to the min between the two points") {
+                        val expected = min(point, other)
+
+                        point.min(other)
+                        assert(point).isEqualTo(expected)
+                    }
+                }
+
+                describe("Max") {
+                    val other = rPoint2D()
+
+                    it("should update point to be equal to the max between the two points") {
+                        val expected = max(point, other)
+
+                        point.max(other)
+                        assert(point).isEqualTo(expected)
+                    }
+                }
+
+                describe("MultiplyLeft") {
+                    val matrix = rMatrix4()
+
+                    it("should update point to be the result of the matrix multiplication") {
+                        val expected = multiply(matrix, point, Point2D())
+
+                        point.multiplyLeft(matrix)
+                        assert(point).isEqualTo(expected)
+                    }
+                }
             }
         }
     }
 
-    given("a point") {
-        val point by memoized { getRandomPoint3D() }
+    repeat(100) {
+        val p = rPoint2D()
+        val v = rVector2()
+        describe("Point2D: $p - Vector2: $v") {
+            val a by memoized { p.copy() }
+            val b by memoized { v.copy() }
+            val dimensions by memoized { max(p.dimensions, v.dimensions) }
 
-        describe("seters") {
-            on("x") {
-                val value = getRandomValue()
-                point.x = value
-                it("should have x set") {
-                    assert(point.x).isCloseTo(value)
+            describe("Add") {
+                val result by memoized { add(a, b) }
+
+                for(i in 0 until dimensions) {
+                    it("should add the $i components") {
+                        assert(result[i]).isEqualTo(a[i] + b[i])
+                    }
                 }
             }
 
-            on("y") {
-                val value = getRandomValue()
-                point.y = value
-                it("should have y set") {
-                    assert(point.y).isCloseTo(value)
-                }
-            }
+            describe("Subtract") {
+                val result by memoized { subtract(a, b) }
 
-            on("z") {
-                val value = getRandomValue()
-                point.z = value
-                it("should have z set") {
-                    assert(point.z).isCloseTo(value)
-                }
-            }
-
-            on("Point") {
-                val other = getRandomPoint3D()
-                point.set(other)
-                it("should have x set") {
-                    assert(point.x).isCloseTo(other.x)
-                }
-                it("should have y set") {
-                    assert(point.y).isCloseTo(other.y)
-                }
-                it("should have z set") {
-                    assert(point.z).isCloseTo(other.z)
-                }
-            }
-
-            on("set") {
-                val x = getRandomValue()
-                val y = getRandomValue()
-                val z = getRandomValue()
-                point.set(x, y, z)
-                it("should have x set") {
-                    assert(point.x).isCloseTo(x)
-                }
-                it("should have y set") {
-                    assert(point.y).isCloseTo(y)
-                }
-                it("should have z set") {
-                    assert(point.z).isCloseTo(z)
-                }
-            }
-
-            on("operator") {
-                val x = getRandomValue()
-                val y = getRandomValue()
-                val z = getRandomValue()
-                point[0] = x
-                point[1] = y
-                point[2] = z
-                it("should have x set") {
-                    assert(point.x).isCloseTo(x)
-                }
-                it("should have y set") {
-                    assert(point.y).isCloseTo(y)
-                }
-                it("should have z set") {
-                    assert(point.z).isCloseTo(z)
+                for(i in 0 until dimensions) {
+                    it("should subtract the $i components") {
+                        assert(result[i]).isEqualTo(a[i] - b[i])
+                    }
                 }
             }
         }
+    }
 
-        describe("operators") {
-            on("plus (Vector2)") {
-                val vector = getRandomVector2()
-                val new = point + vector
-                it("should add and create new one") {
-                    assert(new).isEqualTo(point.add(vector))
-                }
-            }
-            on("plus (Vector3)") {
-                val vector = getRandomVector3()
-                val new = point + vector
-                it("should add and create new one") {
-                    assert(new).isEqualTo(point.add(vector))
-                }
-            }
-            on("minus (Vector2)") {
-                val vector = getRandomVector2()
-                val new = point - vector
-                it("should subtract and create new one") {
-                    assert(new).isEqualTo(point.subtract(vector))
-                }
-            }
-            on("minus (Vector3)") {
-                val vector = getRandomVector3()
-                val new = point - vector
-                it("should subtract and create new one") {
-                    assert(new).isEqualTo(point.subtract(vector))
-                }
-            }
-            /*
-            on("minus (Point2D)") {
-                val other = getRandomPoint2D()
-                val new = point - other
-                it("should subtract and create new one") {
-                    assert(new).isEqualTo(point.subtract(other))
-                }
-            }
-            */
-            on("minus (Point3D)") {
-                val other = getRandomPoint3D()
-                val new = point - other
-                it("should subtract and create new one") {
-                    assert(new).isEqualTo(point.subtract(other, Vector3()))
-                }
-            }
-            on("times") {
-                val scalar = getRandomValue()
-                val new = point * scalar
-                it("should scale and assign") {
-                    assert(new).isEqualTo(point.scale(scalar))
-                }
-            }
-            on("divAssign") {
-                val scalar = getRandomValue()
-                val new = point / scalar
-                it("should scale and assign") {
-                    assert(new).isEqualTo(point.scale(1 / scalar))
+    repeat(100) {
+        val p = rPoint2D()
+        val v = rVector3()
+        describe("Point2D: $p - Vector2: $v") {
+            val a by memoized { p.copy() }
+            val b by memoized { v.copy() }
+            val dimensions by memoized { max(p.dimensions, v.dimensions) }
+
+            describe("Add") {
+                val result by memoized { add(a, b) }
+
+                for(i in 0 until dimensions) {
+                    it("should add the $i components") {
+                        assert(result[i]).isEqualTo(a[i] + b[i])
+                    }
                 }
             }
 
-            on("plusAssign (Vector2)") {
-                val original = point.copy()
-                val vector = getRandomVector2()
-                point += vector
-                it("should add and assign") {
-                    assert(point).isEqualTo(original.add(vector))
-                }
-            }
-            on("plusAssign (Vector3)") {
-                val original = point.copy()
-                val vector = getRandomVector3()
-                point += vector
-                it("should add and assign") {
-                    assert(point).isEqualTo(original.add(vector))
-                }
-            }
-            on("minusAssign (Vector2)") {
-                val original = point.copy()
-                val vector = getRandomVector2()
-                point -= vector
-                it("should subtract and assign") {
-                    assert(point).isEqualTo(original.subtract(vector))
-                }
-            }
-            on("minusAssign (Vector3)") {
-                val original = point.copy()
-                val vector = getRandomVector3()
-                point -= vector
-                it("should subtract and assign") {
-                    assert(point).isEqualTo(original.subtract(vector))
-                }
-            }
-            on("timesAssign") {
-                val original = point.copy()
-                val scalar = getRandomValue()
-                point *= scalar
-                it("should scale and assign") {
-                    assert(point).isEqualTo(original.scale(scalar))
-                }
-            }
-            on("divAssign") {
-                val original = point.copy()
-                val scalar = getRandomValue()
-                point /= scalar
-                it("should scale and assign") {
-                    assert(point).isEqualTo(original.scale(1 / scalar))
+            describe("Subtract") {
+                val result by memoized { subtract(a, b) }
+
+                for(i in 0 until dimensions) {
+                    it("should subtract the $i components") {
+                        assert(result[i]).isEqualTo(a[i] - b[i])
+                    }
                 }
             }
         }
+    }
 
-        on("copy") {
-            val copy = point.copy()
-            it("should be a new instance") {
-                assert(copy).isNotSameAs(point)
-            }
-            it("should be equal to the original") {
-                assert(copy).isEqualTo(point)
-            }
-        }
+    repeat(100) {
+        val p0 = rPoint2D()
+        val p1 = rPoint2D()
+        describe("Point2D: $p0 - Point2D: $p1") {
+            val a by memoized { p0.copy() }
+            val b by memoized { p1.copy() }
+            val dimensions by memoized { max(p0.dimensions, p1.dimensions) }
 
-        on("floor") {
-            val floor = point.copy().floor()
-            it("should set every component to its floor") {
-                for (i in 0 until 3) {
-                    assert(floor[i]).isCloseTo(floor(point[i]))
+            describe("Lerp") {
+                val progress = rScalar()
+                val result by memoized { lerp(a, b, progress) }
+
+                for(i in 0 until dimensions) {
+                    it("should set the $i component to the lerp between the two") {
+                        assert(result[i]).isEqualTo(lerp(a[i], b[i], progress))
+                    }
+                }
+            }
+
+            describe("Min") {
+                val result by memoized { min(a, b) }
+
+                for(i in 0 until dimensions) {
+                    it("should set the $i component to the smallest one between the two") {
+                        assert(result[i]).isEqualTo(min(a[i], b[i]))
+                    }
+                }
+            }
+
+            describe("Max") {
+                val result by memoized { max(a, b) }
+
+                for(i in 0 until dimensions) {
+                    it("should set the $i component to the largest one between the two") {
+                        assert(result[i]).isEqualTo(max(a[i], b[i]))
+                    }
                 }
             }
         }
+    }
 
-        on("ceil") {
-            val ceil = point.copy().ceil()
-            it("should set every component to its ceil") {
-                for (i in 0 until 3) {
-                    assert(ceil[i]).isCloseTo(ceil(point[i]))
+    repeat(100) {
+        val p0 = rPoint2D()
+        val p1 = rPoint3D()
+        describe("Point2D: $p0 - Point3D: $p1") {
+            val a by memoized { p0.copy() }
+            val b by memoized { p1.copy() }
+            val dimensions by memoized { max(p0.dimensions, p1.dimensions) }
+
+            describe("Lerp") {
+                val progress = rScalar()
+                val result by memoized { lerp(a, b, progress) }
+
+                for(i in 0 until dimensions) {
+                    it("should set the $i component to the lerp between the two") {
+                        assert(result[i]).isEqualTo(lerp(a[i], b[i], progress))
+                    }
+                }
+            }
+
+            describe("Min") {
+                val result by memoized { min(a, b) }
+
+                for(i in 0 until dimensions) {
+                    it("should set the $i component to the smallest one between the two") {
+                        assert(result[i]).isEqualTo(min(a[i], b[i]))
+                    }
+                }
+            }
+
+            describe("Max") {
+                val result by memoized { max(a, b) }
+
+                for(i in 0 until dimensions) {
+                    it("should set the $i component to the largest one between the two") {
+                        assert(result[i]).isEqualTo(max(a[i], b[i]))
+                    }
                 }
             }
         }
+    }
 
-        on("abs") {
-            val abs = point.copy().abs()
-            it("should set every component to its absolute value") {
-                for (i in 0 until 3) {
-                    assert(abs[i]).isCloseTo(abs(point[i]))
+    // -----------------------------------------------------------------------------------------------------------------
+
+    repeat(100) {
+        val p = rPoint3D()
+        describe("Point3D: $p") {
+            val point by memoized { p.copy() }
+
+            for (i in -1..3) {
+                describe("Get $i index") {
+                    when {
+                        i < 0 || i >= 3 -> it("throws an IllegalArgumentException") {
+                            assert(IllegalArgumentException::class).isThrownBy { point[i] }
+                        }
+                        i >= point.dimensions -> it("returns 0") {
+                            assert(point[i]).isZero()
+                        }
+                        else -> it("returns the component value") {
+                            assert(point[i]).isEqualTo(point.components[i])
+                        }
+                    }
+                }
+            }
+
+            for (i in -1..3) {
+                describe("Set $i index") {
+                    val value = rScalar()
+                    when {
+                        i < 0 || i >= point.dimensions -> it("throws an IllegalArgumentException") {
+                            assert(IllegalArgumentException::class).isThrownBy { point[i] = value }
+                        }
+                        else -> it("changes the component value") {
+                            point[i] = value
+                            assert(point[i]).isEqualTo(value)
+                        }
+                    }
+                }
+            }
+
+            describe("Negate") {
+                val result by memoized { negate(point) }
+
+                for (i in 0 until point.dimensions) {
+                    it("should negate the $i component") {
+                        assert(result[i]).isEqualTo(-point[i])
+                    }
+                }
+            }
+
+            describe("Floor") {
+                val result by memoized { floor(point) }
+
+                for (i in 0 until point.dimensions) {
+                    it("should compute the floor of the $i component") {
+                        assert(result[i]).isEqualTo(floor(point[i]))
+                    }
+                }
+            }
+
+            describe("Ceil") {
+                val result by memoized { ceil(point) }
+
+                for (i in 0 until point.dimensions) {
+                    it("should compute the ceil of the $i component") {
+                        assert(result[i]).isEqualTo(ceil(point[i]))
+                    }
+                }
+            }
+
+            describe("Abs") {
+                val result by memoized { abs(point) }
+
+                for (i in 0 until point.dimensions) {
+                    it("should compute the absolute value of the $i component") {
+                        assert(result[i]).isEqualTo(abs(point[i]))
+                    }
+                }
+            }
+
+            describe("Scale") {
+                val scalar = rScalar()
+                val result by memoized { scale(point, scalar) }
+
+                for (i in 0 until point.dimensions) {
+                    it("should scale the $i component") {
+                        assert(result[i]).isEqualTo(point[i] * scalar)
+                    }
+                }
+            }
+
+            describe("Operators") {
+                describe("UnaryPlus") {
+                    val result by memoized { +point }
+
+                    it("should be equal to point") {
+                        assert(result).isEqualTo(point)
+                    }
+                }
+
+                describe("UnaryMinus") {
+                    val result by memoized { -point }
+
+                    it("should be equal to point negated") {
+                        assert(result).isEqualTo(negate(point))
+                    }
+                }
+
+                describe("Plus") {
+                    val vector = rVector2()
+                    val result by memoized { point + vector }
+
+                    it("should be equal to the added points") {
+                        assert(result).isEqualTo(add(point, vector))
+                    }
+                }
+
+                describe("Plus") {
+                    val vector = rVector3()
+                    val result by memoized { point + vector }
+
+                    it("should be equal to the added points") {
+                        assert(result).isEqualTo(add(point, vector))
+                    }
+                }
+
+                describe("Minus") {
+                    val vector = rVector2()
+                    val result by memoized { point - vector }
+
+                    it("should be equal to the subtracted points") {
+                        assert(result).isEqualTo(subtract(point, vector))
+                    }
+                }
+
+                describe("Minus") {
+                    val vector = rVector3()
+                    val result by memoized { point - vector }
+
+                    it("should be equal to the subtracted points") {
+                        assert(result).isEqualTo(subtract(point, vector))
+                    }
+                }
+
+                describe("Minus") {
+                    val other = rPoint2D()
+                    val result by memoized { point - other }
+
+                    it("should be equal to the subtracted points") {
+                        assert(result).isEqualTo(subtract(point, other))
+                    }
+                }
+
+                describe("Minus") {
+                    val other = rPoint3D()
+                    val result by memoized { point - other }
+
+                    it("should be equal to the subtracted points") {
+                        assert(result).isEqualTo(subtract(point, other))
+                    }
+                }
+
+                describe("Times") {
+                    val scalar = rScalar()
+                    val result by memoized { point * scalar }
+
+                    it("should be equal to the scaled point") {
+                        assert(result).isEqualTo(scale(point, scalar))
+                    }
+                }
+
+                describe("Div") {
+                    val scalar = rScalar()
+                    val result by memoized { point / scalar }
+
+                    it("should be equal to the scaled point") {
+                        assert(result).isEqualTo(scale(point, 1 / scalar))
+                    }
+                }
+
+                describe("PlusAssign") {
+                    val other = rVector2()
+
+                    it("should update point to be equal to the added points") {
+                        val expected = point + other
+
+                        point += other
+                        assert(point).isEqualTo(expected)
+                    }
+                }
+
+                describe("PlusAssign") {
+                    val other = rVector3()
+
+                    it("should update point to be equal to the added points") {
+                        val expected = point + other
+
+                        point += other
+                        assert(point).isEqualTo(expected)
+                    }
+                }
+
+                describe("MinusAssign") {
+                    val other = rVector2()
+
+                    it("should update point to be equal to the subtracted points") {
+                        val expected = point - other
+
+                        point -= other
+                        assert(point).isEqualTo(expected)
+                    }
+                }
+
+                describe("MinusAssign") {
+                    val other = rVector3()
+
+                    it("should update point to be equal to the subtracted points") {
+                        val expected = point - other
+
+                        point -= other
+                        assert(point).isEqualTo(expected)
+                    }
+                }
+
+                describe("TimesAssign") {
+                    val scalar = rScalar()
+
+                    it("should update point to be equal to the scaled point") {
+                        val expected = point * scalar
+
+                        point *= scalar
+                        assert(point).isEqualTo(expected)
+                    }
+                }
+
+                describe("DivAssign") {
+                    val scalar = rScalar()
+
+                    it("should update point to be equal to the scaled point") {
+                        val expected = point / scalar
+
+                        point /= scalar
+                        assert(point).isEqualTo(expected)
+                    }
+                }
+            }
+
+            describe("Extension functions") {
+                describe("Negate") {
+                    it("should update point to be equal to the negated point") {
+                        val expected = negate(point)
+
+                        point.negate()
+                        assert(point).isEqualTo(expected)
+                    }
+                }
+
+                describe("Floor") {
+                    it("should update point to be equal to the floor point") {
+                        val expected = floor(point)
+
+                        point.floor()
+                        assert(point).isEqualTo(expected)
+                    }
+                }
+
+                describe("Ceil") {
+                    it("should update point to be equal to the ceil point") {
+                        val expected = ceil(point)
+
+                        point.ceil()
+                        assert(point).isEqualTo(expected)
+                    }
+                }
+
+                describe("Abs") {
+                    it("should update point to be equal to the abs point") {
+                        val expected = abs(point)
+
+                        point.abs()
+                        assert(point).isEqualTo(expected)
+                    }
+                }
+
+                describe("Scale") {
+                    val scalar = rScalar()
+
+                    it("should update point to be equal to the scaled point") {
+                        val expected = scale(point, scalar)
+
+                        point.scale(scalar)
+                        assert(point).isEqualTo(expected)
+                    }
+                }
+
+                describe("Add") {
+                    val other = rVector2()
+
+                    it("should update point to be equal to the added points") {
+                        val expected = add(point, other)
+
+                        point.add(other)
+                        assert(point).isEqualTo(expected)
+                    }
+                }
+
+                describe("Add") {
+                    val other = rVector3()
+
+                    it("should update point to be equal to the added points") {
+                        val expected = add(point, other)
+
+                        point.add(other)
+                        assert(point).isEqualTo(expected)
+                    }
+                }
+
+                describe("Subtract") {
+                    val other = rVector2()
+
+                    it("should update point to be equal to the subtracted points") {
+                        val expected = subtract(point, other)
+
+                        point.subtract(other)
+                        assert(point).isEqualTo(expected)
+                    }
+                }
+
+                describe("Subtract") {
+                    val other = rVector3()
+
+                    it("should update point to be equal to the subtracted points") {
+                        val expected = subtract(point, other)
+
+                        point.subtract(other)
+                        assert(point).isEqualTo(expected)
+                    }
+                }
+
+                describe("Lerp") {
+                    val progress = rScalar()
+                    val other = rPoint2D()
+
+                    it("should update point to be equal to the lerp between the two points") {
+                        val expected = lerp(point, other, progress)
+
+                        point.lerp(other, progress)
+                        assert(point).isEqualTo(expected)
+                    }
+                }
+
+                describe("Lerp") {
+                    val progress = rScalar()
+                    val other = rPoint3D()
+
+                    it("should update point to be equal to the lerp between the two points") {
+                        val expected = lerp(point, other, progress)
+
+                        point.lerp(other, progress)
+                        assert(point).isEqualTo(expected)
+                    }
+                }
+
+                describe("Min") {
+                    val other = rPoint2D()
+
+                    it("should update point to be equal to the min between the two points") {
+                        val expected = min(point, other)
+
+                        point.min(other)
+                        assert(point).isEqualTo(expected)
+                    }
+                }
+
+                describe("Min") {
+                    val other = rPoint3D()
+
+                    it("should update point to be equal to the min between the two points") {
+                        val expected = min(point, other)
+
+                        point.min(other)
+                        assert(point).isEqualTo(expected)
+                    }
+                }
+
+                describe("Max") {
+                    val other = rPoint2D()
+
+                    it("should update point to be equal to the max between the two points") {
+                        val expected = max(point, other)
+
+                        point.max(other)
+                        assert(point).isEqualTo(expected)
+                    }
+                }
+
+                describe("Max") {
+                    val other = rPoint3D()
+
+                    it("should update point to be equal to the max between the two points") {
+                        val expected = max(point, other)
+
+                        point.max(other)
+                        assert(point).isEqualTo(expected)
+                    }
+                }
+
+                describe("MultiplyLeft") {
+                    val matrix = rMatrix4()
+
+                    it("should update point to be the result of the matrix multiplication") {
+                        val expected = multiply(matrix, point, Point3D())
+
+                        point.multiplyLeft(matrix)
+                        assert(point).isEqualTo(expected)
+                    }
                 }
             }
         }
+    }
 
-        on("scale") {
-            val scalar = getRandomValue()
-            val scaled = point.copy().scale(scalar)
-            it("should scale every component") {
-                for (i in 0 until 3) {
-                    assert(scaled[i]).isCloseTo(point[i] * scalar)
+    repeat(100) {
+        val p0 = rPoint3D()
+        val p1 = rPoint2D()
+        describe("Point3D: $p0 - Point2D: $p1") {
+            val a by memoized { p0.copy() }
+            val b by memoized { p1.copy() }
+            val dimensions by memoized { max(p0.dimensions, p1.dimensions) }
+
+            describe("Lerp") {
+                val progress = rScalar()
+                val result by memoized { lerp(a, b, progress) }
+
+                for(i in 0 until dimensions) {
+                    it("should set the $i component to the lerp between the two") {
+                        assert(result[i]).isEqualTo(lerp(a[i], b[i], progress))
+                    }
+                }
+            }
+
+            describe("Min") {
+                val result by memoized { min(a, b) }
+
+                for(i in 0 until dimensions) {
+                    it("should set the $i component to the smallest one between the two") {
+                        assert(result[i]).isEqualTo(min(a[i], b[i]))
+                    }
+                }
+            }
+
+            describe("Max") {
+                val result by memoized { max(a, b) }
+
+                for(i in 0 until dimensions) {
+                    it("should set the $i component to the largest one between the two") {
+                        assert(result[i]).isEqualTo(max(a[i], b[i]))
+                    }
                 }
             }
         }
+    }
 
-        on("distance") {
-            val other = getRandomPoint3D()
-            val distance = point.distance(other)
-            it("should return the magnitude of the vector between the two points") {
-                val vector = point - other
-                assert(distance).isCloseTo(vector.magnitude)
-            }
-        }
+    repeat(100) {
+        val p0 = rPoint3D()
+        val p1 = rPoint3D()
+        describe("Point3D: $p0 - Point3D: $p1") {
+            val a by memoized { p0.copy() }
+            val b by memoized { p1.copy() }
+            val dimensions by memoized { max(p0.dimensions, p1.dimensions) }
 
-        on("distanceSquared") {
-            val other = getRandomPoint3D()
-            val distanceSquared = point.distanceSquared(other)
-            it("should return the square of the distance") {
-                val distance = point.distance(other)
-                val expected = distance * distance
+            describe("Lerp") {
+                val progress = rScalar()
+                val result by memoized { lerp(a, b, progress) }
 
-                assert(distanceSquared).isCloseTo(expected)
-            }
-        }
-
-        on("add (Vector)") {
-            val vector = getRandomVector3()
-            val add = point.copy().add(vector)
-            it("should add componentwise") {
-                for (i in 0 until 3) {
-                    assert(add[i]).isCloseTo(point[i] + vector[i])
+                for(i in 0 until dimensions) {
+                    it("should set the $i component to the lerp between the two") {
+                        assert(result[i]).isEqualTo(lerp(a[i], b[i], progress))
+                    }
                 }
             }
-        }
 
-        on("subtract (Point)") {
-            val other = getRandomPoint3D()
-            val subtract = point.subtract(other, Vector3())
-            it("should subtract componentwise") {
-                for (i in 0 until 3) {
-                    assert(subtract[i]).isCloseTo(point[i] - other[i])
+            describe("Min") {
+                val result by memoized { min(a, b) }
+
+                for(i in 0 until dimensions) {
+                    it("should set the $i component to the smallest one between the two") {
+                        assert(result[i]).isEqualTo(min(a[i], b[i]))
+                    }
                 }
             }
-        }
 
-        on("subtract (Vector3)") {
-            val other = getRandomVector3()
-            val subtract = point.copy().subtract(other)
-            it("should subtract componentwise") {
-                for (i in 0 until 3) {
-                    assert(subtract[i]).isCloseTo(point[i] - other[i])
-                }
-            }
-        }
+            describe("Max") {
+                val result by memoized { max(a, b) }
 
-        on("lerp") {
-            val other = getRandomPoint3D()
-            val progress = getRandomValue()
-            val interpolated = point.copy().lerp(other, progress)
-            it("should lerp componentwise") {
-                for (i in 0 until 3) {
-                    assert(interpolated[i]).isCloseTo(lerp(point[i], other[i], progress))
-                }
-            }
-        }
-
-        on("min") {
-            val other = getRandomPoint3D()
-            val min = point.copy().min(other)
-            it("should perform min componentwise") {
-                for (i in 0 until 3) {
-                    assert(min[i]).isCloseTo(min(point[i], other[i]))
-                }
-            }
-        }
-
-        on("max") {
-            val other = getRandomPoint3D()
-            val max = point.copy().max(other)
-            it("should perform max componentwise") {
-                for (i in 0 until 3) {
-                    assert(max[i]).isCloseTo(max(point[i], other[i]))
+                for(i in 0 until dimensions) {
+                    it("should set the $i component to the largest one between the two") {
+                        assert(result[i]).isEqualTo(max(a[i], b[i]))
+                    }
                 }
             }
         }
     }
 })
 
-private fun getRandomValue() = random(-100f, 100f)
-private fun getRandomPoint3D() = Point3D(getRandomValue(), getRandomValue(), getRandomValue())
-private fun getRandomVector2() = Vector2(getRandomValue(), getRandomValue())
-private fun getRandomVector3() = Vector3(getRandomValue(), getRandomValue(), getRandomValue())
-private fun getRandomProjection() : Projection {
-    val p = MutableProjection()
-    p.set(
-            getRandomValue(),
-            getRandomValue(),
-            getRandomValue(), getRandomValue(),
-            getRandomValue(), getRandomValue()
-    )
-
-    return Projection(p)
-}
-private fun getRandomTransformation() : Transformation {
-    val t = MutableTransformation()
-    t.set(
-            getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue(),
-            getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue(),
-            getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue()
-    )
-
-    return Transformation(t)
-}
-private fun getRandomMatrix4() = Matrix4(
-        getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue(),
-        getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue(),
-        getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue(),
-        getRandomValue(), getRandomValue(), getRandomValue(), getRandomValue()
-)
+private fun rScalar() = random(-10f, 10f)
+private fun rVector2() = Vector2 { rScalar() }
+private fun rVector3() = Vector3 { rScalar() }
+private fun rPoint2D() = Point2D { rScalar() }
+private fun rPoint3D() = Point3D { rScalar() }
+private fun rMatrix4() = Matrix4 { _, _ -> rScalar() }

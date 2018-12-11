@@ -1,101 +1,66 @@
+@file:Suppress("NOTHING_TO_INLINE")
+
 package org.rufousengine.math
 
 import org.badlogic.gdx.math.RandomXS128
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.ulp
 
-// ---
+// --- CONSTANTS -------------------------------------------------------------------------------------------------------
 
-private const val TOLERANCE = 0.00001f
-private const val ULPS_TOLERANCE = 5
+const val PI = 3.1415926536f
+const val HALF_PI = PI * 0.5f
+const val TWO_PI = PI * 2.0f
+const val FOUR_PI = PI * 4.0f
+const val INV_PI      = 1.0f / PI
+const val INV_TWO_PI  = INV_PI * 0.5f
+const val INV_FOUR_PI = INV_PI * 0.25f
 
-const val PI = 3.1415927f
-const val PI2 = PI * 2f
-const val E = 2.7182818f
-const val RADIANS_TO_DEGREES = 180f / PI
+const val RADIANS_TO_DEGREES = 180f * INV_PI
 const val RAD_DEG = RADIANS_TO_DEGREES
 const val DEGREES_TO_RADIANS = PI / 180f
 const val DEG_RAD = DEGREES_TO_RADIANS
 
-// ---
+const val E = 2.7182818f
 
-private object Trigonometry {
-    val sinBits = 14 // 16KB. Adjust for accuracy.
-    val sinMask = (-1 shl sinBits).inv()
-    val sinCount = sinMask + 1
+// --- TRIGONOMETRY ----------------------------------------------------------------------------------------------------
 
-    val radFull = PI * 2
-    val degFull = 360f
-    val radToIndex = sinCount / radFull
-    val degToIndex = sinCount / degFull
-
-    val sinTable = FloatArray(sinCount)
-
-    init {
-        for (i in 0 until sinCount)
-            sinTable[i] = Math.sin((i + 0.5) / sinCount * radFull).toFloat()
-        var i = 0
-        while (i < 360) {
-            sinTable[(i * degToIndex).toInt() and sinMask] = Math.sin(i * DEGREES_TO_RADIANS.toDouble()).toFloat()
-            i += 90
-        }
-    }
-
-    fun sin(degrees: Float): Float {
-        return sinTable[(degrees * degToIndex).toInt() and sinMask]
-    }
-
-    fun cos(degrees: Float): Float {
-        return sinTable[((degrees + 90) * degToIndex).toInt() and sinMask]
-    }
-
-    fun sinRad(radians: Float): Float {
-        return sinTable[(radians * radToIndex).toInt() and sinMask]
-    }
-
-    fun cosRad(radians: Float): Float {
-        return sinTable[((radians + PI / 2) * radToIndex).toInt() and sinMask]
-    }
-}
-
-val Float.sin: Float
-    get() = sin(this)
-
-val Float.cos: Float
-    get() = cos(this)
-
-val Float.sinRad: Float
-    get() = sinRad(this)
-
-val Float.cosRad: Float
-    get() = cosRad(this)
-
-/** Returns the sine from a lookup sinTable.  */
+/** Returns the sine from a lookup table.  */
 fun sin(degrees: Float) = Trigonometry.sin(degrees)
 
-/** Returns the cosine from a lookup sinTable.  */
+/** Returns the cosine from a lookup table.  */
 fun cos(degrees: Float) = Trigonometry.cos(degrees)
 
-/** Returns the sine from a lookup sinTable.  */
+/** Returns the tangent from a lookup table.  */
+fun tan(degrees: Float) = Trigonometry.tan(degrees)
+
+/** Returns the sine from a lookup table.  */
 fun sinRad(radians: Float) = Trigonometry.sinRad(radians)
 
-/** Returns the cosine from a lookup sinTable.  */
+/** Returns the cosine from a lookup table.  */
 fun cosRad(radians: Float) = Trigonometry.cosRad(radians)
+
+/** Returns the tangent from a lookup table.  */
+fun tanRad(radians: Float) = Trigonometry.tanRad(radians)
 
 fun Float.toRadians() = this * DEGREES_TO_RADIANS
 fun Float.toDegrees() = this * RADIANS_TO_DEGREES
 
-// ---
+// --- COMPARISONS -----------------------------------------------------------------------------------------------------
 
-fun Float.isZero(maxDifference: Float = TOLERANCE, maxUlpsDistance: Int = ULPS_TOLERANCE) = this.isCloseTo(0f, maxDifference, maxUlpsDistance)
-fun Float.isOne(maxDifference: Float = TOLERANCE, maxUlpsDistance: Int = ULPS_TOLERANCE) = this.isCloseTo(1f, maxDifference, maxUlpsDistance)
+private const val TOLERANCE = 0.00001f
+private const val ULPS_TOLERANCE = 5
 
-infix fun Float.isCloseTo(other: Float) = this.isCloseTo(other, TOLERANCE, ULPS_TOLERANCE)
-fun Float.isCloseTo(other: Float, maxDifference: Float = TOLERANCE, maxUlpsDistance: Int = ULPS_TOLERANCE) = close(this, other, maxDifference, maxUlpsDistance)
+fun Float.isZero(maxDifference: Float = TOLERANCE, maxUlpsDistance: Int = ULPS_TOLERANCE) = (this).isEqualTo(0f, maxDifference, maxUlpsDistance)
+fun Float.isOne(maxDifference: Float = TOLERANCE, maxUlpsDistance: Int = ULPS_TOLERANCE) = this.isEqualTo(1f, maxDifference, maxUlpsDistance)
 
-infix fun Float.isNotCloseTo(other: Float) = !isCloseTo(other)
-fun Float.isNotCloseTo(other: Float, maxDifference: Float = TOLERANCE, maxUlpsDistance: Int = ULPS_TOLERANCE) = !isCloseTo(other, maxDifference, maxUlpsDistance)
+infix fun Float.isEqualTo(other: Float) = this.isEqualTo(other, TOLERANCE, ULPS_TOLERANCE)
+fun Float.isEqualTo(other: Float, maxDifference: Float = TOLERANCE, maxUlpsDistance: Int = ULPS_TOLERANCE) = close(this, other, maxDifference, maxUlpsDistance)
+
+infix fun Float.isNotCloseTo(other: Float) = !isEqualTo(other)
+fun Float.isNotCloseTo(other: Float, maxDifference: Float = TOLERANCE, maxUlpsDistance: Int = ULPS_TOLERANCE) = !isEqualTo(other, maxDifference, maxUlpsDistance)
 
 fun close(a: Float, b: Float, tolerance: Float = TOLERANCE, ulpsTolerance: Int = ULPS_TOLERANCE) : Boolean {
     val absDifference = abs(a - b)
@@ -116,11 +81,9 @@ fun close(a: Float, b: Float, tolerance: Float = TOLERANCE, ulpsTolerance: Int =
     return false
 }
 
-private fun ulpsDistance(a: Float, b: Float) : Int {
-    if(a == b) {
-        return 0
-    }
+private fun distance(a: Float, b: Float) = abs(a - b) / (abs(b) * b.ulp)
 
+private fun ulpsDistance(a: Float, b: Float) : Int {
     val max = Int.MAX_VALUE
 
     if(!a.isFinite() || !b.isFinite()) {
@@ -134,22 +97,33 @@ private fun ulpsDistance(a: Float, b: Float) : Int {
         return max
     }
 
-    var distance = aBits - bBits
-    if(distance < 0) {
-        return -distance
-    }
-
-    return distance
+    val distance = aBits - bBits
+    return if(distance < 0) -distance else distance
 }
 
-val Float.Companion.sizeInBytes: Int
-    get() = 4
+private fun ulpsDistance2(a: Float, b: Float): Int {
+    if(!a.isFinite() || !b.isFinite()) {
+        return Int.MAX_VALUE
+    }
 
-fun Float.format(digits: Int) = "%.${digits}f".format(this)
+    var aBits = a.toBits()
+    if (aBits < 0) {
+        aBits = (0b1000_0000_0000_0000_0000_0000_0000_0000 - aBits).toInt()
+    }
 
-// ---
+    var bBits = b.toBits()
+    if (bBits < 0) {
+        (0b1000_0000_0000_0000_0000_0000_0000_0000 - bBits).toInt()
+    }
+
+    return if (aBits > bBits) aBits - bBits else bBits - aBits
+}
+
+// --- RANDOM ----------------------------------------------------------------------------------------------------------
 
 private val random = RandomXS128()
+
+fun setRandomSeed(seed: Long) = random.setSeed(seed)
 
 /**
  * Returns a random number between 0 (inclusive) and the specified value (exclusive).
@@ -170,14 +144,14 @@ fun random(start: Int, end: Int)= start + random.nextInt(end - start + 1)
  *
  * @param[range] The size of the range.
  */
-fun random(range: Long) = (random.nextDouble() * range) as Long
+fun random(range: Long) = (random.nextDouble() * range).toLong()
 /**
  * Returns a random number between [start] (inclusive) and [end] (exclusive).
  *
  * @param[start] The start of the range.
  * @param[end] The end of the range.
  */
-fun random(start: Long, end: Long) = start + (random.nextDouble() * (end - start)) as Long
+fun random(start: Long, end: Long) = start + (random.nextDouble() * (end - start)).toLong()
 
 /** Returns a random boolean value. */
 fun randomBoolean() = random.nextBoolean()
@@ -234,15 +208,24 @@ fun randomTriangular(min: Float, max: Float) = randomTriangular(min, max, (min +
 fun randomTriangular(min: Float, max: Float, mode: Float): Float {
     val u = random.nextFloat()
     val d = max - min
-    return if (u <= (mode - min) / d) min + Math.sqrt((u * d * (mode - min)).toDouble()).toFloat() else max - Math.sqrt(((1 - u) * d * (max - mode)).toDouble()).toFloat()
+    return if (u <= (mode - min) / d) min + sqrt(u * d * (mode - min)) else max - sqrt((1 - u) * d * (max - mode))
 }
 
-// ---
+// --- OTHER UTILITIES -------------------------------------------------------------------------------------------------
 
 /** Linearly interpolates between [fromValue] to [toValue] on [progress] position. */
-fun lerp(fromValue: Int, toValue: Int, progress: Int) = fromValue + (toValue - fromValue) * progress
+inline fun lerp(fromValue: Int, toValue: Int, progress: Int) = fromValue + (toValue - fromValue) * progress
 /** Linearly interpolates between [fromValue] to [toValue] on [progress] position. */
-fun lerp(fromValue: Float, toValue: Float, progress: Float) = fromValue + (toValue - fromValue) * progress
+inline fun lerp(fromValue: Float, toValue: Float, progress: Float) = fromValue + (toValue - fromValue) * progress
 
-fun clamp(value: Int, a: Int, b: Int) = max(min(value, b), a)
-fun clamp(value: Float, a: Float, b: Float) = max(min(value, b), a)
+inline fun clamp(value: Int, a: Int, b: Int) = max(min(value, b), a)
+inline fun clamp(value: Float, a: Float, b: Float) = max(min(value, b), a)
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+inline fun sqrt(value: Float) = kotlin.math.sqrt(value)
+
+inline fun pow(a: Int, b: Int) = Math.pow(a.toDouble(), b.toDouble()).toInt()
+inline fun pow(a: Float, b: Int) = Math.pow(a.toDouble(), b.toDouble()).toFloat()
+inline fun pow(a: Int, b: Float) = Math.pow(a.toDouble(), b.toDouble()).toFloat()
+inline fun pow(a: Float, b: Float) = Math.pow(a.toDouble(), b.toDouble()).toFloat()

@@ -1,170 +1,1304 @@
+@file:Suppress("NOTHING_TO_INLINE")
+
 package org.rufousengine.math
 
 import kotlin.math.*
 
-operator fun Vector.times(other: Vector) = dot(other)
-
-val Vector.magnitude: Float
+inline val Vector.magnitude: Float
     get() = sqrt(magnitudeSquared)
-val Vector.magnitudeSquared: Float
-    get() = dot(this)
+inline val Vector.magnitudeSquared: Float
+    get() = dot(this,this)
 
 /** Whether all components are zero. */
-val Vector.isZero: Boolean
+inline val Vector.isZero: Boolean
     get() = components.all { it.isZero() }
 /** Whether this vector is a unit length vector. */
-val Vector.isUnit: Boolean
+inline val Vector.isUnit: Boolean
     get() = magnitudeSquared.isOne()
 /** Whether all components are 1. */
-val Vector.isOne: Boolean
+inline val Vector.isOne: Boolean
     get() = components.all { it.isOne() }
 
 /** The smallest between all components. */
-val Vector.minComponent : Float
+inline val Vector.minComponent : Float
     get() = components.min() ?: 0f
 /** The largest between all components. */
-val Vector.maxComponent : Float
+inline val Vector.maxComponent : Float
     get() = components.max() ?: 0f
 /** The dimension that contains the smallest component. */
-val Vector.minDimension : Int
+inline val Vector.minDimension : Int
     get() = components.indexOf(minComponent)
 /** The dimension that contains the largest component. */
-val Vector.maxDimension : Int
+inline val Vector.maxDimension : Int
     get() = components.indexOf(maxComponent)
 
-/** Whether this vector is orthogonal to [other]. */
-fun Vector.isOrthogonal(other: Vector) = dot(other).isZero() || getAngle(other).isCloseTo(90f)
-/** Whether this vector is orthogonal to ([x], [y]). */
-fun Vector.isOrthogonal(x: Float, y: Float) = isOrthogonal(cVector(x, y))
-/** Whether this vector is orthogonal to ([x], [y], [z]). */
-fun Vector.isOrthogonal(x: Float, y: Float, z: Float) = isOrthogonal(cVector(x, y, z))
-/** Whether this vector is orthogonal to ([x], [y], [z], [w]). */
-fun Vector.isOrthogonal(x: Float, y: Float, z: Float, w: Float) = isOrthogonal(cVector(x, y, z, w))
+// ---
 
-/** Whether this vector is orthogonal to [other] and both vectors are unit vectors. */
-fun Vector.isOrthonormal(other: Vector) = isUnit && other.isUnit && isOrthogonal(other)
-/** Whether this vector is orthogonal to ([x], [y]) and both vectors are unit vectors. */
-fun Vector.isOrthonormal(x: Float, y: Float) = isOrthonormal(cVector(x, y))
-/** Whether this vector is orthogonal to ([x], [y], [z]) and both vectors are unit vectors. */
-fun Vector.isOrthonormal(x: Float, y: Float, z: Float) = isOrthonormal(cVector(x, y, z))
-/** Whether this vector is orthogonal to ([x], [y], [z], [w]) and both vectors are unit vectors. */
-fun Vector.isOrthonormal(x: Float, y: Float, z: Float, w: Float) = isOrthonormal(cVector(x, y, z, w))
+/** Whether [a] is orthogonal to [b]. */
+inline fun orthogonal(a: Vector, b: Vector) = dot(a, b).isZero() || angle(a, b).isEqualTo(90f)
 
-/** Whether this vector is parallel to [other]. */
-fun Vector.isParallel(other: Vector): Boolean {
-    val dimensions = max(dimensions, other.dimensions)
+/** Whether [a] is orthogonal to [b] and both vectors are unit vectors. */
+inline fun orthonormal(a: Vector, b: Vector) = a.isUnit && b.isUnit && orthogonal(a, b)
+
+/** Whether [a] is parallel to [b]. */
+fun parallel(a: Vector, b: Vector): Boolean {
+    val dimensions = max(a.dimensions, b.dimensions)
     if(dimensions == 0) {
         return true
     }
 
-    val reference = this[0] / other[0]
+    val reference = a[0] / b[0]
 
     for(i in 1 until dimensions) {
-        if(this[i] / other[i] isNotCloseTo reference) {
+        if(a[i] / b[i] isNotCloseTo reference) {
             return false
         }
     }
 
     return true
 }
-/** Whether this vector is parallel to ([x], [y]). */
-fun Vector.isParallel(x: Float, y: Float) = isParallel(cVector(x, y))
-/** Whether this vector is parallel to ([x], [y], [z]). */
-fun Vector.isParallel(x: Float, y: Float, z: Float) = isParallel(cVector(x, y, z))
-/** Whether this vector is parallel to ([x], [y], [z], [w]). */
-fun Vector.isParallel(x: Float, y: Float, z: Float, w: Float) = isParallel(cVector(x, y, z, w))
 
-/**
- * Returns the min angle between this vector and [other].
- *
- * @param[other] The other vector.
- * @return The angle in degrees.
- */
-fun Vector.getAngle(other: Vector) : Float {
-    val cos = dot(other) / (magnitude * other.magnitude)
+/** Returns the min angle in degrees between [a] and [b]. */
+fun angle(a: Vector, b: Vector) : Float {
+    val cos = dot(a, b) / (a.magnitude * b.magnitude)
     val acos = acos(cos)
 
     return acos * RADIANS_TO_DEGREES
 }
-/**
- * Returns the min angle between this vector and ([x], [y]).
- *
- * @return The angle in degrees.
- */
-fun Vector.getAngle(x: Float, y: Float) = getAngle(cVector(x, y))
-/**
- * Returns the min angle between this vector and ([x], [y], [z]).
- *
- * @return The angle in degrees.
- */
-fun Vector.getAngle(x: Float, y: Float, z: Float) = getAngle(cVector(x, y, z))
-/**
- * Returns the min angle between this vector and ([x], [y], [z], [w]).
- *
- * @return The angle in degrees.
- */
-fun Vector.getAngle(x: Float, y: Float, z: Float, w: Float) = getAngle(cVector(x, y, z, w))
 
-/**
- * Returns the dot product between this vector and [other].
- *
- * @param[other] The other vector.
- * @return The dot product.
- */
-fun Vector.dot(other: Vector): Float {
-    val dimensions = min(dimensions, other.dimensions)
+/** Returns the dot product between [a] and [b]. */
+fun dot(a: Vector, b: Vector): Float {
+    val dimensions = min(a.dimensions, b.dimensions)
 
     var dot = 0f
     for(i in 0 until dimensions) {
-        dot += components[i] * other.components[i]
+        dot += a.components[i] * b.components[i]
     }
 
     return dot
 }
-/**
- * Returns the dot product between this vector and ([x], [y]).
- *
- * @return The dot product.
+
+/** Returns the absolute value of the dot product between [a] and [b]. */
+inline fun dotAbs(a: Vector, b: Vector) = abs(dot(a, b))
+
+// ---
+
+/** 
+ * Negates each component of [vector] and stores the result in [out].
+ * 
+ * @return The [out] vector for chaining.
  */
-fun Vector.dot(x: Float, y: Float) = dot(cVector(x, y))
-/**
- * Returns the dot product between this vector and ([x], [y], [z]).
+inline fun negate(vector: Vector2, out: Vector2 = Vector2()) = out.set(-vector.x, -vector.y)
+/** 
+ * Negates each component of [vector] and stores the result in [out].
  *
- * @return The dot product.
+ * @return The [out] vector for chaining.
  */
-fun Vector.dot(x: Float, y: Float, z: Float) = dot(cVector(x, y, z))
-/**
- * Returns the dot product between this vector and ([x], [y], [z], [w]).
+inline fun negate(vector: Vector3, out: Vector3 = Vector3()) = out.set(-vector.x, -vector.y, -vector.z)
+/** 
+ * Negates each component of [vector] and stores the result in [out].
  *
- * @return The dot product.
+ * @return The [out] vector for chaining.
  */
-fun Vector.dot(x: Float, y: Float, z: Float, w: Float) = dot(cVector(x, y, z, w))
+inline fun negate(vector: Vector4, out: Vector4 = Vector4()) = out.set(-vector.x, -vector.y, -vector.z, -vector.w)
+
+/** 
+ * Normalizes [vector] and stores the result in [out].
+ * If [vector] is the zero vector, the result is the zero vector.
+ *
+ * @return The [out] vector for chaining.
+ */
+inline fun normalize(vector: Vector2, out: Vector2 = Vector2()) = if(vector.isZero) {
+    out.set(vector)
+} else {
+    scale(vector, 1 / vector.magnitude, out)
+}
+/**
+ * Normalizes [vector] and stores the result in [out].
+ * If [vector] is the zero vector, the result is the zero vector.
+ *
+ * @return The [out] vector for chaining.
+ */
+fun normalize(vector: Vector3, out: Vector3 = Vector3()) = if(vector.isZero) {
+    out.set(vector)
+} else {
+    scale(vector, 1 / vector.magnitude, out)
+}
+/**
+ *  Normalizes [vector] and stores the result in [out].
+ * If [vector] is the zero vector, the result is the zero vector.
+ *
+ * @return The [out] vector for chaining.
+ */
+fun normalize(vector: Vector4, out: Vector4 = Vector4()) = if(vector.isZero) {
+    out.set(vector)
+} else {
+    scale(vector, 1 / vector.magnitude, out)
+}
+
+/** 
+ * Applies the absolute value to each component of [vector] and stores the result in [out].
+ *
+ * @return The [out] vector for chaining.
+ */
+inline fun abs(vector: Vector2, out: Vector2 = Vector2()) = out.set(abs(vector.x), abs(vector.y))
+/**
+ * Applies the absolute value to each component of [vector] and stores the result in [out].
+ *
+ * @return The [out] vector for chaining.
+ */
+inline fun abs(vector: Vector3, out: Vector3 = Vector3()) = out.set(abs(vector.x), abs(vector.y), abs(vector.z))
+/**
+ * Applies the absolute value to each component of [vector] and stores the result in [out].
+ *
+ * @return The [out] vector for chaining.
+ */
+inline fun abs(vector: Vector4, out: Vector4 = Vector4()) = out.set(abs(vector.x), abs(vector.y), abs(vector.z), abs(vector.w))
 
 /**
- * Returns the absolute value of the dot product between this vector and [other].
+ * Scales [vector] (i.e., multiplies each component with [scalar]) and stores the result in [out].
  *
- * @param[other] The other vector.
- * @return The dot product.
+ * @return The [out] vector for chaining.
  */
-fun Vector.dotAbs(other: Vector) = abs(dot(other))
+inline fun scale(vector: Vector2, scalar: Float, out: Vector2 = Vector2()) = out.set(vector.x * scalar, vector.y * scalar)
 /**
- * Returns the absolute value of the dot product between this vector and ([x], [y]).
+ * Scales [vector] (i.e., multiplies each component with [scalar]) and stores the result in [out].
  *
- * @return The dot product.
+ * @return The [out] vector for chaining.
  */
-fun Vector.dotAbs(x: Float, y: Float) = dotAbs(cVector(x, y))
+inline fun scale(vector: Vector3, scalar: Float, out: Vector3 = Vector3()) = out.set(vector.x * scalar, vector.y * scalar, vector.z * scalar)
 /**
- * Returns the absolute value of the dot product between this vector and ([x], [y], [z]).
+ * Scales [vector] (i.e., multiplies each component with [scalar]) and stores the result in [out].
  *
- * @return The dot product.
+ * @return The [out] vector for chaining.
  */
-fun Vector.dotAbs(x: Float, y: Float, z: Float) = dotAbs(cVector(x, y, z))
+inline fun scale(vector: Vector4, scalar: Float, out: Vector4 = Vector4()) = out.set(vector.x * scalar, vector.y * scalar, vector.z * scalar, vector.w * scalar)
+
+/** 
+ * Adds [a] and [b] and stores the result in [out].
+ *
+ * @return The [out] vector for chaining.
+ */
+inline fun add(a: Vector2, b: Vector2, out: Vector2 = Vector2()) = out.set(a.x + b.x, a.y + b.y)
+/** 
+ * Adds [a] and [b] and stores the result in [out].
+ *
+ * @return The [out] vector for chaining.
+ */
+inline fun add(a: Vector2, b: Vector3, out: Vector3 = Vector3()) = out.set(a.x + b.x, a.y + b.y, b.z)
+/** 
+ * Adds [a] and [b] and stores the result in [out].
+ *
+ * @return The [out] vector for chaining.
+ */
+inline fun add(a: Vector2, b: Vector4, out: Vector4 = Vector4()) = out.set(a.x + b.x, a.y + b.y, b.z, b.w)
 /**
- * Returns the absolute value of the dot product between this vector and ([x], [y], [z], [w]).
+ * Adds [a] and [b] and stores the result in [out].
  *
- * @return The dot product.
+ * @return The [out] vector for chaining.
  */
-fun Vector.dotAbs(x: Float, y: Float, z: Float, w: Float) = dotAbs(cVector(x, y, z, w))
+inline fun add(a: Vector3, b: Vector2, out: Vector3 = Vector3()) = out.set(a.x + b.x, a.y + b.y, a.z)
+/**
+ * Adds [a] and [b] and stores the result in [out].
+ *
+ * @return The [out] vector for chaining.
+ */
+inline fun add(a: Vector3, b: Vector3, out: Vector3 = Vector3()) = out.set(a.x + b.x, a.y + b.y, a.z + b.z)
+/** 
+ * Adds [a] and [b] and stores the result in [out].
+ *
+ * @return The [out] vector for chaining.
+ */
+inline fun add(a: Vector3, b: Vector4, out: Vector4 = Vector4()) = out.set(a.x + b.x, a.y + b.y, a.z + b.z, b.w)
+/** 
+ * Adds [a] and [b] and stores the result in [out].
+ *
+ * @return The [out] vector for chaining.
+ */
+inline fun add(a: Vector4, b: Vector2, out: Vector4 = Vector4()) = out.set(a.x + b.x, a.y + b.y, a.z, a.w)
+/** 
+ * Adds [a] and [b] and stores the result in [out].
+ *
+ * @return The [out] vector for chaining.
+ */
+inline fun add(a: Vector4, b: Vector3, out: Vector4 = Vector4()) = out.set(a.x + b.x, a.y + b.y, a.z + b.z, a.w)
+/** 
+ * Adds [a] and [b] and stores the result in [out].
+ *
+ * @return The [out] vector for chaining.
+ */
+inline fun add(a: Vector4, b: Vector4, out: Vector4 = Vector4()) = out.set(a.x + b.x, a.y + b.y, a.z + b.z, a.w + b.w)
+
+/**
+ * Subtracts [b] from [a] and stores the result in [out].
+ *
+ * @return The [out] vector for chaining.
+ */
+inline fun subtract(a: Vector2, b: Vector2, out: Vector2 = Vector2()) = out.set(a.x - b.x, a.y - b.y)
+/**
+ * Subtracts [b] from [a] and stores the result in [out].
+ *
+ * @return The [out] vector for chaining.
+ */
+inline fun subtract(a: Vector2, b: Vector3, out: Vector3 = Vector3()) = out.set(a.x - b.x, a.y - b.y, -b.z)
+/** 
+ * Subtracts [b] from [a] and stores the result in [out].
+ *
+ * @return The [out] vector for chaining.
+ */
+inline fun subtract(a: Vector2, b: Vector4, out: Vector4 = Vector4()) = out.set(a.x - b.x, a.y - b.y, -b.z, -b.w)
+/** 
+ * Subtracts [b] from [a] and stores the result in [out].
+ *
+ * @return The [out] vector for chaining.
+ */
+inline fun subtract(a: Vector3, b: Vector2, out: Vector3 = Vector3()) = out.set(a.x - b.x, a.y - b.y, a.z)
+/** 
+ * Subtracts [b] from [a] and stores the result in [out].
+ *
+ * @return The [out] vector for chaining.
+ */
+inline fun subtract(a: Vector3, b: Vector3, out: Vector3 = Vector3()) = out.set(a.x - b.x, a.y - b.y, a.z - b.z)
+/** 
+ * Subtracts [b] from [a] and stores the result in [out].
+ *
+ * @return The [out] vector for chaining.
+ */
+inline fun subtract(a: Vector3, b: Vector4, out: Vector4 = Vector4()) = out.set(a.x - b.x, a.y - b.y, a.z - b.z, -b.w)
+/** Subtracts [b] from [a] and stores the result in [out].
+ *
+ * @return The [out] vector for chaining.
+ */
+inline fun subtract(a: Vector4, b: Vector2, out: Vector4 = Vector4()) = out.set(a.x - b.x, a.y - b.y, a.z, a.w)
+/** 
+ * Subtracts [b] from [a] and stores the result in [out].
+ *
+ * @return The [out] vector for chaining.
+ */
+inline fun subtract(a: Vector4, b: Vector3, out: Vector4 = Vector4()) = out.set(a.x - b.x, a.y - b.y, a.z - b.z, a.w)
+/** 
+ * Subtracts [b] from [a] and stores the result in [out].
+ *
+ * @return The [out] vector for chaining.
+ */
+inline fun subtract(a: Vector4, b: Vector4, out: Vector4 = Vector4()) = out.set(a.x - b.x, a.y - b.y, a.z - b.z, a.w - b.w)
+
+/** 
+ * Stores in [out] the vector composed of the smallest components between [a] and [b].
+ *
+ * @return The [out] vector for chaining.
+ */
+inline fun min(a: Vector2, b: Vector2, out: Vector2 = Vector2()) = out.set(kotlin.math.min(a.x, b.x), kotlin.math.min(a.y, b.y))
+/** 
+ * Stores in [out] the vector composed of the smallest components between [a] and [b].
+ *
+ * @return The [out] vector for chaining.
+ */
+inline fun min(a: Vector2, b: Vector3, out: Vector3 = Vector3()) = out.set(kotlin.math.min(a.x, b.x), kotlin.math.min(a.y, b.y), kotlin.math.min(a.z, b.z))
+/** 
+ * Stores in [out] the vector composed of the smallest components between [a] and [b].
+ *
+ * @return The [out] vector for chaining.
+ */
+inline fun min(a: Vector2, b: Vector4, out: Vector4 = Vector4()) = out.set(kotlin.math.min(a.x, b.x), kotlin.math.min(a.y, b.y), kotlin.math.min(a.z, b.z), kotlin.math.min(a.w, b.w))
+/** 
+ * Stores in [out] the vector composed of the smallest components between [a] and [b].
+ *
+ * @return The [out] vector for chaining.
+ */
+inline fun min(a: Vector3, b: Vector2, out: Vector3 = Vector3()) = out.set(kotlin.math.min(a.x, b.x), kotlin.math.min(a.y, b.y), kotlin.math.min(a.z, b.z))
+/** 
+ * Stores in [out] the vector composed of the smallest components between [a] and [b].
+ *
+ * @return The [out] vector for chaining.
+ */
+inline fun min(a: Vector3, b: Vector3, out: Vector3 = Vector3()) = out.set(kotlin.math.min(a.x, b.x), kotlin.math.min(a.y, b.y), kotlin.math.min(a.z, b.z))
+/** 
+ * Stores in [out] the vector composed of the smallest components between [a] and [b].
+ *
+ * @return The [out] vector for chaining.
+ */
+inline fun min(a: Vector3, b: Vector4, out: Vector4 = Vector4()) = out.set(kotlin.math.min(a.x, b.x), kotlin.math.min(a.y, b.y), kotlin.math.min(a.z, b.z), kotlin.math.min(a.w, b.w))
+/** 
+ * Stores in [out] the vector composed of the smallest components between [a] and [b].
+ *
+ * @return The [out] vector for chaining.
+ */
+inline fun min(a: Vector4, b: Vector2, out: Vector4 = Vector4()) = out.set(kotlin.math.min(a.x, b.x), kotlin.math.min(a.y, b.y), kotlin.math.min(a.z, b.z), kotlin.math.min(a.w, b.w))
+/** 
+ * Stores in [out] the vector composed of the smallest components between [a] and [b].
+ *
+ * @return The [out] vector for chaining.
+ */
+inline fun min(a: Vector4, b: Vector3, out: Vector4 = Vector4()) = out.set(kotlin.math.min(a.x, b.x), kotlin.math.min(a.y, b.y), kotlin.math.min(a.z, b.z), kotlin.math.min(a.w, b.w))
+/** 
+ * Stores in [out] the vector composed of the smallest components between [a] and [b].
+ *
+ * @return The [out] vector for chaining.
+ */
+inline fun min(a: Vector4, b: Vector4, out: Vector4 = Vector4()) = out.set(kotlin.math.min(a.x, b.x), kotlin.math.min(a.y, b.y), kotlin.math.min(a.z, b.z), kotlin.math.min(a.w, b.w))
+
+/** 
+ * Stores in [out] the vector composed of the largest components between [a] and [b].
+ *
+ * @return The [out] vector for chaining.
+ */
+inline fun max(a: Vector2, b: Vector2, out: Vector2 = Vector2()) = out.set(kotlin.math.max(a.x, b.x), kotlin.math.max(a.y, b.y))
+/** 
+ * Stores in [out] the vector composed of the largest components between [a] and [b].
+ *
+ * @return The [out] vector for chaining.
+ */
+inline fun max(a: Vector2, b: Vector3, out: Vector3 = Vector3()) = out.set(kotlin.math.max(a.x, b.x), kotlin.math.max(a.y, b.y), kotlin.math.max(a.z, b.z))
+/** 
+ * Stores in [out] the vector composed of the largest components between [a] and [b].
+ *
+ * @return The [out] vector for chaining.
+ */
+inline fun max(a: Vector2, b: Vector4, out: Vector4 = Vector4()) = out.set(kotlin.math.max(a.x, b.x), kotlin.math.max(a.y, b.y), kotlin.math.max(a.z, b.z), kotlin.math.max(a.w, b.w))
+/** 
+ * Stores in [out] the vector composed of the largest components between [a] and [b].
+ *
+ * @return The [out] vector for chaining.
+ */
+inline fun max(a: Vector3, b: Vector2, out: Vector3 = Vector3()) = out.set(kotlin.math.max(a.x, b.x), kotlin.math.max(a.y, b.y), kotlin.math.max(a.z, b.z))
+/** 
+ * Stores in [out] the vector composed of the largest components between [a] and [b].
+ *
+ * @return The [out] vector for chaining.
+ */
+inline fun max(a: Vector3, b: Vector3, out: Vector3 = Vector3()) = out.set(kotlin.math.max(a.x, b.x), kotlin.math.max(a.y, b.y), kotlin.math.max(a.z, b.z))
+/** 
+ * Stores in [out] the vector composed of the largest components between [a] and [b].
+ *
+ * @return The [out] vector for chaining.
+ */
+inline fun max(a: Vector3, b: Vector4, out: Vector4 = Vector4()) = out.set(kotlin.math.max(a.x, b.x), kotlin.math.max(a.y, b.y), kotlin.math.max(a.z, b.z), kotlin.math.max(a.w, b.w))
+/** 
+ * Stores in [out] the vector composed of the largest components between [a] and [b].
+ *
+ * @return The [out] vector for chaining.
+ */
+inline fun max(a: Vector4, b: Vector2, out: Vector4 = Vector4()) = out.set(kotlin.math.max(a.x, b.x), kotlin.math.max(a.y, b.y), kotlin.math.max(a.z, b.z), kotlin.math.max(a.w, b.w))
+/** 
+ * Stores in [out] the vector composed of the largest components between [a] and [b].
+ *
+ * @return The [out] vector for chaining.
+ */
+inline fun max(a: Vector4, b: Vector3, out: Vector4 = Vector4()) = out.set(kotlin.math.max(a.x, b.x), kotlin.math.max(a.y, b.y), kotlin.math.max(a.z, b.z), kotlin.math.max(a.w, b.w))
+/** 
+ * Stores in [out] the vector composed of the largest components between [a] and [b].
+ *
+ * @return The [out] vector for chaining.
+ */
+inline fun max(a: Vector4, b: Vector4, out: Vector4 = Vector4()) = out.set(kotlin.math.max(a.x, b.x), kotlin.math.max(a.y, b.y), kotlin.math.max(a.z, b.z), kotlin.math.max(a.w, b.w))
+
+/**
+ * Projects [a] onto [b] and stores the result in [out].
+ *
+ * @return The [out] vector for chaining.
+ */
+fun project(a: Vector2, b: Vector2, out: Vector2 = Vector2()) : Vector2 {
+    val scalar = dot(a, b) / b.magnitudeSquared
+
+    return out.set(b).scale(scalar)
+}
+/**
+ * Projects [a] onto [b] and stores the result in [out].
+ *
+ * @return The [out] vector for chaining.
+ */
+fun project(a: Vector2, b: Vector3, out: Vector3 = Vector3()) : Vector3 {
+    val scalar = dot(a, b) / b.magnitudeSquared
+
+    return out.set(b).scale(scalar)
+}
+/**
+ * Projects [a] onto [b] and stores the result in [out].
+ *
+ * @return The [out] vector for chaining.
+ */
+fun project(a: Vector2, b: Vector4, out: Vector4 = Vector4()) : Vector4 {
+    val scalar = dot(a, b) / b.magnitudeSquared
+
+    return out.set(b).scale(scalar)
+}
+/**
+ * Projects [a] onto [b] and stores the result in [out].
+ *
+ * @return The [out] vector for chaining.
+ */
+fun project(a: Vector3, b: Vector2, out: Vector2) : Vector2 {
+    val scalar = dot(a, b) / b.magnitudeSquared
+
+    return out.set(b).scale(scalar)
+}
+/**
+ * Projects [a] onto [b] and stores the result in [out].
+ *
+ * @return The [out] vector for chaining.
+ */
+fun project(a: Vector3, b: Vector2, out: Vector3 = Vector3()) : Vector3 {
+    val scalar = dot(a, b) / b.magnitudeSquared
+
+    return out.set(b).scale(scalar)
+}
+/**
+ * Projects [a] onto [b] and stores the result in [out].
+ *
+ * @return The [out] vector for chaining.
+ */
+fun project(a: Vector3, b: Vector3, out: Vector3 = Vector3()) : Vector3 {
+    val scalar = dot(a, b) / b.magnitudeSquared
+
+    return out.set(b).scale(scalar)
+}
+/**
+ * Projects [a] onto [b] and stores the result in [out].
+ *
+ * @return The [out] vector for chaining.
+ */
+fun project(a: Vector3, b: Vector4, out: Vector4 = Vector4()) : Vector4 {
+    val scalar = dot(a, b) / b.magnitudeSquared
+
+    return out.set(b).scale(scalar)
+}
+/**
+ * Projects [a] onto [b] and stores the result in [out].
+ *
+ * @return The [out] vector for chaining.
+ */
+fun project(a: Vector4, b: Vector2, out: Vector2) : Vector2 {
+    val scalar = dot(a, b) / b.magnitudeSquared
+
+    return out.set(b).scale(scalar)
+}
+/**
+ * Projects [a] onto [b] and stores the result in [out].
+ *
+ * @return The [out] vector for chaining.
+ */
+fun project(a: Vector4, b: Vector2, out: Vector4 = Vector4()) : Vector4 {
+    val scalar = dot(a, b) / b.magnitudeSquared
+
+    return out.set(b).scale(scalar)
+}
+/**
+ * Projects [a] onto [b] and stores the result in [out].
+ *
+ * @return The [out] vector for chaining.
+ */
+fun project(a: Vector4, b: Vector3, out: Vector3) : Vector3 {
+    val scalar = dot(a, b) / b.magnitudeSquared
+
+    return out.set(b).scale(scalar)
+}
+/**
+ * Projects [a] onto [b] and stores the result in [out].
+ *
+ * @return The [out] vector for chaining.
+ */
+fun project(a: Vector4, b: Vector3, out: Vector4 = Vector4()) : Vector4 {
+    val scalar = dot(a, b) / b.magnitudeSquared
+
+    return out.set(b).scale(scalar)
+}
+/**
+ * Projects [a] onto [b] and stores the result in [out].
+ *
+ * @return The [out] vector for chaining.
+ */
+fun project(a: Vector4, b: Vector4, out: Vector4 = Vector4()) : Vector4 {
+    val scalar = dot(a, b) / b.magnitudeSquared
+
+    return out.set(b).scale(scalar)
+}
+
+/**
+ * Rejects [a] from [b] and stores the result in [out].
+ *
+ * @return The [out] vector for chaining.
+ */
+fun reject(a: Vector2, b: Vector2, out: Vector2 = Vector2()) : Vector2 {
+    val oX = a.x
+    val oY = a.y
+
+    project(a, b, out)
+
+    return out.set(oX - out.x, oY - out.y)
+}
+/**
+ * Rejects [a] from [b] and stores the result in [out].
+ *
+ * @return The [out] vector for chaining.
+ */
+fun reject(a: Vector2, b: Vector3, out: Vector3 = Vector3()) : Vector3 {
+    val oX = a.x
+    val oY = a.y
+
+    project(a, b, out)
+
+    return out.set(oX - out.x, oY - out.y, -out.z)
+}
+/**
+ * Rejects [a] from [b] and stores the result in [out].
+ *
+ * @return The [out] vector for chaining.
+ */
+fun reject(a: Vector2, b: Vector4, out: Vector4 = Vector4()) : Vector4 {
+    val oX = a.x
+    val oY = a.y
+
+    project(a, b, out)
+
+    return out.set(oX - out.x, oY - out.y, -out.z, -out.w)
+}
+/**
+ * Rejects [a] from [b] and stores the result in [out].
+ *
+ * @return The [out] vector for chaining.
+ */
+fun reject(a: Vector3, b: Vector2, out: Vector3 = Vector3()) : Vector3 {
+    val oX = a.x
+    val oY = a.y
+    val oZ = a.z
+
+    project(a, b, out)
+
+    return out.set(oX - out.x, oY - out.y, oZ)
+}
+/**
+ * Rejects [a] from [b] and stores the result in [out].
+ *
+ * @return The [out] vector for chaining.
+ */
+fun reject(a: Vector3, b: Vector3, out: Vector3 = Vector3()) : Vector3 {
+    val oX = a.x
+    val oY = a.y
+    val oZ = a.z
+
+    project(a, b, out)
+
+    return out.set(oX - out.x, oY - out.y, oZ - out.z)
+}
+/**
+ * Rejects [a] from [b] and stores the result in [out].
+ *
+ * @return The [out] vector for chaining.
+ */
+fun reject(a: Vector3, b: Vector4, out: Vector4 = Vector4()) : Vector4 {
+    val oX = a.x
+    val oY = a.y
+    val oZ = a.z
+
+    project(a, b, out)
+
+    return out.set(oX - out.x, oY - out.y, oZ - out.z, -out.w)
+}
+
+/**
+ * Rejects [a] from [b] and stores the result in [out].
+ *
+ * @return The [out] vector for chaining.
+ */
+fun reject(a: Vector4, b: Vector2, out: Vector4 = Vector4()) : Vector4 {
+    val oX = a.x
+    val oY = a.y
+    val oZ = a.z
+    val oW = a.w
+
+    project(a, b, out)
+
+    return out.set(oX - out.x, oY - out.y, oZ, oW)
+}
+/**
+ * Rejects [a] from [b] and stores the result in [out].
+ *
+ * @return The [out] vector for chaining.
+ */
+fun reject(a: Vector4, b: Vector3, out: Vector4 = Vector4()) : Vector4 {
+    val oX = a.x
+    val oY = a.y
+    val oZ = a.z
+    val oW = a.w
+
+    project(a, b, out)
+
+    return out.set(oX - out.x, oY - out.y, oZ - out.z, oW)
+}
+/**
+ * Rejects [a] from [b] and stores the result in [out].
+ *
+ * @return The [out] vector for chaining.
+ */
+fun reject(a: Vector4, b: Vector4, out: Vector4 = Vector4()) : Vector4 {
+    val oX = a.x
+    val oY = a.y
+    val oZ = a.z
+    val oW = a.w
+
+    project(a, b, out)
+
+    return out.set(oX - out.x, oY - out.y, oZ - out.z, oW - out.w)
+}
+
+/**
+ * Cross product between [a] and [b] and stores the result in [out].
+ *
+ * @return The [out] vector for chaining.
+ */
+inline fun cross(a: Vector3, b: Vector3, out: Vector3 = Vector3()) = out.set(
+        a.y * b.z - a.z * b.y,
+        a.z * b.x - a.x * b.z,
+        a.x * b.y - a.y * b.x
+)
+
+// ---
+
+inline operator fun Vector2.unaryPlus() = this.copy()
+inline operator fun Vector2.unaryMinus() = negate(this, Vector2())
+
+inline operator fun Vector2.plus(other: Vector2) = add(this, other, Vector2())
+inline operator fun Vector2.plus(other: Vector3) = add(this, other, Vector3())
+inline operator fun Vector2.plus(other: Vector4) = add(this, other, Vector4())
+inline operator fun Vector2.minus(other: Vector2) = subtract(this, other, Vector2())
+inline operator fun Vector2.minus(other: Vector3) = subtract(this, other, Vector3())
+inline operator fun Vector2.minus(other: Vector4) = subtract(this, other, Vector4())
+inline operator fun Vector2.times(scalar: Float) = scale(this, scalar, Vector2())
+inline operator fun Vector2.div(scalar: Float) = times(1 / scalar)
+
+inline operator fun Vector2.plusAssign(other: Vector2) { add(other) }
+inline operator fun Vector2.minusAssign(other: Vector2) { subtract(other) }
+inline operator fun Vector2.timesAssign(scalar: Float) { scale(scalar) }
+inline operator fun Vector2.divAssign(scalar: Float) = timesAssign(1 / scalar)
+
+/**
+ * Negates each component.
+ * 
+ * @return This vector for chaining.
+ */
+inline fun Vector2.negate() = negate(this, this)
+
+/**
+ * Normalizes the vector.
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector2.normalize() = normalize(this, this)
+
+/**
+ * Applies the absolute value to each component.
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector2.abs() = abs(this, this)
+
+/**
+ * Scales this vector (i.e., multiplies each component with [scalar]).
+ * 
+ * @return This vector for chaining.
+ */
+inline fun Vector2.scale(scalar: Float) = scale(this, scalar, this)
+
+/**
+ * Adds [other] to this vector.
+ * 
+ * @return This vector for chaining.
+ */
+inline fun Vector2.add(other: Vector2) = add(this, other, this)
+/**
+ * Adds ([x], [y]) to this vector.
+ * 
+ * @return This vector for chaining.
+ */
+inline fun Vector2.add(x: Float, y: Float) = add(cVector(x, y))
+
+/**
+ * Subtracts [other] from this vector.
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector2.subtract(other: Vector2) = subtract(this, other, this)
+/**
+ * Subtracts ([x], [y]) from this vector.
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector2.subtract(x: Float, y: Float) = subtract(cVector(x, y))
+
+/**
+ * Composes this vector with the smallest components between this vector and [other].
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector2.min(other: Vector2) = min(this, other, this)
+/**
+ * Composes this vector with the smallest components between this vector and ([x], [y]).
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector2.min(x: Float, y: Float) = min(cVector(x, y))
+
+/**
+ * Composes this vector with the largest components between this vector and [other].
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector2.max(other: Vector2) = max(this, other, this)
+/**
+ * Composes this vector with the largest components between this vector and ([x], [y]).
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector2.max(x: Float, y: Float) = max(cVector(x, y))
+
+/**
+ * Projects this vector onto [other].
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector2.projectOnto(other: Vector2) = project(this, other, this)
+/**
+ * Projects this vector onto ([x], [y]).
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector2.projectOnto(x: Float, y: Float) = projectOnto(cVector(x, y))
+
+/**
+ * Rejects this vector from [other].
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector2.rejectFrom(other: Vector2) = reject(this, other, this)
+/**
+ * Rejects this vector from ([x], [y]).
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector2.rejectFrom(x: Float, y: Float) = rejectFrom(cVector(x, y))
+
+/**
+ * Multiplies [matrix] with this vector.
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector2.multiplyLeft(matrix: Matrix2) = multiply(matrix, this, this)
+
+/**
+ * Multiplies [matrix] with this vector. Use this method only if [matrix] is known to be a 2D transformation.
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector2.multiplyLeft(matrix: Matrix4) = multiply(matrix, this, this)
+
+// ---
+
+inline operator fun Vector3.unaryPlus() = this.copy()
+inline operator fun Vector3.unaryMinus() = negate(this, Vector3())
+
+inline operator fun Vector3.plus(other: Vector2) = add(this, other, Vector3())
+inline operator fun Vector3.plus(other: Vector3) = add(this, other, Vector3())
+inline operator fun Vector3.plus(other: Vector4) = add(this, other, Vector4())
+inline operator fun Vector3.minus(other: Vector2) = subtract(this, other, Vector3())
+inline operator fun Vector3.minus(other: Vector3) = subtract(this, other, Vector3())
+inline operator fun Vector3.minus(other: Vector4) = subtract(this, other, Vector4())
+inline operator fun Vector3.times(scalar: Float) = scale(this, scalar, Vector3())
+inline operator fun Vector3.div(scalar: Float) = times(1 / scalar)
+
+inline operator fun Vector3.plusAssign(other: Vector2) { add(other) }
+inline operator fun Vector3.plusAssign(other: Vector3) { add(other) }
+inline operator fun Vector3.minusAssign(other: Vector2) { subtract(other) }
+inline operator fun Vector3.minusAssign(other: Vector3) { subtract(other) }
+inline operator fun Vector3.timesAssign(scalar: Float) { scale(scalar) }
+inline operator fun Vector3.divAssign(scalar: Float) = timesAssign(1 / scalar)
+
+/**
+ * Negates each component.
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector3.negate() = negate(this, this)
+
+/**
+ * Normalizes the vector.
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector3.normalize() = normalize(this, this)
+
+/**
+ * Applies the absolute value to each component.
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector3.abs() = abs(this, this)
+
+/**
+ * Scales this vector (i.e., multiplies each component with [scalar]).
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector3.scale(scalar: Float) = scale(this, scalar, this)
+
+/**
+ * Adds [other] to this vector.
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector3.add(other: Vector2) = add(this, other, this)
+/**
+ * Adds [other] to this vector.
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector3.add(other: Vector3) = add(this, other, this)
+/**
+ * Adds ([x], [y]) to this vector.
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector3.add(x: Float, y: Float) = add(cVector(x, y))
+/**
+ * Adds ([x], [y], [z]) to this vector.
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector3.add(x: Float, y: Float, z: Float) = add(cVector(x, y, z))
+
+/**
+ * Subtracts [other] from this vector.
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector3.subtract(other: Vector2) = subtract(this, other, this)
+/**
+ * Subtracts [other] from this vector.
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector3.subtract(other: Vector3) = subtract(this, other, this)
+/**
+ * Subtracts ([x], [y]) from this vector.
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector3.subtract(x: Float, y: Float) = subtract(cVector(x, y))
+/**
+ * Subtracts ([x], [y], [z]) from this vector.
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector3.subtract(x: Float, y: Float, z: Float) = subtract(cVector(x, y, z))
+
+/**
+ * Composes this vector with the smallest components between this vector and [other].
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector3.min(other: Vector2) = min(this, other, this)
+/**
+ * Composes this vector with the smallest components between this vector and [other].
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector3.min(other: Vector3) = min(this, other, this)
+/**
+ * Composes this vector with the smallest components between this vector and ([x], [y]).
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector3.min(x: Float, y: Float) = min(cVector(x, y))
+/**
+ * Composes this vector with the smallest components between this vector and ([x], [y], [z]).
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector3.min(x: Float, y: Float, z: Float) = min(cVector(x, y, z))
+
+/**
+ * Composes this vector with the largest components between this vector and [other].
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector3.max(other: Vector2) = max(this, other, this)
+/**
+ * Composes this vector with the largest components between this vector and [other].
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector3.max(other: Vector3) = max(this, other, this)
+/**
+ * Composes this vector with the largest components between this vector and ([x], [y]).
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector3.max(x: Float, y: Float) = max(cVector(x, y))
+/**
+ * Composes this vector with the largest components between this vector and ([x], [y], [z]).
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector3.max(x: Float, y: Float, z: Float) = max(cVector(x, y, z))
+
+/**
+ * Projects this vector onto [other].
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector3.projectOnto(other: Vector2) = project(this, other, this)
+/**
+ * Projects this vector onto [other].
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector3.projectOnto(other: Vector3) = project(this, other, this)
+/**
+ * Projects this vector onto ([x], [y]).
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector3.projectOnto(x: Float, y: Float) = projectOnto(cVector(x, y))
+/**
+ * Projects this vector onto ([x], [y], [z]).
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector3.projectOnto(x: Float, y: Float, z: Float) = projectOnto(cVector(x, y, z))
+
+/**
+ * Rejects this vector from [other].
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector3.rejectFrom(other: Vector2) = reject(this, other, this)
+/**
+ * Rejects this vector from [other].
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector3.rejectFrom(other: Vector3) = reject(this, other, this)
+/**
+ * Rejects this vector from ([x], [y]).
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector3.rejectFrom(x: Float, y: Float) = rejectFrom(cVector(x, y))
+/**
+ * Rejects this vector from ([x], [y], [z]).
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector3.rejectFrom(x: Float, y: Float, z: Float) = rejectFrom(cVector(x, y, z))
+
+/**
+ * Cross product between this vector and [other].
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector3.cross(other: Vector3) = cross(this, other, this)
+/**
+ * Cross product between this vector and ([x], [y], [z]).
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector3.cross(x: Float, y: Float, z: Float) = cross(cVector(x, y, z))
+
+/**
+ * Multiplies [matrix] with this vector.
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector3.multiplyLeft(matrix: Matrix3) = multiply(matrix, this, this)
+
+/**
+ * Multiplies [matrix] with this vector. Use this method only if [matrix] is known to be a transformation.
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector3.multiplyLeft(matrix: Matrix4) = multiply(matrix, this, this)
+
+// ---
+
+inline operator fun Vector4.unaryPlus() = this.copy()
+inline operator fun Vector4.unaryMinus() = negate(this, Vector4())
+
+inline operator fun Vector4.plus(other: Vector2) = add(this, other, Vector4())
+inline operator fun Vector4.plus(other: Vector3) = add(this, other, Vector4())
+inline operator fun Vector4.plus(other: Vector4) = add(this, other, Vector4())
+inline operator fun Vector4.minus(other: Vector2) = subtract(this, other, Vector4())
+inline operator fun Vector4.minus(other: Vector3) = subtract(this, other, Vector4())
+inline operator fun Vector4.minus(other: Vector4) = subtract(this, other, Vector4())
+inline operator fun Vector4.times(scalar: Float) = scale(this, scalar, Vector4())
+inline operator fun Vector4.div(scalar: Float) = times(1 / scalar)
+
+inline operator fun Vector4.plusAssign(other: Vector2) { add(other) }
+inline operator fun Vector4.plusAssign(other: Vector3) { add(other) }
+inline operator fun Vector4.plusAssign(other: Vector4) { add(other) }
+inline operator fun Vector4.minusAssign(other: Vector2) { subtract(other) }
+inline operator fun Vector4.minusAssign(other: Vector3) { subtract(other) }
+inline operator fun Vector4.minusAssign(other: Vector4) { subtract(other) }
+inline operator fun Vector4.timesAssign(scalar: Float) { scale(scalar) }
+inline operator fun Vector4.divAssign(scalar: Float) = timesAssign(1 / scalar)
+
+/**
+ * Negates each component.
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector4.negate() = negate(this, this)
+
+/**
+ * Normalizes the vector.
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector4.normalize() = normalize(this, this)
+
+/**
+ * Applies the absolute value to each component.
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector4.abs() = abs(this, this)
+
+/**
+ * Scales this vector (i.e., multiplies each component with [scalar]).
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector4.scale(scalar: Float) = scale(this, scalar, this)
+
+/**
+ * Adds [other] to this vector.
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector4.add(other: Vector2) = add(this, other, this)
+/**
+ * Adds [other] to this vector.
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector4.add(other: Vector3) = add(this, other, this)
+/**
+ * Adds [other] to this vector.
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector4.add(other: Vector4) = add(this, other, this)
+/**
+ * Adds ([x], [y]) to this vector.
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector4.add(x: Float, y: Float) = add(cVector(x, y))
+/**
+ * Adds ([x], [y], [z]) to this vector.
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector4.add(x: Float, y: Float, z: Float) = add(cVector(x, y, z))
+/**
+ * Adds ([x], [y], [z], [w]) to this vector.
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector4.add(x: Float, y: Float, z: Float, w: Float) = add(cVector(x, y, z, w))
+
+/**
+ * Subtracts [other] from this vector.
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector4.subtract(other: Vector2) = subtract(this, other, this)
+/**
+ * Subtracts [other] from this vector.
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector4.subtract(other: Vector3) = subtract(this, other, this)
+/**
+ * Subtracts [other] from this vector.
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector4.subtract(other: Vector4) = subtract(this, other, this)
+/**
+ * Subtracts ([x], [y]) from this vector.
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector4.subtract(x: Float, y: Float) = subtract(cVector(x, y))
+/**
+ * Subtracts ([x], [y], [z]) from this vector.
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector4.subtract(x: Float, y: Float, z: Float) = subtract(cVector(x, y, z))
+/**
+ * Subtracts ([x], [y], [z], [w]) from this vector.
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector4.subtract(x: Float, y: Float, z: Float, w: Float) = subtract(cVector(x, y, z, w))
+
+/**
+ * Composes this vector with the smallest components between this vector and [other].
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector4.min(other: Vector2) = min(this, other, this)
+/**
+ * Composes this vector with the smallest components between this vector and [other].
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector4.min(other: Vector3) = min(this, other, this)
+/**
+ * Composes this vector with the smallest components between this vector and [other].
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector4.min(other: Vector4) = min(this, other, this)
+/**
+ * Composes this vector with the smallest components between this vector and ([x], [y]).
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector4.min(x: Float, y: Float) = min(cVector(x, y))
+/**
+ * Composes this vector with the smallest components between this vector and ([x], [y], [z]).
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector4.min(x: Float, y: Float, z: Float) = min(cVector(x, y, z))
+/**
+ * Composes this vector with the smallest components between this vector and ([x], [y], [z], [w]).
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector4.min(x: Float, y: Float, z: Float, w: Float) = min(cVector(x, y, z, w))
+
+/**
+ * Composes this vector with the largest components between this vector and [other].
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector4.max(other: Vector2) = max(this, other, this)
+/**
+ * Composes this vector with the largest components between this vector and [other].
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector4.max(other: Vector3) = max(this, other, this)
+/**
+ * Composes this vector with the largest components between this vector and [other].
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector4.max(other: Vector4) = max(this, other, this)
+/**
+ * Composes this vector with the largest components between this vector and ([x], [y]).
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector4.max(x: Float, y: Float) = max(cVector(x, y))
+/**
+ * Composes this vector with the largest components between this vector and ([x], [y], [z]).
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector4.max(x: Float, y: Float, z: Float) = max(cVector(x, y, z))
+/**
+ * Composes this vector with the largest components between this vector and ([x], [y], [z], [w]).
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector4.max(x: Float, y: Float, z: Float, w: Float) = max(cVector(x, y, z, w))
+
+/**
+ * Projects this vector onto [other].
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector4.projectOnto(other: Vector2) = project(this, other, this)
+/**
+ * Projects this vector onto [other].
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector4.projectOnto(other: Vector3) = project(this, other, this)
+/**
+ * Projects this vector onto [other].
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector4.projectOnto(other: Vector4) = project(this, other, this)
+/**
+ * Projects this vector onto ([x], [y]).
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector4.projectOnto(x: Float, y: Float) = projectOnto(cVector(x, y))
+/**
+ * Projects this vector onto ([x], [y], [z]).
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector4.projectOnto(x: Float, y: Float, z: Float) = projectOnto(cVector(x, y, z))
+/**
+ * Projects this vector onto ([x], [y], [z], [w]).
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector4.projectOnto(x: Float, y: Float, z: Float, w: Float) = projectOnto(cVector(x, y, z, w))
+
+/**
+ * Rejects this vector from [other].
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector4.rejectFrom(other: Vector2) = reject(this, other, this)
+/**
+ * Rejects this vector from [other].
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector4.rejectFrom(other: Vector3) = reject(this, other, this)
+/**
+ * Rejects this vector from [other].
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector4.rejectFrom(other: Vector4) = reject(this, other, this)
+/**
+ * Rejects this vector from ([x], [y]).
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector4.rejectFrom(x: Float, y: Float) = rejectFrom(cVector(x, y))
+/**
+ * Rejects this vector from ([x], [y], [z]).
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector4.rejectFrom(x: Float, y: Float, z: Float) = rejectFrom(cVector(x, y, z))
+/**
+ * Rejects this vector from ([x], [y], [z], [w]).
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector4.rejectFrom(x: Float, y: Float, z: Float, w: Float) = rejectFrom(cVector(x, y, z, w))
+
+/**
+ * Multiplies [matrix] with this vector.
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector4.multiplyLeft(matrix: Matrix4) = multiply(matrix, this, this)
+
+// ---
 
 private val v2 by lazy { Vector2() }
 private val v3 by lazy { Vector3() }
@@ -173,887 +1307,6 @@ private val v4 by lazy { Vector4() }
 fun cVector(x: Float, y: Float) = v2.set(x, y)
 fun cVector(x: Float, y: Float, z: Float) = v3.set(x, y, z)
 fun cVector(x: Float, y: Float, z: Float, w: Float) = v4.set(x, y, z, w)
-
-// ---
-
-operator fun Vector2.unaryPlus() = Vector2(this)
-operator fun Vector2.unaryMinus() = negate(Vector2())
-
-operator fun Vector2.plus(other: Vector2) = add(other, Vector2())
-operator fun Vector2.plus(other: Vector3) = other.add(this, Vector3())
-operator fun Vector2.plus(other: Vector4) = other.add(this, Vector4())
-operator fun Vector2.minus(other: Vector2) = subtract(other, Vector2())
-operator fun Vector2.minus(other: Vector3) = other.negate(Vector3()).add(this)
-operator fun Vector2.minus(other: Vector4) = other.negate(Vector4()).add(this)
-operator fun Vector2.times(scalar: Float) = scale(scalar, Vector2())
-operator fun Vector2.div(scalar: Float) = scale(1 / scalar, Vector2())
-
-operator fun Vector2.plusAssign(other: Vector2) { add(other) }
-operator fun Vector2.minusAssign(other: Vector2) { subtract(other) }
-operator fun Vector2.timesAssign(scalar: Float) { scale(scalar) }
-operator fun Vector2.divAssign(scalar: Float) { scale(1 / scalar) }
-
-/**
- * Negates each component.
- *
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector2.negate(out: Vector2 = this) = out.set(-x, -y)
-
-/**
- * Normalizes the vector.
- *
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector2.normalize(out: Vector2 = this) = out.scale(1 / magnitude)
-
-/**
- * Applies the absolute value to each component.
- *
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector2.abs(out: Vector2 = this) = out.set(abs(x), abs(y))
-
-/**
- * Scales this vector (i.e., multiplies each component with [scalar]).
- *
- * @param[scalar] The scalar to multiply the vector with.
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector2.scale(scalar: Float, out: Vector2 = this) = out.set(x * scalar, y * scalar)
-
-/**
- * Adds [other] to this vector.
- *
- * @param[other] The other vector.
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector2.add(other: Vector2, out: Vector2 = this) = out.set(x + other.x, y + other.y)
-/**
- * Adds ([x], [y]) to this vector.
- *
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector2.add(x: Float, y: Float, out: Vector2 = this) = add(cVector(x, y), out)
-
-/**
- * Subtracts [other] from this vector.
- *
- * @param[other] The other vector.
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector2.subtract(other: Vector2, out: Vector2 = this) = out.set(x - other.x, y - other.y)
-/**
- * Subtracts ([x], [y]) from this vector.
- *
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector2.subtract(x: Float, y: Float, out: Vector2 = this) = subtract(cVector(x, y), out)
-
-/**
- * Returns the vector composed of the smallest components between this vector and [other].
- *
- * @param[other] The other vector.
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector2.min(other: Vector2, out: Vector2 = this) = out.set(kotlin.math.min(x, other.x), kotlin.math.min(y, other.y))
-/**
- * Returns the vector composed of the smallest components between this vector and ([x], [y]).
- *
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector2.min(x: Float, y: Float, out: Vector2 = this) = min(cVector(x, y), out)
-
-/**
- * Returns the vector composed of the largest components between this vector and [other].
- *
- * @param[other] The other vector.
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector2.max(other: Vector2, out: Vector2 = this) = out.set(kotlin.math.max(x, other.x), kotlin.math.max(y, other.y))
-/**
- * Returns the vector composed of the largest components between this vector and ([x], [y]).
- *
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector2.max(x: Float, y: Float, out: Vector2 = this) = max(cVector(x, y), out)
-
-/**
- * Projects this vector onto [other].
- *
- * @param[other] The other vector.
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector2.projectOnto(other: Vector2, out: Vector2 = this) : Vector2 {
-    val scalar = dot(other) / other.magnitudeSquared
-
-    return out.set(other).scale(scalar)
-}
-/**
- * Projects this vector onto ([x], [y]).
- *
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector2.projectOnto(x: Float, y: Float, out: Vector2 = this) = projectOnto(cVector(x, y), out)
-
-/**
- * Rejects this vector from [other].
- *
- * @param[other] The other vector.
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector2.rejectFrom(other: Vector2, out: Vector2 = this) : Vector2 {
-    val oX = this.x
-    val oY = this.y
-
-    projectOnto(other, out)
-
-    return out.set(oX - out.x, oY - out.y)
-}
-/**
- * Rejects this vector from ([x], [y]).
- *
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector2.rejectFrom(x: Float, y: Float, out: Vector2 = this) = rejectFrom(cVector(x, y), out)
-
-// ---
-
-operator fun Vector3.unaryPlus() = Vector3(this)
-operator fun Vector3.unaryMinus() = negate(Vector3())
-
-operator fun Vector3.plus(other: Vector2) = add(other, Vector3())
-operator fun Vector3.plus(other: Vector3) = add(other, Vector3())
-operator fun Vector3.plus(other: Vector4) = other.add(this, Vector4())
-operator fun Vector3.minus(other: Vector2) = subtract(other, Vector3())
-operator fun Vector3.minus(other: Vector3) = subtract(other, Vector3())
-operator fun Vector3.minus(other: Vector4) = other.negate(Vector4()).add(this)
-operator fun Vector3.times(scalar: Float) = scale(scalar, Vector3())
-operator fun Vector3.div(scalar: Float) = scale(1 / scalar, Vector3())
-
-operator fun Vector3.plusAssign(other: Vector3) { add(other) }
-operator fun Vector3.minusAssign(other: Vector3) { subtract(other) }
-operator fun Vector3.timesAssign(scalar: Float) { scale(scalar) }
-operator fun Vector3.divAssign(scalar: Float) { scale(1 / scalar) }
-
-infix fun Vector3.x(other: Vector3) = cross(other, Vector3())
-
-/**
- * Negates each component.
- *
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector3.negate(out: Vector3 = this) = out.set(-x, -y, -z)
-
-/**
- * Normalizes the vector.
- *
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector3.normalize(out: Vector3 = this) = out.scale(1 / magnitude)
-
-/**
- * Applies the absolute value to each component.
- *
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector3.abs(out: Vector3 = this) = out.set(abs(x), abs(y), abs(z))
-
-/**
- * Scales this vector (i.e., multiplies each component with [scalar]).
- *
- * @param[scalar] The scalar to multiply the vector with.
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector3.scale(scalar: Float, out: Vector3 = this) = out.set(x * scalar, y * scalar, z * scalar)
-
-/**
- * Adds [other] to this vector.
- *
- * @param[other] The other vector.
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector3.add(other: Vector2, out: Vector3 = this) = out.set(x + other.x, y + other.y, z)
-/**
- * Adds ([x], [y]) to this vector.
- *
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector3.add(x: Float, y: Float, out: Vector3 = this) = add(cVector(x, y), out)
-/**
- * Adds [other] to this vector.
- *
- * @param[other] The other vector.
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector3.add(other: Vector3, out: Vector3 = this) = out.set(x + other.x, y + other.y, z + other.z)
-/**
- * Adds ([x], [y], [z]) to this vector.
- *
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector3.add(x: Float, y: Float, z: Float, out: Vector3 = this) = add(cVector(x, y, z), out)
-
-/**
- * Subtracts [other] from this vector.
- *
- * @param[other] The other vector.
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector3.subtract(other: Vector2, out: Vector3 = this) = out.set(x - other.x, y - other.y, z)
-/**
- * Subtracts ([x], [y]) from this vector.
- *
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector3.subtract(x: Float, y: Float, out: Vector3 = this) = subtract(cVector(x, y), out)
-/**
- * Subtracts [other] from this vector.
- *
- * @param[other] The other vector.
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector3.subtract(other: Vector3, out: Vector3 = this) = out.set(x - other.x, y - other.y, z - other.z)
-/**
- * Subtracts ([x], [y], [z]) from this vector.
- *
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector3.subtract(x: Float, y: Float, z: Float, out: Vector3 = this) = subtract(cVector(x, y, z), out)
-
-/**
- * Returns the vector composed of the smallest components between this vector and [other].
- *
- * @param[other] The other vector.
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector3.min(other: Vector2, out: Vector3 = this) = out.set(kotlin.math.min(x, other.x), kotlin.math.min(y, other.y), kotlin.math.min(z, other.z))
-/**
- * Returns the vector composed of the smallest components between this vector and ([x], [y]).
- *
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector3.min(x: Float, y: Float, out: Vector3 = this) = min(cVector(x, y), out)
-/**
- * Returns the vector composed of the smallest components between this vector and [other].
- *
- * @param[other] The other vector.
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector3.min(other: Vector3, out: Vector3 = this) = out.set(kotlin.math.min(x, other.x), kotlin.math.min(y, other.y), kotlin.math.min(z, other.z))
-/**
- * Returns the vector composed of the smallest components between this vector and ([x], [y], [z]).
- *
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector3.min(x: Float, y: Float, z: Float, out: Vector3 = this) = min(cVector(x, y, z), out)
-
-/**
- * Returns the vector composed of the largest components between this vector and [other].
- *
- * @param[other] The other vector.
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector3.max(other: Vector2, out: Vector3 = this) = out.set(kotlin.math.max(x, other.x), kotlin.math.max(y, other.y), kotlin.math.max(z, other.z))
-/**
- * Returns the vector composed of the largest components between this vector and ([x], [y]).
- *
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector3.max(x: Float, y: Float, out: Vector3 = this) = max(cVector(x, y), out)
-/**
- * Returns the vector composed of the largest components between this vector and [other].
- *
- * @param[other] The other vector.
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector3.max(other: Vector3, out: Vector3 = this) = out.set(kotlin.math.max(x, other.x), kotlin.math.max(y, other.y), kotlin.math.max(z, other.z))
-/**
- * Returns the vector composed of the largest components between this vector and ([x], [y], [z]).
- *
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector3.max(x: Float, y: Float, z: Float, out: Vector3 = this) = max(cVector(x, y, z), out)
-
-/**
- * Projects this vector onto [other].
- *
- * @param[other] The other vector.
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector3.projectOnto(other: Vector2, out: Vector2): Vector2 {
-    val scalar = dot(other) / other.magnitudeSquared
-
-    return out.set(other).scale(scalar)
-}
-/**
- * Projects this vector onto ([x], [y]).
- *
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector3.projectOnto(x: Float, y: Float, out: Vector2) = projectOnto(cVector(x, y), out)
-/**
- * Projects this vector onto [other].
- *
- * @param[other] The other vector.
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector3.projectOnto(other: Vector2, out: Vector3 = this): Vector3 {
-    val scalar = dot(other) / other.magnitudeSquared
-
-    return out.set(other).scale(scalar)
-}
-/**
- * Projects this vector onto ([x], [y]).
- *
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector3.projectOnto(x: Float, y: Float, out: Vector3) = projectOnto(cVector(x, y), out)
-
-/**
- * Projects this vector onto [other].
- *
- * @param[other] The other vector.
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector3.projectOnto(other: Vector3, out: Vector3 = this) : Vector3 {
-    val scalar = dot(other) / other.magnitudeSquared
-
-    return out.set(other).scale(scalar)
-}
-/**
- * Projects this vector onto ([x], [y], [z]).
- *
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector3.projectOnto(x: Float, y: Float, z: Float, out: Vector3 = this) = projectOnto(cVector(x, y, z), out)
-
-/**
- * Rejects this vector from [other].
- *
- * @param[other] The other vector.
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector3.rejectFrom(other: Vector2, out: Vector3 = this) : Vector3 {
-    val oX = this.x
-    val oY = this.y
-    val oZ = this.z
-
-    projectOnto(other, out)
-
-    return out.set(oX - out.x, oY - out.y, oZ)
-}
-/**
- * Rejects this vector from ([x], [y]).
- *
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector3.rejectFrom(x: Float, y: Float, out: Vector3 = this) = rejectFrom(cVector(x, y), out)
-
-/**
- * Rejects this vector from [other].
- *
- * @param[other] The other vector.
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector3.rejectFrom(other: Vector3, out: Vector3 = this) : Vector3 {
-    val oX = this.x
-    val oY = this.y
-    val oZ = this.z
-
-    projectOnto(other, out)
-
-    return out.set(oX - out.x, oY - out.y, oZ - out.z)
-}
-/**
- * Rejects this vector from ([x], [y], [z]).
- *
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector3.rejectFrom(x: Float, y: Float, z: Float, out: Vector3 = this) = rejectFrom(cVector(x, y, z), out)
-
-/**
- * Cross product between this vector and [other].
- *
- * @param[other] The other vector.
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector3.cross(other: Vector3, out: Vector3 = this) = out.set(
-        y * other.z - z * other.y,
-        z * other.x - x * other.z,
-        x * other.y - y * other.x
-)
-/**
- * Cross product between this vector and ([x], [y], [z]).
- *
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector3.cross(x: Float, y: Float, z: Float, out: Vector3 = this) = cross(cVector(x, y, z), out)
-
-// ---
-
-operator fun Vector4.unaryPlus() = Vector4(this)
-operator fun Vector4.unaryMinus() = negate(Vector4())
-
-operator fun Vector4.plus(other: Vector2) = add(other, Vector4())
-operator fun Vector4.plus(other: Vector3) = add(other, Vector4())
-operator fun Vector4.plus(other: Vector4) = add(other, Vector4())
-operator fun Vector4.minus(other: Vector2) = subtract(other, Vector4())
-operator fun Vector4.minus(other: Vector3) = subtract(other, Vector4())
-operator fun Vector4.minus(other: Vector4) = subtract(other, Vector4())
-operator fun Vector4.times(scalar: Float) = scale(scalar, Vector4())
-operator fun Vector4.div(scalar: Float) = scale(1 / scalar, Vector4())
-
-operator fun Vector4.plusAssign(other: Vector4) { add(other) }
-operator fun Vector4.minusAssign(other: Vector4) { subtract(other) }
-operator fun Vector4.timesAssign(scalar: Float) { scale(scalar) }
-operator fun Vector4.divAssign(scalar: Float) { scale(1 / scalar) }
-
-/**
- * Negates each component.
- *
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector4.negate(out: Vector4 = this) = out.set(-x, -y, -z, -w)
-
-/**
- * Normalizes the vector.
- *
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector4.normalize(out: Vector4 = this) = out.scale(1 / magnitude)
-
-/**
- * Applies the absolute value to each component.
- *
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector4.abs(out: Vector4 = this) = out.set(abs(x), abs(y), abs(z), abs(w))
-
-/**
- * Scales this vector (i.e., multiplies each component with [scalar]).
- *
- * @param[scalar] The scalar to multiply the vector with.
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector4.scale(scalar: Float, out: Vector4 = this) = out.set(x * scalar, y * scalar, z * scalar, w * scalar)
-
-/**
- * Adds [other] to this vector.
- *
- * @param[other] The other vector.
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector4.add(other: Vector2, out: Vector4 = this) = out.set(x + other.x, y + other.y, z, w)
-/**
- * Adds ([x], [y]) to this vector.
- *
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector4.add(x: Float, y: Float, out: Vector4 = this) = add(cVector(x, y), out)
-
-/**
- * Adds [other] to this vector.
- *
- * @param[other] The other vector.
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector4.add(other: Vector3, out: Vector4 = this) = out.set(x + other.x, y + other.y, z + other.z, w)
-/**
- * Adds ([x], [y], [z]) to this vector.
- *
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector4.add(x: Float, y: Float, z: Float, out: Vector4 = this) = add(cVector(x, y, z), out)
-
-/**
- * Adds [other] to this vector.
- *
- * @param[other] The other vector.
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector4.add(other: Vector4, out: Vector4 = this) = out.set(x + other.x, y + other.y, z + other.z, w + other.w)
-/**
- * Adds ([x], [y], [z], [w]) to this vector.
- *
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector4.add(x: Float, y: Float, z: Float, w: Float, out: Vector4 = this) = add(cVector(x, y, z, w), out)
-
-/**
- * Subtracts [other] from this vector.
- *
- * @param[other] The other vector.
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector4.subtract(other: Vector2, out: Vector4 = this) = out.set(x - other.x, y - other.y, z, w)
-/**
- * Subtracts ([x], [y]) from this vector.
- *
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector4.subtract(x: Float, y: Float, out: Vector4 = this) = subtract(cVector(x, y), out)
-
-/**
- * Subtracts [other] from this vector.
- *
- * @param[other] The other vector.
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector4.subtract(other: Vector3, out: Vector4 = this) = out.set(x - other.x, y - other.y, z - other.z, w)
-/**
- * Subtracts ([x], [y], [z]) from this vector.
- *
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector4.subtract(x: Float, y: Float, z: Float, out: Vector4 = this) = subtract(cVector(x, y, z), out)
-
-/**
- * Subtracts [other] from this vector.
- *
- * @param[other] The other vector.
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector4.subtract(other: Vector4, out: Vector4 = this) = out.set(x - other.x, y - other.y, z - other.z, w - other.w)
-/**
- * Subtracts ([x], [y], [z], [w]) from this vector.
- *
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector4.subtract(x: Float, y: Float, z: Float, w: Float, out: Vector4 = this) = subtract(cVector(x, y, z, w), out)
-
-/**
- * Returns the vector composed of the smallest components between this vector and [other].
- *
- * @param[other] The other vector.
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector4.min(other: Vector2, out: Vector4 = this) = out.set(kotlin.math.min(x, other.x), kotlin.math.min(y, other.y), kotlin.math.min(z, other.z), kotlin.math.min(w, other.w))
-/**
- * Returns the vector composed of the smallest components between this vector and ([x], [y]).
- *
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector4.min(x: Float, y: Float, out: Vector4 = this) = min(cVector(x, y), out)
-
-/**
- * Returns the vector composed of the smallest components between this vector and [other].
- *
- * @param[other] The other vector.
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector4.min(other: Vector3, out: Vector4 = this) = out.set(kotlin.math.min(x, other.x), kotlin.math.min(y, other.y), kotlin.math.min(z, other.z), kotlin.math.min(w, other.w))
-/**
- * Returns the vector composed of the smallest components between this vector and ([x], [y], [z]).
- *
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector4.min(x: Float, y: Float, z: Float, out: Vector4 = this) = min(cVector(x, y, z), out)
-
-/**
- * Returns the vector composed of the smallest components between this vector and [other].
- *
- * @param[other] The other vector.
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector4.min(other: Vector4, out: Vector4 = this) = out.set(kotlin.math.min(x, other.x), kotlin.math.min(y, other.y), kotlin.math.min(z, other.z), kotlin.math.min(w, other.w))
-/**
- * Returns the vector composed of the smallest components between this vector and ([x], [y], [z], [w]).
- *
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector4.min(x: Float, y: Float, z: Float, w: Float, out: Vector4 = this) = min(cVector(x, y, z, w), out)
-
-/**
- * Returns the vector composed of the largest components between this vector and [other].
- *
- * @param[other] The other vector.
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector4.max(other: Vector2, out: Vector4 = this) = out.set(kotlin.math.max(x, other.x), kotlin.math.max(y, other.y), kotlin.math.max(z, other.z), kotlin.math.max(w, other.w))
-/**
- * Returns the vector composed of the largest components between this vector and ([x], [y]).
- *
- * @param[other] The other vector.
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector4.max(x: Float, y: Float, out: Vector4 = this) = max(cVector(x, y), out)
-
-/**
- * Returns the vector composed of the largest components between this vector and [other].
- *
- * @param[other] The other vector.
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector4.max(other: Vector3, out: Vector4 = this) = out.set(kotlin.math.max(x, other.x), kotlin.math.max(y, other.y), kotlin.math.max(z, other.z), kotlin.math.max(w, other.w))
-/**
- * Returns the vector composed of the largest components between this vector and ([x], [y], [z]).
- *
- * @param[other] The other vector.
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector4.max(x: Float, y: Float, z: Float, out: Vector4 = this) = max(cVector(x, y, z), out)
-
-/**
- * Returns the vector composed of the largest components between this vector and [other].
- *
- * @param[other] The other vector.
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector4.max(other: Vector4, out: Vector4 = this) = out.set(kotlin.math.max(x, other.x), kotlin.math.max(y, other.y), kotlin.math.max(z, other.z), kotlin.math.max(w, other.w))
-/**
- * Returns the vector composed of the largest components between this vector and ([x], [y], [z], [w]).
- *
- * @param[other] The other vector.
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector4.max(x: Float, y: Float, z: Float, w: Float, out: Vector4 = this) = max(cVector(x, y, z, w), out)
-
-/**
- * Projects this vector onto [other].
- *
- * @param[other] The other vector.
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector4.projectOnto(other: Vector2, out: Vector2) : Vector2 {
-    val scalar = dot(other) / other.magnitudeSquared
-
-    return out.set(other).scale(scalar)
-}
-/**
- * Projects this vector onto ([x], [y]).
- *
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector4.projectOnto(x: Float, y: Float, out: Vector2) = projectOnto(cVector(x, y), out)
-/**
- * Projects this vector onto [other].
- *
- * @param[other] The other vector.
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector4.projectOnto(other: Vector2, out: Vector4 = this) : Vector4 {
-    val scalar = dot(other) / other.magnitudeSquared
-
-    return out.set(other).scale(scalar)
-}
-/**
- * Projects this vector onto ([x], [y]).
- *
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector4.projectOnto(x: Float, y: Float, out: Vector4 = this) = projectOnto(cVector(x, y), out)
-
-/**
- * Projects this vector onto [other].
- *
- * @param[other] The other vector.
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector4.projectOnto(other: Vector3, out: Vector3) : Vector3 {
-    val scalar = dot(other) / other.magnitudeSquared
-
-    return out.set(other).scale(scalar)
-}
-/**
- * Projects this vector onto ([x], [y], [z]).
- *
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector4.projectOnto(x: Float, y: Float, z: Float, out: Vector3) = projectOnto(cVector(x, y, z), out)
-/**
- * Projects this vector onto [other].
- *
- * @param[other] The other vector.
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector4.projectOnto(other: Vector3, out: Vector4 = this) : Vector4 {
-    val scalar = dot(other) / other.magnitudeSquared
-
-    return out.set(other).scale(scalar)
-}
-/**
- * Projects this vector onto ([x], [y], [z]).
- *
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector4.projectOnto(x: Float, y: Float, z: Float, out: Vector4 = this) = projectOnto(cVector(x, y, z), out)
-
-/**
- * Projects this vector onto [other].
- *
- * @param[other] The other vector.
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector4.projectOnto(other: Vector4, out: Vector4 = this) : Vector4 {
-    val scalar = dot(other) / other.magnitudeSquared
-
-    return out.set(other).scale(scalar)
-}
-/**
- * Projects this vector onto ([x], [y], [z], [w]).
- *
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector4.projectOnto(x: Float, y: Float, z: Float, w: Float, out: Vector4 = this) = projectOnto(cVector(x, y, z, w), out)
-
-/**
- * Rejects this vector from [other].
- *
- * @param[other] The other vector.
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector4.rejectFrom(other: Vector2, out: Vector4 = this) : Vector4 {
-    val oX = this.x
-    val oY = this.y
-    val oZ = this.z
-    val oW = this.w
-
-    projectOnto(other, out)
-
-    return out.set(oX - x, oY - y, oZ, oW)
-}
-/**
- * Rejects this vector from ([x], [y]).
- *
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector4.rejectFrom(x: Float, y: Float, out: Vector4 = this) = rejectFrom(cVector(x, y), out)
-
-/**
- * Rejects this vector from [other].
- *
- * @param[other] The other vector.
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector4.rejectFrom(other: Vector3, out: Vector4 = this) : Vector4 {
-    val oX = this.x
-    val oY = this.y
-    val oZ = this.z
-    val oW = this.w
-
-    projectOnto(other, out)
-
-    return out.set(oX - x, oY - y, oZ - z, oW)
-}
-/**
- * Rejects this vector from ([x], [y], [z]).
- *
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector4.rejectFrom(x: Float, y: Float, z: Float, out: Vector4 = this) = rejectFrom(cVector(x, y, z), out)
-
-/**
- * Rejects this vector from [other].
- *
- * @param[other] The other vector.
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector4.rejectFrom(other: Vector4, out: Vector4 = this) : Vector4 {
-    val oX = this.x
-    val oY = this.y
-    val oZ = this.z
-    val oW = this.w
-
-    projectOnto(other, out)
-
-    return out.set(oX - x, oY - y, oZ - z, oW - w)
-}
-/**
- * Rejects this vector from ([x], [y], [z], [w]).
- *
- * @param[out] The vector that stores the result.
- * @return The output vector for chaining.
- */
-fun Vector4.rejectFrom(x: Float, y: Float, z: Float, w: Float, out: Vector4 = this) = rejectFrom(cVector(x, y, z, w), out)
+fun cVector(other: Vector2) = v2.set(other)
+fun cVector(other: Vector3) = v3.set(other)
+fun cVector(other: Vector4) = v4.set(other)

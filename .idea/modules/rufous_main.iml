@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module version="4">
+  <component name="FacetManager">
+    <facet type="kotlin-language" name="Kotlin">
+      <configuration version="3" platform="JVM 1.8" useProjectSettings="false">
+        <compilerSettings />
+        <compilerArguments>
+          <option name="destination" value="$MODULE_DIR$/../../build/classes/kotlin/main" />
+          <option name="classpath" value="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib-jdk8/1.3.10/71d0fa967493eb76648b575edf1762cb2d0c7f10/kotlin-stdlib-jdk8-1.3.10.jar:/home/lisandroct/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-assimp/3.2.0/c399181a0725dcc3b3edcc6116da7f724c6ad1c6/lwjgl-assimp-3.2.0.jar:/home/lisandroct/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-assimp/3.2.0/e36e88b2c8cfae5393b4e7006d9ab926c73e2f9d/lwjgl-assimp-3.2.0-natives-linux.jar:/home/lisandroct/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-glfw/3.2.0/9ff0ed06de0a1d83dd182f2ead48ac4c90865c44/lwjgl-glfw-3.2.0.jar:/home/lisandroct/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-glfw/3.2.0/2d270a9146ae47e929f5b6295eeb4e51a5ff577b/lwjgl-glfw-3.2.0-natives-linux.jar:/home/lisandroct/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-opengl/3.2.0/1c64c692473a70af297651d369debc93efa2e49f/lwjgl-opengl-3.2.0.jar:/home/lisandroct/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-opengl/3.2.0/953ac48def909b1c67fc54299f5c403479ef8ac7/lwjgl-opengl-3.2.0-natives-linux.jar:/home/lisandroct/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-stb/3.2.0/cd60eafae0690e024fab99e9864a2ea8e56d86a8/lwjgl-stb-3.2.0.jar:/home/lisandroct/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-stb/3.2.0/1ea72c3849ca94669a9dafe69e8acc7f22fe3925/lwjgl-stb-3.2.0-natives-linux.jar:/home/lisandroct/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl/3.2.0/7723544dc3fc740f0ee59cce9a3a0cecc8681747/lwjgl-3.2.0.jar:/home/lisandroct/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl/3.2.0/4c23e3f9ae657a52bddfa1c92d1b0ba770259eed/lwjgl-3.2.0-natives-linux.jar:/home/lisandroct/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib-jdk7/1.3.10/4d147bf43060dc43d61b096e24da1e67dfe0c032/kotlin-stdlib-jdk7-1.3.10.jar:/home/lisandroct/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/1.3.10/b178c1501609c6e4ee8be635513cb023a466457d/kotlin-stdlib-1.3.10.jar:/home/lisandroct/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib-common/1.3.10/1b19d99229dcedad7caf50534dce38fe82845269/kotlin-stdlib-common-1.3.10.jar:/home/lisandroct/.gradle/caches/modules-2/files-2.1/org.jetbrains/annotations/13.0/919f0dfe192fb4e063e7dacadee7f8bb9a2672a9/annotations-13.0.jar" />
+          <option name="noStdlib" value="true" />
+          <option name="noReflect" value="true" />
+          <option name="moduleName" value="rufous" />
+          <option name="jvmTarget" value="1.8" />
+          <option name="addCompilerBuiltIns" value="true" />
+          <option name="loadBuiltInsFromDependencies" value="true" />
+          <option name="languageVersion" value="1.3" />
+          <option name="apiVersion" value="1.3" />
+          <option name="pluginOptions">
+            <array />
+          </option>
+          <option name="pluginClasspaths">
+            <array />
+          </option>
+        </compilerArguments>
+      </configuration>
+    </facet>
+  </component>
+</module>
