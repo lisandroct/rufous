@@ -48,4 +48,6 @@ class File(fileName: String, fileType: FileType) {
         native.mkdirs()
         native.createNewFile()
     }
+
+    fun readBytes() = native.readBytes()
 }

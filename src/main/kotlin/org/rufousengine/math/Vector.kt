@@ -6,7 +6,7 @@ import kotlin.math.*
 /**
  * An abstract vector.
  *
- * The purpose of the [Vector] classes is to represent directions. To represent positions, use [Point] instead.
+ * The purpose of the [Vector] classes is to represent directions. To represent positions, useProgram [Point] instead.
  *
  * @property[components] The components.
  * @constructor Creates a vector pointing towards ([components].[0], [components].[1], ..., [components].[size - 1]).
@@ -57,7 +57,7 @@ sealed class Vector(val components: FloatArray) {
 /**
  * A two-dimensional vector.
  *
- * The purpose of the [Vector] classes is to represent directions. To represent positions, use [Point] instead.
+ * The purpose of the [Vector] classes is to represent directions. To represent positions, useProgram [Point] instead.
  *
  * @property[x] The x component.
  * @property[y] The y component.
@@ -103,7 +103,7 @@ class Vector2(x: Float = 0f, y: Float = 0f): Vector(floatArrayOf(x, y)) {
 /**
  * A three-dimensional vector.
  *
- * The purpose of the [Vector] classes is to represent directions. To represent positions, use [Point] instead.
+ * The purpose of the [Vector] classes is to represent directions. To represent positions, useProgram [Point] instead.
  *
  * @property[x] The x component.
  * @property[y] The y component.
@@ -154,7 +154,7 @@ class Vector3(x: Float = 0f, y: Float = 0f, z: Float = 0f): Vector(floatArrayOf(
 /**
  * A four-dimensional vector.
  *
- * The purpose of the [Vector] classes is to represent directions. To represent positions, use [Point] instead.
+ * The purpose of the [Vector] classes is to represent directions. To represent positions, useProgram [Point] instead.
  *
  * @property[x] The x component.
  * @property[y] The y component.

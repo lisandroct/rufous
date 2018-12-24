@@ -6,7 +6,7 @@ import kotlin.math.max
 /**
  * An abstract point.
  *
- * The purpose of the [Point] classes is to represent positions. To represent directions, use [Vector] instead.
+ * The purpose of the [Point] classes is to represent positions. To represent directions, useProgram [Vector] instead.
  *
  * @property[components] The components.
  * @constructor Creates a point at ([components].[0], [components].[1], ..., [components].[size - 1]).
@@ -56,7 +56,7 @@ sealed class Point(val components: FloatArray) {
 /**
  * A 2D point.
  *
- * The purpose of the [Point] classes is to represent positions. To represent directions, use [Vector] instead.
+ * The purpose of the [Point] classes is to represent positions. To represent directions, useProgram [Vector] instead.
  *
  * @property[x] The x component.
  * @property[y] The y component.
@@ -102,7 +102,7 @@ class Point2D(x: Float = 0f, y: Float = 0f): Point(floatArrayOf(x, y)) {
 /**
  * A 3D point.
  *
- * The purpose of the [Point] classes is to represent positions. To represent directions, use [Vector] instead.
+ * The purpose of the [Point] classes is to represent positions. To represent directions, useProgram [Vector] instead.
  *
  * @property[x] The x component.
  * @property[y] The y component.

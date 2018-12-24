@@ -19,20 +19,19 @@ fun orthographic(width: Float, height: Float, near: Float, far: Float, matrix: M
         throw IllegalArgumentException("far must be greater than near.")
     }
 
-    val a = 1 / (far - near)
     val r = width * 0.5f
     val t = height * 0.5f
 
     val e00 = 1 / r
     val e11 = 1 / t
-    val e22 = -2 * a
-    val e32 = -(far + near) * a
+    val e22 = -2f / (far - near)
+    val e23 = -(far + near) / (far - near)
 
     return matrix.set(
             e00, 0f, 0f, 0f,
             0f, e11, 0f, 0f,
-            0f, 0f, e22, 0f,
-            0f, 0f, e32, 1f
+            0f, 0f, e22, e23,
+            0f, 0f, 0f, 1f
     )
 }
 /*
@@ -93,17 +92,21 @@ fun perspective(fieldOfView: Float, aspectRatio: Float, near: Float, far: Float,
         throw IllegalArgumentException("far must be greater than near.")
     }
 
-    val a = 1f / tan(fieldOfView.toRadians() * 0.5f)
-    val b = 1f / (far - near)
-    val e00 = a / aspectRatio
-    val e22 = -(far + near) * b
-    val e32 = -2f * far * near * b
+    val fov = fieldOfView.toRadians()
+    val tfov = 1 / tan(fov * 0.5f)
+    val zm = far - near
+    val zp = far + near
+
+    val e00 = tfov / aspectRatio
+    val e11 = tfov
+    val e22 = -zp / zm
+    val e23 = -(2f * far * near) / zm
 
     return matrix.set(
             e00, 0f, 0f, 0f,
-            0f, a, 0f, 0f,
-            0f, 0f, e22, -1f,
-            0f, 0f, e32, 0f
+            0f, e11, 0f, 0f,
+            0f, 0f, e22, e23,
+            0f, 0f, -1f, 0f
     )
 }
 /*

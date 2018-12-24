@@ -125,5 +125,5 @@ class ColorInt(r: Float = 1f, g: Float = 1f, b: Float = 1f, a: Float = 1f, val b
         return this
     }
 
-    fun copy() = ColorFloat(this)
+    fun copy() = ColorInt(this)
 }
