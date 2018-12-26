@@ -1,11 +1,12 @@
-@file:Suppress("NOTHING_TO_INLINE")
-
 package org.rufousengine.graphics
 
+import org.rufousengine.graphics.internal.ErrorMaterial
 import org.rufousengine.math.Matrix4
 import org.rufousengine.system.GL
 
 object Graphics {
+    val errorMaterial = ErrorMaterial()
+
     fun draw(mesh: Mesh) {
         GL.bindVertexArray(mesh.vao)
         GL.drawElements(mesh.count)
@@ -14,7 +15,7 @@ object Graphics {
 
     fun render(model: Model, world: Matrix4, view: Matrix4, projection: Matrix4) {
         for(mesh in model.meshes) {
-            val material = model.getMaterial(mesh) ?: Materials.default
+            val material = model.getMaterial(mesh) ?: errorMaterial
 
             GL.useProgram(material.program)
             material.setTransformParameters(world, view, projection)

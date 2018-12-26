@@ -4,7 +4,7 @@ import org.rufousengine.editor.MeshesLoader
 import org.rufousengine.editor.TextureLoader
 import org.rufousengine.files.Files
 import org.rufousengine.graphics.*
-import org.rufousengine.internal.UnlitMaterial
+import org.rufousengine.graphics.internal.UnlitMaterial
 import org.rufousengine.math.*
 import org.rufousengine.system.GL
 
@@ -49,7 +49,7 @@ class Application {
 
     init {
         model.setMaterial(meshes[0], mat0)
-        model.setMaterial(meshes[1], mat1)
+        //model.setMaterial(meshes[1], mat1)
     }
 
     fun render() {
