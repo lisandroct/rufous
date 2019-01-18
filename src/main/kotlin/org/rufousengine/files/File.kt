@@ -7,7 +7,7 @@ import java.io.IOException
 private typealias NativeFile = java.io.File
 
 class File(fileName: String, fileType: FileType) {
-    private val native : NativeFile
+    val native : NativeFile
     private val type : FileType
 
     val readonly: Boolean

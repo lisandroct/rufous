@@ -10,7 +10,7 @@ import java.nio.ByteBuffer
 object TextureLoader {
     fun load(file: File, sRGB: Boolean = true) : Texture {
         if(!file.exists || !file.isFile) {
-            throw Exception("Error loading model")
+            throw Exception("Error loading function")
         }
 
         val fileBytes = file.readBytes()

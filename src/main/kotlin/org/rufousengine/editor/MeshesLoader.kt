@@ -6,12 +6,11 @@ import org.lwjgl.system.MemoryUtil
 import org.rufousengine.files.File
 import org.rufousengine.graphics.Mesh
 import org.rufousengine.graphics.VertexAttribute
-import org.rufousengine.graphics.contains
 
 object MeshesLoader {
-    fun load(file: File, flags: Int = VertexAttribute.Position() or VertexAttribute.Normal() or VertexAttribute.UV()) : Array<Mesh> {
+    fun load(file: File, mask: Int = VertexAttribute.mask(VertexAttribute.position, VertexAttribute.normal, VertexAttribute.uv)) : Array<Mesh> {
         if(!file.exists || !file.isFile) {
-            throw Exception("Error loading model")
+            throw Exception("Error loading function")
         }
 
         val fileBytes = file.readBytes()
@@ -19,12 +18,12 @@ object MeshesLoader {
         buffer.put(fileBytes)
         buffer.flip()
 
-        val aiScene = aiImportFileFromMemory(buffer, aiProcess_Triangulate or aiProcess_FlipUVs or aiProcess_JoinIdenticalVertices, file.extension) ?: throw Exception("Error loading model")
+        val aiScene = aiImportFileFromMemory(buffer, aiProcess_Triangulate or aiProcess_FlipUVs or aiProcess_JoinIdenticalVertices, file.extension) ?: throw Exception("Error loading function")
 
         MemoryUtil.memFree(buffer)
 
         if((aiScene.mFlags() and AI_SCENE_FLAGS_INCOMPLETE) != 0) {
-            throw Exception("Error loading model")
+            throw Exception("Error loading function")
         }
 
         val aiMeshes = aiScene.mMeshes() ?: return arrayOf()
@@ -32,7 +31,7 @@ object MeshesLoader {
         val meshes = mutableListOf<Mesh>()
         while(aiMeshes.remaining() > 0) {
             val aiMesh = AIMesh.create(aiMeshes.get())
-            meshes.add(processMesh(aiMesh, flags))
+            meshes.add(processMesh(aiMesh, mask))
         }
 
         aiFreeScene(aiScene)
@@ -40,15 +39,15 @@ object MeshesLoader {
         return meshes.toTypedArray()
     }
 
-    private fun processMesh(aiMesh: AIMesh, flags: Int) : Mesh {
+    private fun processMesh(aiMesh: AIMesh, mask: Int) : Mesh {
         val aiPositions = aiMesh.mVertices()
         val count = aiPositions.count()
-        val positions = VertexAttribute.Position in flags
+        val positions = VertexAttribute.position.isIn(mask)
 
         val aiNormals = aiMesh.mNormals()
-        val normals = VertexAttribute.Normal in flags && aiNormals != null
+        val normals = VertexAttribute.normal.isIn(mask) && aiNormals != null
         val aiUVs = aiMesh.mTextureCoords(0)
-        val uvs = VertexAttribute.Normal in flags && aiUVs != null
+        val uvs = VertexAttribute.uv.isIn(mask) && aiUVs != null
 
         val vertices = mutableListOf<Float>()
 
@@ -86,17 +85,17 @@ object MeshesLoader {
             }
         }
 
-        var layout = 0
+        val attributes = mutableListOf<VertexAttribute>()
         if(positions) {
-            layout = layout or VertexAttribute.Position()
+            attributes.add(VertexAttribute.position)
         }
         if(normals) {
-            layout = layout or VertexAttribute.Normal()
+            attributes.add(VertexAttribute.normal)
         }
         if(uvs) {
-            layout = layout or VertexAttribute.UV()
+            attributes.add(VertexAttribute.uv)
         }
 
-        return Mesh(vertices.toFloatArray(), indices.toIntArray(), layout)
+        return Mesh(vertices.toFloatArray(), indices.toIntArray(), VertexAttribute.mask(attributes))
     }
 }

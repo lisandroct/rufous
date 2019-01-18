@@ -1,6 +1,5 @@
 package org.rufousengine.math
 
-import java.lang.StringBuilder
 import java.util.*
 
 sealed class Matrix(val components: FloatArray) {

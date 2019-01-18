@@ -11,11 +11,11 @@ abstract class Material(vertexShaderSource: String, fragmentShaderSource: String
     private val projectionLocation = GL.getUniformLocation(program, "uProjection")
 
     fun setTransformParameters(world: Matrix4, view: Matrix4, projection: Matrix4) {
-        GL.setUniformMatrix4(worldLocation, world)
-        GL.setUniformMatrix4(viewLocation, view)
-        GL.setUniformMatrix4(projectionLocation, projection)
+        GL.setUniformMatrix(worldLocation, world)
+        GL.setUniformMatrix(viewLocation, view)
+        GL.setUniformMatrix(projectionLocation, projection)
     }
 
-    abstract fun setParameters()
+    open fun setParameters() { }
     fun destroy() = GL.deleteProgram(program)
 }

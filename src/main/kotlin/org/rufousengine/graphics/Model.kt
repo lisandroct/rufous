@@ -14,7 +14,7 @@ class Model(meshes: Array<Mesh> = arrayOf(), materials: Array<Material> = arrayO
 
     fun addMesh(mesh: Mesh) {
         if(mesh in meshesSet) {
-            throw IllegalArgumentException("mesh is already part of this model.")
+            throw IllegalArgumentException("mesh is already part of this function.")
         }
 
         _meshes.add(mesh)
@@ -23,7 +23,7 @@ class Model(meshes: Array<Mesh> = arrayOf(), materials: Array<Material> = arrayO
 
     fun addMaterial(material: Material) {
         if(material in materialsSet) {
-            throw IllegalArgumentException("material is already part of this model.")
+            throw IllegalArgumentException("material is already part of this function.")
         }
 
         _materials.add(material)
@@ -32,7 +32,7 @@ class Model(meshes: Array<Mesh> = arrayOf(), materials: Array<Material> = arrayO
 
     fun removeMesh(mesh: Mesh) {
         if(mesh !in meshesSet) {
-            throw IllegalArgumentException("mesh is not part of this model.")
+            throw IllegalArgumentException("mesh is not part of this function.")
         }
 
         _meshes.remove(mesh)
@@ -54,7 +54,7 @@ class Model(meshes: Array<Mesh> = arrayOf(), materials: Array<Material> = arrayO
 
     fun removeMaterial(material: Material) {
         if(material !in materialsSet) {
-            throw IllegalArgumentException("material is not part of this model.")
+            throw IllegalArgumentException("material is not part of this function.")
         }
 
         _materials.remove(material)
@@ -84,10 +84,10 @@ class Model(meshes: Array<Mesh> = arrayOf(), materials: Array<Material> = arrayO
 
     fun setMaterial(mesh: Mesh, material: Material) {
         if(mesh !in meshesSet) {
-            throw IllegalArgumentException("mesh is not part of this model.")
+            throw IllegalArgumentException("mesh is not part of this function.")
         }
         if(material !in materialsSet) {
-            throw IllegalArgumentException("material is not part of this model.")
+            throw IllegalArgumentException("material is not part of this function.")
         }
 
         materialByMesh[mesh] = material
@@ -106,7 +106,7 @@ class Model(meshes: Array<Mesh> = arrayOf(), materials: Array<Material> = arrayO
 
     fun getMaterial(mesh: Mesh): Material? {
         if(mesh !in meshesSet) {
-            throw IllegalArgumentException("mesh is not part of this model.")
+            throw IllegalArgumentException("mesh is not part of this function.")
         }
 
         return materialByMesh[mesh]
@@ -122,7 +122,7 @@ class Model(meshes: Array<Mesh> = arrayOf(), materials: Array<Material> = arrayO
 
     fun getMaterialIndex(mesh: Mesh): Int {
         if(mesh !in meshesSet) {
-            throw IllegalArgumentException("mesh is not part of this model.")
+            throw IllegalArgumentException("mesh is not part of this function.")
         }
 
         return materials.indexOf(materialByMesh[mesh])

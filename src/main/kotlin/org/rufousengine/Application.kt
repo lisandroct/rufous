@@ -4,7 +4,7 @@ import org.rufousengine.editor.MeshesLoader
 import org.rufousengine.editor.TextureLoader
 import org.rufousengine.files.Files
 import org.rufousengine.graphics.*
-import org.rufousengine.graphics.internal.UnlitMaterial
+import org.rufousengine.graphics.internal.Materials
 import org.rufousengine.math.*
 import org.rufousengine.system.GL
 
@@ -15,8 +15,11 @@ class Application {
     private val meshes = MeshesLoader.load(Files.local("models/frankie/frankie.obj"))
     private val tex0 = TextureLoader.load(Files.local("models/frankie/frankie-diffuse.png"))
     private val tex1 = TextureLoader.load(Files.local("models/frankie/env-diffuse.png"))
-    private val mat0 = UnlitMaterial(tex0)
-    private val mat1 = UnlitMaterial(tex1)
+    private val mat0 = Materials.Test().apply {
+        texture = tex0
+        textureColor.set(0.7f, 0.3f, 0.5f, 1.0f)
+    }
+    private val mat1 = Materials.Unlit().apply { texture = tex1 }
 
     private val model = Model(meshes, arrayOf(mat0, mat1))
 
@@ -46,10 +49,11 @@ class Application {
     private val projection = Matrix4()
 
     var accum = 0f
+    var smallAccum = 0f
 
     init {
         model.setMaterial(meshes[0], mat0)
-        //model.setMaterial(meshes[1], mat1)
+        model.setMaterial(meshes[1], mat1)
     }
 
     fun render() {
@@ -57,6 +61,9 @@ class Application {
         accum += 1f
         GL.setClearColor(0.2f, 0.3f, 0.3f, 1f)
         GL.clear()
+
+        smallAccum += 0.01f
+        mat0.time = smallAccum
 
         if(projectionDirty) {
             perspective(fieldOfView, aspectRatio, NEAR, FAR, projection)

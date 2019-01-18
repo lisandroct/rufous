@@ -34,4 +34,16 @@ class Texture(width: Int, height: Int, pixels: ByteArray, sRGB: Boolean = true) 
     fun destroy() {
         GL.deleteTexture(id)
     }
+
+    override fun equals(other: Any?): Boolean {
+        if(this === other) {
+            return true
+        }
+
+        if(other !is Texture) {
+            return false
+        }
+
+        return id == other.id
+    }
 }

@@ -15,37 +15,19 @@ class Mesh(vertices: FloatArray, indices: IntArray, vertexLayout: Int) {
         GL.bindVertexBuffer(vbo)
         GL.setVertexBufferData(vertices)
 
-        val positions = VertexAttribute.Position in vertexLayout
-        val colors = VertexAttribute.Color in vertexLayout
-        val normals = VertexAttribute.Normal in vertexLayout
-        val uvs = VertexAttribute.UV in vertexLayout
-
         var stride = 0
-        if(positions) {
-            stride += VertexAttribute.Position.size
-        }
-        if(colors) {
-            stride += VertexAttribute.Color.size
-        }
-        if(normals) {
-            stride += VertexAttribute.Normal.size
-        }
-        if(uvs) {
-            stride += VertexAttribute.UV.size
+        for(vertexAttribute in VertexAttribute.all) {
+            if(vertexAttribute.isIn(vertexLayout)) {
+                stride += vertexAttribute.size
+            }
         }
 
         var pointer = 0L
-        if(positions) {
-            pointer += enableAttribute(0, VertexAttribute.Position.size, stride, pointer)
-        }
-        if(colors) {
-            pointer += enableAttribute(1, VertexAttribute.Color.size, stride, pointer)
-        }
-        if(normals) {
-            pointer += enableAttribute(2, VertexAttribute.Normal.size, stride, pointer)
-        }
-        if(uvs) {
-            pointer += enableAttribute(3, VertexAttribute.UV.size, stride, pointer)
+        for(vertexAttribute in VertexAttribute.all) {
+            if(vertexAttribute.isIn(vertexLayout)) {
+                enableAttribute(vertexAttribute, stride, pointer)
+                pointer += vertexAttribute.size
+            }
         }
 
         GL.bindIndexBuffer(ibo)
@@ -61,10 +43,8 @@ class Mesh(vertices: FloatArray, indices: IntArray, vertexLayout: Int) {
         GL.destroyBuffer(ibo)
     }
 
-    private fun enableAttribute(index: Int, size: Int, stride: Int, pointer: Long): Int {
-        GL.enableVertexAttribute(index)
-        GL.describeVertexAttribute(index, size, stride, pointer)
-
-        return size
+    private fun enableAttribute(attribute: VertexAttribute, stride: Int, pointer: Long) {
+        GL.enableVertexAttribute(attribute.index)
+        GL.describeVertexAttribute(attribute.index, attribute.size, stride, pointer)
     }
 }

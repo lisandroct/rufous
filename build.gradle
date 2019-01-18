@@ -72,3 +72,9 @@ dependencies {
     compile "org.lwjgl:lwjgl-opengl:$lwjglVersion:$lwjglNatives"
     compile "org.lwjgl:lwjgl-stb:$lwjglVersion:$lwjglNatives"
 }
+
+// --- Reflections -----------------------------------------------------------------------------------------------------
+
+dependencies {
+    compile "org.reflections:reflections:0.9.11"
+}

@@ -11,9 +11,7 @@ import org.lwjgl.system.MemoryStack
 import org.rufousengine.graphics.Material
 import org.rufousengine.graphics.Mesh
 import org.rufousengine.graphics.Texture
-import org.rufousengine.math.Color
-import org.rufousengine.math.ColorFloat
-import org.rufousengine.math.Matrix4
+import org.rufousengine.math.*
 import sun.security.pkcs11.P11TlsKeyMaterialGenerator
 import java.nio.ByteBuffer
 
@@ -171,7 +169,22 @@ object GL {
 
     inline fun getUniformLocation(program: Int, name: String) = glGetUniformLocation(program, name)
 
+    inline fun setUniformBoolean(location: Int, value: Boolean) = setUniformInt(location, if (value) 1 else 0)
     inline fun setUniformInt(location: Int, value: Int) = glUniform1i(location, value)
+    inline fun setUniformFloat(location: Int, value: Float) = glUniform1f(location, value)
+    inline fun setUniformVector(location: Int, value: Vector) = when(value) {
+        is Vector2 -> glUniform2fv(location, value.components)
+        is Vector3 -> glUniform3fv(location, value.components)
+        is Vector4 -> glUniform4fv(location, value.components)
+    }
+    inline fun setUniformPoint(location: Int, value: Point) = when(value) {
+        is Point2D -> glUniform2fv(location, value.components)
+        is Point3D -> glUniform3fv(location, value.components)
+    }
+    inline fun setUniformMatrix(location: Int, value: Matrix) = when(value) {
+        is Matrix2 -> GL20.glUniformMatrix2fv(location, true, value.components)
+        is Matrix3 -> GL20.glUniformMatrix3fv(location, true, value.components)
+        is Matrix4 -> GL20.glUniformMatrix4fv(location, true, value.components)
+    }
     inline fun setUniformColor(location: Int, color: ColorFloat) = glUniform4fv(location, color.components)
-    inline fun setUniformMatrix4(location: Int, matrix: Matrix4) = glUniformMatrix4fv(location, true, matrix.components)
 }

@@ -1,11 +1,11 @@
 package org.rufousengine.graphics
 
-import org.rufousengine.graphics.internal.ErrorMaterial
+import org.rufousengine.graphics.internal.Materials
 import org.rufousengine.math.Matrix4
 import org.rufousengine.system.GL
 
 object Graphics {
-    val errorMaterial = ErrorMaterial()
+    val errorMaterial = Materials.Error()
 
     fun draw(mesh: Mesh) {
         GL.bindVertexArray(mesh.vao)
