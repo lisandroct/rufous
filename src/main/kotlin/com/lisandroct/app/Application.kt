@@ -4,7 +4,6 @@ import org.rufousengine.Rufous
 import org.rufousengine.ecs.*
 import org.rufousengine.editor.MeshesLoader
 import org.rufousengine.editor.TextureLoader
-import org.rufousengine.events.MouseClickEvent
 import org.rufousengine.events.dispatch
 import org.rufousengine.events.subscribeTo
 import org.rufousengine.files.Files
