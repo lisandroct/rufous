@@ -8,7 +8,7 @@ import org.lwjgl.system.MemoryStack
 import org.lwjgl.system.MemoryUtil
 import org.rufousengine.system.GL
 
-class Texture(width: Int, height: Int, pixels: ByteArray, sRGB: Boolean = true) {
+class Texture(val width: Int, val height: Int, pixels: ByteArray, sRGB: Boolean = true) {
     val id = GL.generateTexture()
 
     init {

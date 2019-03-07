@@ -2,46 +2,97 @@ package org.rufousengine.graphics.internal
 
 import org.rufousengine.graphics.VertexAttribute
 
-abstract class MaterialType(builder: MaterialType.() -> Unit) {
-    var model: ShadingModel? = null
+class ShadingModel(builder: ShadingModel.() -> Unit) {
+    val properties = MaterialType.GValuesList()
+    var glsl = ""
+
+    init {
+        apply(builder)
+    }
+}
+
+abstract class MaterialType(val model: ShadingModel, builder: MaterialType.() -> Unit) {
     val requires = Requires()
-    val parameters = Parameters()
-    var fragment: String? = null
+    val parameters = GValuesList()
+    val vertexShader = Vertex()
+    val fragmentShader = Fragment()
 
     init {
         apply(builder)
     }
 
-    class Requires: ArrayList<VertexAttribute>() {
-        val position = VertexAttribute.position
-        val color = VertexAttribute.color
-        val normal = VertexAttribute.normal
-        val uv = VertexAttribute.uv
+    class Requires : Iterable<VertexAttribute> {
+        private val attributes = mutableListOf<VertexAttribute>()
+        private val locations = hashSetOf<Int>()
 
-        operator fun invoke(block: Requires.() -> Unit) {
-            addAll(Requires().apply(block))
+        val position
+            get() = position()
+        val color
+            get() = color()
+        val normal
+            get() = normal()
+        val uv
+            get() = uv()
+
+        init {
+            position()
         }
 
-        fun vertexAttribute(type: VertexAttribute) = add(type)
+        private fun position() = add(VertexAttribute.position)
+        private fun color() = add(VertexAttribute.color)
+        private fun normal() = add(VertexAttribute.normal)
+        private fun uv() = add(VertexAttribute.uv)
+
+        private fun add(attribute: VertexAttribute) {
+            if(attribute.location in locations) {
+                return
+            }
+
+            attributes.add(attribute)
+            locations.add(attribute.location)
+        }
+
+        override fun iterator() = attributes.iterator()
+
+        operator fun invoke(block: Requires.() -> Unit) = apply(block)
     }
 
-    class Parameters: ArrayList<GValue>() {
-        val boolean = GType.Boolean
-        val int = GType.Int
-        val float = GType.Float
-        val vector2 = GType.Vector2
-        val vector3 = GType.Vector3
-        val vector4 = GType.Vector4
-        val point2D = GType.Point2D
-        val point3D = GType.Point3D
-        val color = GType.Color
-        val matrix2 = GType.Matrix2
-        val matrix3 = GType.Matrix3
-        val matrix4 = GType.Matrix4
-        val texture = GType.Texture
+    class Vertex {
+        var glsl = ""
 
-        operator fun invoke(block: Parameters.() -> Unit) = addAll(Parameters().apply(block))
+        operator fun invoke(block: Vertex.() -> Unit) = apply(block)
+    }
 
-        fun parameter(name: String, type: GType) = add(GValue(name, type))
+    class Fragment {
+        val inputs = GValuesList()
+        var glsl = ""
+
+        operator fun invoke(block: Fragment.() -> Unit) = apply(block)
+    }
+
+    class GValuesList : Iterable<GValue> {
+        private val values = mutableListOf<GValue>()
+
+        fun boolean(name: String) = add(name, GType.Boolean)
+        fun int(name: String) = add(name, GType.Int)
+        fun float(name: String) = add(name, GType.Float)
+        fun vector2(name: String) = add(name, GType.Vector2)
+        fun vector3(name: String) = add(name, GType.Vector3)
+        fun vector4(name: String) = add(name, GType.Vector4)
+        fun point2D(name: String) = add(name, GType.Point2D)
+        fun point3D(name: String) = add(name, GType.Point3D)
+        fun color(name: String) = add(name, GType.Color)
+        fun matrix2(name: String) = add(name, GType.Matrix2)
+        fun matrix3(name: String) = add(name, GType.Matrix3)
+        fun matrix4(name: String) = add(name, GType.Matrix4)
+        fun texture(name: String) = add(name, GType.Texture)
+
+        private fun add(name: String, type: GType) = values.add(GValue(name, type))
+
+        fun isEmpty() = values.isEmpty()
+        fun isNotEmpty() = values.isNotEmpty()
+        override fun iterator() = values.iterator()
+
+        operator fun invoke(block: GValuesList.() -> Unit) = apply(block)
     }
 }

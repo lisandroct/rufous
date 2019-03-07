@@ -1,5 +1,6 @@
 package org.rufousengine
 
+import com.lisandroct.app.Application
 import org.lwjgl.opengl.GL11.*
 import org.rufousengine.system.*
 

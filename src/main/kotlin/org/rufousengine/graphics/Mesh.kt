@@ -44,7 +44,7 @@ class Mesh(vertices: FloatArray, indices: IntArray, vertexLayout: Int) {
     }
 
     private fun enableAttribute(attribute: VertexAttribute, stride: Int, pointer: Long) {
-        GL.enableVertexAttribute(attribute.index)
-        GL.describeVertexAttribute(attribute.index, attribute.size, stride, pointer)
+        GL.enableVertexAttribute(attribute.location)
+        GL.describeVertexAttribute(attribute.location, attribute.size, stride, pointer)
     }
 }

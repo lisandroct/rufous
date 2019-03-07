@@ -14,7 +14,7 @@ class Model(meshes: Array<Mesh> = arrayOf(), materials: Array<Material> = arrayO
 
     fun addMesh(mesh: Mesh) {
         if(mesh in meshesSet) {
-            throw IllegalArgumentException("mesh is already part of this function.")
+            throw IllegalArgumentException("mesh is already part of this glsl.")
         }
 
         _meshes.add(mesh)
@@ -23,7 +23,7 @@ class Model(meshes: Array<Mesh> = arrayOf(), materials: Array<Material> = arrayO
 
     fun addMaterial(material: Material) {
         if(material in materialsSet) {
-            throw IllegalArgumentException("material is already part of this function.")
+            throw IllegalArgumentException("material is already part of this glsl.")
         }
 
         _materials.add(material)
@@ -32,7 +32,7 @@ class Model(meshes: Array<Mesh> = arrayOf(), materials: Array<Material> = arrayO
 
     fun removeMesh(mesh: Mesh) {
         if(mesh !in meshesSet) {
-            throw IllegalArgumentException("mesh is not part of this function.")
+            throw IllegalArgumentException("mesh is not part of this glsl.")
         }
 
         _meshes.remove(mesh)
@@ -42,7 +42,7 @@ class Model(meshes: Array<Mesh> = arrayOf(), materials: Array<Material> = arrayO
 
     fun removeMesh(index: Int) {
         if(index !in meshes.indices) {
-            throw IndexOutOfBoundsException("index is out of bounds.")
+            throw IndexOutOfBoundsException("location is out of bounds.")
         }
 
         val mesh = meshes[index]
@@ -54,7 +54,7 @@ class Model(meshes: Array<Mesh> = arrayOf(), materials: Array<Material> = arrayO
 
     fun removeMaterial(material: Material) {
         if(material !in materialsSet) {
-            throw IllegalArgumentException("material is not part of this function.")
+            throw IllegalArgumentException("material is not part of this glsl.")
         }
 
         _materials.remove(material)
@@ -68,7 +68,7 @@ class Model(meshes: Array<Mesh> = arrayOf(), materials: Array<Material> = arrayO
 
     fun removeMaterial(index: Int) {
         if(index !in _materials.indices) {
-            throw IndexOutOfBoundsException("index is out of bounds.")
+            throw IndexOutOfBoundsException("location is out of bounds.")
         }
 
         val material = materials[index]
@@ -84,10 +84,10 @@ class Model(meshes: Array<Mesh> = arrayOf(), materials: Array<Material> = arrayO
 
     fun setMaterial(mesh: Mesh, material: Material) {
         if(mesh !in meshesSet) {
-            throw IllegalArgumentException("mesh is not part of this function.")
+            throw IllegalArgumentException("mesh is not part of this glsl.")
         }
         if(material !in materialsSet) {
-            throw IllegalArgumentException("material is not part of this function.")
+            throw IllegalArgumentException("material is not part of this glsl.")
         }
 
         materialByMesh[mesh] = material
@@ -106,7 +106,7 @@ class Model(meshes: Array<Mesh> = arrayOf(), materials: Array<Material> = arrayO
 
     fun getMaterial(mesh: Mesh): Material? {
         if(mesh !in meshesSet) {
-            throw IllegalArgumentException("mesh is not part of this function.")
+            throw IllegalArgumentException("mesh is not part of this glsl.")
         }
 
         return materialByMesh[mesh]
@@ -122,7 +122,7 @@ class Model(meshes: Array<Mesh> = arrayOf(), materials: Array<Material> = arrayO
 
     fun getMaterialIndex(mesh: Mesh): Int {
         if(mesh !in meshesSet) {
-            throw IllegalArgumentException("mesh is not part of this function.")
+            throw IllegalArgumentException("mesh is not part of this glsl.")
         }
 
         return materials.indexOf(materialByMesh[mesh])
