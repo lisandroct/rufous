@@ -1,9 +1,11 @@
 package org.rufousengine.graphics
 
+import org.rufousengine.Disposable
+import org.rufousengine.ManagedResource
 import org.rufousengine.math.Matrix4
 import org.rufousengine.system.GL
 
-abstract class Material(vertexShaderSource: String, fragmentShaderSource: String) {
+abstract class Material(vertexShaderSource: String, fragmentShaderSource: String) : ManagedResource(), Disposable {
     val program = GL.ShaderProgram(GL.VertexShader(vertexShaderSource), GL.FragmentShader(fragmentShaderSource))
 
     private val worldLocation = GL.getUniformLocation(program, "uWorld")
@@ -17,5 +19,6 @@ abstract class Material(vertexShaderSource: String, fragmentShaderSource: String
     }
 
     open fun setParameters() { }
-    fun destroy() = GL.deleteProgram(program)
+
+    override fun dispose() = GL.deleteProgram(program)
 }

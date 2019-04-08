@@ -1,3 +1,12 @@
 package org.rufousengine.ecs
 
-data class Entity internal constructor(val id: Int)
+import org.rufousengine.Resource
+
+/**
+ * A bag of components in ECS.
+ */
+class Entity internal constructor(internal val index: Int): Resource() {
+    override fun destroy() {
+        World.destroyEntity(this)
+    }
+}

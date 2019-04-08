@@ -1,22 +1,26 @@
 package org.rufousengine.ecs
 
-import org.rufousengine.events.dispatch
+import org.rufousengine.Resources
+import org.rufousengine.events.Event1
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
 
+/**
+ * Manager of an specific type of component.
+ */
 class ComponentManager<E: Component>(private val type: KClass<E>) {
     private val list = mutableListOf<E>()
     private val free = mutableListOf<Int>()
 
-    private val indicesMap = hashMapOf<Entity, Int>()
+    private val indicesByEntity = hashMapOf<Entity, Int>()
 
     fun get(entity: Entity): E? {
-        val index = indicesMap[entity] ?: return null
+        val index = indicesByEntity[entity] ?: return null
         return list[index]
     }
 
     fun add(entity: Entity): E? {
-        if(indicesMap.containsKey(entity)) {
+        if(indicesByEntity.containsKey(entity)) {
             return null
         }
 
@@ -28,45 +32,23 @@ class ComponentManager<E: Component>(private val type: KClass<E>) {
             list.add(type.createInstance())
         }
 
-        indicesMap[entity] = index
+        val component = list[index]
 
-        dispatch<ComponentEvent>(ComponentEvent.Added(entity, list[index]))
+        indicesByEntity[entity] = index
 
-        return list[index]
+        Resources.register(component)
+
+        return component
     }
 
-    fun remove(entity: Entity): Boolean {
-        val index = indicesMap.remove(entity) ?: return false
+    fun remove(entity: Entity): E? {
+        val index = indicesByEntity.remove(entity) ?: return null
+        val component = list[index]
 
         free.add(index)
 
-        dispatch<ComponentEvent>(ComponentEvent.Removed(entity, list[index]))
+        Resources.unregister(component)
 
-        return true
-    }
-}
-
-sealed class ComponentEvent {
-    lateinit var entity: Entity
-        protected set
-    lateinit var component: Component
-        protected set
-
-    object Added : ComponentEvent() {
-        operator fun invoke(entity: Entity, component: Component): Added {
-            this.entity = entity
-            this.component = component
-
-            return this
-        }
-    }
-
-    object Removed : ComponentEvent() {
-        operator fun invoke(entity: Entity, component: Component): Removed {
-            this.entity = entity
-            this.component = component
-
-            return this
-        }
+        return component
     }
 }

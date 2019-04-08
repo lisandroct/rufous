@@ -33,18 +33,6 @@ object Graphics {
         GL.unbindVertexArray()
     }
 
-    fun render(model: Model, world: Matrix4, view: Matrix4, projection: Matrix4) {
-        for(mesh in model.meshes) {
-            val material = model.getMaterial(mesh) ?: errorMaterial
-
-            GL.useProgram(material.program)
-            material.setTransformParameters(world, view, projection)
-            material.setParameters()
-
-            draw(mesh)
-        }
-    }
-
     fun render(texture: Texture, position: Point3D, view: Matrix4, projection: Matrix4, tint: ColorFloat = Colors.white) {
         val aspectRatio = texture.width / texture.height.toFloat()
 

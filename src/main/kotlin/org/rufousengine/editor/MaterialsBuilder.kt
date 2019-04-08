@@ -357,7 +357,7 @@ private fun buildClass(name: String, vsName: String, fsName: String, materialTyp
                         funBuilder.nextControlFlow("else")
                         funBuilder.addStatement("GL.setUniformColor(${parameter.name}ColorLocation, ${parameter.name}Color)")
                         funBuilder.endControlFlow()
-                        funBuilder.addStatement("GL.bindTexture(_${parameter.name}.id, ${textureSlot++})")
+                        funBuilder.addStatement("GL.bindTexture(_${parameter.name}.name, ${textureSlot++})")
                     }
                 }
             }

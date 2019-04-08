@@ -2,6 +2,8 @@ package org.rufousengine
 
 import com.lisandroct.app.Application
 import org.lwjgl.opengl.GL11.*
+import org.rufousengine.ecs.World
+import org.rufousengine.events.mouse.ScrollEvent
 import org.rufousengine.system.*
 
 class Rufous(name: String, width: Int, height: Int) {
@@ -46,7 +48,7 @@ class Rufous(name: String, width: Int, height: Int) {
                 Context.setShouldClose(window, true)
             }
 
-            app.render()
+            World.update()
 
             // check and call events and swap the buffers
             Context.swapBuffers(window)
@@ -55,11 +57,13 @@ class Rufous(name: String, width: Int, height: Int) {
     }
 
     private fun terminate() {
-        app.destroy()
+        Resources.destroyAll()
 
         Context.terminate(window)
     }
 
     private fun resize(window: Long, width: Int, height: Int) = app.resize(width, height)
-    private fun scroll(window: Long, x: Double, y: Double) = app.scroll(x.toFloat(), y.toFloat())
+    private fun scroll(window: Long, x: Double, y: Double) {
+        ScrollEvent(x.toFloat(), y.toFloat())
+    }
 }

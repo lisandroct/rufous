@@ -572,7 +572,7 @@ object Materials {
             } else {
                 GL.setUniformColor(textureColorLocation, textureColor)
             }
-            GL.bindTexture(_texture.id, 0)
+            GL.bindTexture(_texture.name, 0)
         }
     }
 
@@ -609,7 +609,7 @@ object Materials {
             } else {
                 GL.setUniformColor(textureColorLocation, textureColor)
             }
-            GL.bindTexture(_texture.id, 0)
+            GL.bindTexture(_texture.name, 0)
             GL.setUniformColor(tintLocation, tint)
         }
     }
@@ -663,7 +663,7 @@ object Materials {
             } else {
                 GL.setUniformColor(textureColorLocation, textureColor)
             }
-            GL.bindTexture(_texture.id, 0)
+            GL.bindTexture(_texture.name, 0)
         }
     }
 
@@ -700,7 +700,7 @@ object Materials {
             } else {
                 GL.setUniformColor(textureColorLocation, textureColor)
             }
-            GL.bindTexture(_texture.id, 0)
+            GL.bindTexture(_texture.name, 0)
             GL.setUniformFloat(timeLocation, time)
         }
     }
@@ -734,7 +734,7 @@ object Materials {
             } else {
                 GL.setUniformColor(textureColorLocation, textureColor)
             }
-            GL.bindTexture(_texture.id, 0)
+            GL.bindTexture(_texture.name, 0)
         }
     }
 }

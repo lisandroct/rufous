@@ -1,8 +1,10 @@
 package org.rufousengine.graphics
 
+import org.rufousengine.Disposable
+import org.rufousengine.ManagedResource
 import org.rufousengine.system.GL
 
-class Mesh(vertices: FloatArray, indices: IntArray, vertexLayout: Int) {
+class Mesh(vertices: FloatArray, indices: IntArray, vertexLayout: Int) : ManagedResource(), Disposable {
     val vao = GL.generateVertexArray()
     private val vbo = GL.generateBuffer()
     private val ibo = GL.generateBuffer()
@@ -37,14 +39,14 @@ class Mesh(vertices: FloatArray, indices: IntArray, vertexLayout: Int) {
         GL.unbindVertexArray()
     }
 
-    fun destroy() {
-        GL.destroyVertexArray(vao)
-        GL.destroyBuffer(vbo)
-        GL.destroyBuffer(ibo)
-    }
-
     private fun enableAttribute(attribute: VertexAttribute, stride: Int, pointer: Long) {
         GL.enableVertexAttribute(attribute.location)
         GL.describeVertexAttribute(attribute.location, attribute.size, stride, pointer)
+    }
+
+    override fun dispose() {
+        GL.destroyVertexArray(vao)
+        GL.destroyBuffer(vbo)
+        GL.destroyBuffer(ibo)
     }
 }

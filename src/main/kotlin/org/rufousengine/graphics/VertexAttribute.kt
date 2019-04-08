@@ -1,7 +1,5 @@
 package org.rufousengine.graphics
 
-import org.rufousengine.graphics.internal.GType
-
 data class VertexAttribute(val location: Int, val name: String, val size: Int, private val flag: Int) {
     companion object {
         val position = VertexAttribute(0, "position", 3, 0b0001)

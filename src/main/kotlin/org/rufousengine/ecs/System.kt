@@ -1,5 +1,7 @@
 package org.rufousengine.ecs
 
-interface System {
-    val priority: Int
+abstract class System(val priority: Int) {
+    var active = true
+
+    abstract fun update()
 }

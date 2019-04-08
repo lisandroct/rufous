@@ -4,15 +4,18 @@ import org.lwjgl.opengl.ARBFramebufferObject
 import org.lwjgl.opengl.GL11.*
 import org.lwjgl.opengl.GL21.GL_SRGB8_ALPHA8
 import org.lwjgl.opengl.GL30
-import org.lwjgl.system.MemoryStack
 import org.lwjgl.system.MemoryUtil
+import org.rufousengine.Disposable
+import org.rufousengine.ManagedResource
 import org.rufousengine.system.GL
 
-class Texture(val width: Int, val height: Int, pixels: ByteArray, sRGB: Boolean = true) {
-    val id = GL.generateTexture()
+class Texture(val width: Int, val height: Int, pixels: ByteArray, sRGB: Boolean = true) : ManagedResource(), Disposable {
+    val name = GL.generateTexture()
+
+    val i: Long = 0
 
     init {
-        GL.bindTexture(id, 0)
+        GL.bindTexture(name, 0)
 
         val buffer = MemoryUtil.memAlloc(pixels.size)
         buffer.put(pixels)
@@ -31,19 +34,7 @@ class Texture(val width: Int, val height: Int, pixels: ByteArray, sRGB: Boolean 
         GL.unbindTexture(0)
     }
 
-    fun destroy() {
-        GL.deleteTexture(id)
-    }
-
-    override fun equals(other: Any?): Boolean {
-        if(this === other) {
-            return true
-        }
-
-        if(other !is Texture) {
-            return false
-        }
-
-        return id == other.id
+    override fun dispose() {
+        GL.deleteTexture(name)
     }
 }

@@ -1,10 +1,13 @@
-package org.rufousengine.graphics
+package org.rufousengine.ecs.components
 
+import org.rufousengine.ecs.Component
+import org.rufousengine.graphics.Material
+import org.rufousengine.graphics.Mesh
 
-class Model(meshes: Array<Mesh> = arrayOf(), materials: Array<Material> = arrayOf()) {
-    private val _meshes = meshes.toMutableList()
+class Model : Component() {
+    private val _meshes = mutableListOf<Mesh>()
     val meshes: List<Mesh> = _meshes
-    private val _materials = materials.toMutableList()
+    private val _materials = mutableListOf<Material>()
     val materials: List<Material> = _materials
 
     private val meshesSet = meshes.toHashSet()
@@ -14,7 +17,7 @@ class Model(meshes: Array<Mesh> = arrayOf(), materials: Array<Material> = arrayO
 
     fun addMesh(mesh: Mesh) {
         if(mesh in meshesSet) {
-            throw IllegalArgumentException("mesh is already part of this glsl.")
+            throw IllegalArgumentException("mesh is already part of this model.")
         }
 
         _meshes.add(mesh)
@@ -23,7 +26,7 @@ class Model(meshes: Array<Mesh> = arrayOf(), materials: Array<Material> = arrayO
 
     fun addMaterial(material: Material) {
         if(material in materialsSet) {
-            throw IllegalArgumentException("material is already part of this glsl.")
+            throw IllegalArgumentException("material is already part of this model.")
         }
 
         _materials.add(material)
@@ -32,7 +35,7 @@ class Model(meshes: Array<Mesh> = arrayOf(), materials: Array<Material> = arrayO
 
     fun removeMesh(mesh: Mesh) {
         if(mesh !in meshesSet) {
-            throw IllegalArgumentException("mesh is not part of this glsl.")
+            throw IllegalArgumentException("mesh is not part of this model.")
         }
 
         _meshes.remove(mesh)
@@ -54,7 +57,7 @@ class Model(meshes: Array<Mesh> = arrayOf(), materials: Array<Material> = arrayO
 
     fun removeMaterial(material: Material) {
         if(material !in materialsSet) {
-            throw IllegalArgumentException("material is not part of this glsl.")
+            throw IllegalArgumentException("material is not part of this model.")
         }
 
         _materials.remove(material)
@@ -84,10 +87,10 @@ class Model(meshes: Array<Mesh> = arrayOf(), materials: Array<Material> = arrayO
 
     fun setMaterial(mesh: Mesh, material: Material) {
         if(mesh !in meshesSet) {
-            throw IllegalArgumentException("mesh is not part of this glsl.")
+            throw IllegalArgumentException("mesh is not part of this model.")
         }
         if(material !in materialsSet) {
-            throw IllegalArgumentException("material is not part of this glsl.")
+            throw IllegalArgumentException("material is not part of this model.")
         }
 
         materialByMesh[mesh] = material
@@ -106,7 +109,7 @@ class Model(meshes: Array<Mesh> = arrayOf(), materials: Array<Material> = arrayO
 
     fun getMaterial(mesh: Mesh): Material? {
         if(mesh !in meshesSet) {
-            throw IllegalArgumentException("mesh is not part of this glsl.")
+            throw IllegalArgumentException("mesh is not part of this model.")
         }
 
         return materialByMesh[mesh]
@@ -122,7 +125,7 @@ class Model(meshes: Array<Mesh> = arrayOf(), materials: Array<Material> = arrayO
 
     fun getMaterialIndex(mesh: Mesh): Int {
         if(mesh !in meshesSet) {
-            throw IllegalArgumentException("mesh is not part of this glsl.")
+            throw IllegalArgumentException("mesh is not part of this model.")
         }
 
         return materials.indexOf(materialByMesh[mesh])
