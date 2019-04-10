@@ -1,5 +1,6 @@
 package org.rufousengine.math
 
+import org.rufousengine.utils.DirtyFlag
 import java.util.*
 import kotlin.math.*
 
@@ -13,6 +14,7 @@ import kotlin.math.*
  */
 sealed class Vector(val components: FloatArray) {
     val dimensions = components.size
+    var dirty by DirtyFlag()
 
     operator fun component1() = get(0)
     operator fun component2() = get(1)
@@ -73,10 +75,16 @@ class Vector2(x: Float = 0f, y: Float = 0f): Vector(floatArrayOf(x, y)) {
 
     inline var x: Float
         get() = components[0]
-        set(value) { components[0] = value }
+        set(value) {
+            components[0] = value
+            dirty = true
+        }
     inline var y: Float
         get() = components[1]
-        set(value) { components[1] = value }
+        set(value) {
+            components[1] = value
+            dirty = true
+        }
     inline val z: Float
         get() = 0f
     inline val w: Float
@@ -121,13 +129,22 @@ class Vector3(x: Float = 0f, y: Float = 0f, z: Float = 0f): Vector(floatArrayOf(
 
     inline var x: Float
         get() = components[0]
-        set(value) { components[0] = value }
+        set(value) {
+            components[0] = value
+            dirty = true
+        }
     inline var y: Float
         get() = components[1]
-        set(value) { components[1] = value }
+        set(value) {
+            components[1] = value
+            dirty = true
+        }
     inline var z: Float
         get() = components[2]
-        set(value) { components[2] = value }
+        set(value) {
+            components[2] = value
+            dirty = true
+        }
     inline val w: Float
         get() = 0f
 
@@ -174,16 +191,28 @@ class Vector4(x: Float = 0f, y: Float = 0f, z: Float = 0f, w: Float = 0f): Vecto
 
     inline var x: Float
         get() = components[0]
-        set(value) { components[0] = value }
+        set(value) {
+            components[0] = value
+            dirty = true
+        }
     inline var y: Float
         get() = components[1]
-        set(value) { components[1] = value }
+        set(value) {
+            components[1] = value
+            dirty = true
+        }
     inline var z: Float
         get() = components[2]
-        set(value) { components[2] = value }
+        set(value) {
+            components[2] = value
+            dirty = true
+        }
     inline var w: Float
         get() = components[3]
-        set(value) { components[3] = value }
+        set(value) {
+            components[3] = value
+            dirty = true
+        }
 
     fun set(other: Vector2) = set(other.x, other.y, 0f, 0f)
     fun set(other: Vector3) = set(other.x, other.y, other.z, 0f)

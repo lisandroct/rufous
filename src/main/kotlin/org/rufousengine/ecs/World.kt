@@ -1,7 +1,9 @@
 package org.rufousengine.ecs
 
 import com.lisandroct.app.systems.RotatorSystem
+import com.lisandroct.app.systems.SinusoidalSystem
 import org.rufousengine.Resources
+import org.rufousengine.ecs.systems.DebugSystem
 import org.rufousengine.ecs.systems.RenderingSystem
 import org.rufousengine.events.Event1
 import kotlin.reflect.KClass
@@ -20,7 +22,9 @@ object World {
 
     init {
         systems.add(RenderingSystem)
+        systems.add(DebugSystem)
         systems.add(RotatorSystem)
+        systems.add(SinusoidalSystem)
     }
 
     fun update() {

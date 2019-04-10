@@ -163,3 +163,55 @@ object Gouraud : MaterialType(ShadingModels.phong, {
         """.trimIndent()
     }
 })
+
+object BlinnPhong : MaterialType(ShadingModels.phong, {
+    requires {
+        normal
+        uv
+    }
+
+    parameters {
+        point3D("cameraPosition")
+        color("lightColor")
+        point3D("lightPosition")
+        texture("texture")
+    }
+
+    fragmentShader {
+        glsl = """
+            vec3 ambient() {
+                float ambientStrength = 0.4;
+
+                return ambientStrength * parameters.lightColor.rgb;
+            }
+
+            vec3 diffuse() {
+                vec3 norm = normalize(normal);
+                vec3 lightDirection = normalize(parameters.lightPosition - position);
+
+                float diff = max(dot(norm, lightDirection), 0.0);
+
+                return diff * parameters.lightColor.rgb;
+            }
+
+            vec3 specular() {
+                float specularStrength = 0.5;
+
+                vec3 lightDirection = normalize(parameters.lightPosition - position);
+                vec3 viewDirection = normalize(parameters.cameraPosition - position);
+                vec3 halfwayDirection = normalize(lightDirection + viewDirection);
+
+                float spec = pow(max(dot(normal, halfwayDirection), 0.0), 32);
+
+                return specularStrength * spec * parameters.lightColor.rgb;
+            }
+
+            void fragment() {
+                properties.ambient = ambient();
+                properties.diffuse = diffuse();
+                properties.specular = specular();
+                properties.objectColor = textureColor(parameters.texture, uv);
+            }
+        """.trimIndent()
+    }
+})

@@ -1,5 +1,6 @@
 package org.rufousengine.math
 
+import org.rufousengine.utils.DirtyFlag
 import java.util.*
 import kotlin.math.max
 
@@ -12,7 +13,9 @@ import kotlin.math.max
  * @constructor Creates a point at ([components].[0], [components].[1], ..., [components].[size - 1]).
  */
 sealed class Point(val components: FloatArray) {
-    abstract val dimensions: Int
+    val dimensions = components.size
+
+    var dirty by DirtyFlag()
 
     operator fun component1() = get(0)
     operator fun component2() = get(1)
@@ -63,8 +66,6 @@ sealed class Point(val components: FloatArray) {
  * @constructor Creates a point at ([x], [y]).
  */
 class Point2D(x: Float = 0f, y: Float = 0f): Point(floatArrayOf(x, y)) {
-    override val dimensions = 2
-
     constructor(other: Point2D) : this(other.x, other.y)
     constructor(init: (Int) -> Float) : this() {
         repeat(dimensions) { i ->
@@ -74,10 +75,16 @@ class Point2D(x: Float = 0f, y: Float = 0f): Point(floatArrayOf(x, y)) {
 
     inline var x: Float
         get() = components[0]
-        set(value) { components[0] = value }
+        set(value) {
+            components[0] = value
+            dirty = true
+        }
     inline var y: Float
         get() = components[1]
-        set(value) { components[1] = value }
+        set(value) {
+            components[1] = value
+            dirty = true
+        }
     inline val z: Float
         get() = 0f
 
@@ -110,8 +117,6 @@ class Point2D(x: Float = 0f, y: Float = 0f): Point(floatArrayOf(x, y)) {
  * @constructor Creates a point at ([x], [y], [z]).
  */
 class Point3D(x: Float = 0f, y: Float = 0f, z: Float = 0f): Point(floatArrayOf(x, y, z)) {
-    override val dimensions = 3
-
     constructor(other: Point2D) : this(other.x, other.y, 0f)
     constructor(other: Point3D) : this(other.x, other.y, other.z)
     constructor(init: (Int) -> Float) : this() {
@@ -122,13 +127,22 @@ class Point3D(x: Float = 0f, y: Float = 0f, z: Float = 0f): Point(floatArrayOf(x
 
     inline var x: Float
         get() = components[0]
-        set(value) { components[0] = value }
+        set(value) {
+            components[0] = value
+            dirty = true
+        }
     inline var y: Float
         get() = components[1]
-        set(value) { components[1] = value }
+        set(value) {
+            components[1] = value
+            dirty = true
+        }
     inline var z: Float
         get() = components[2]
-        set(value) { components[2] = value }
+        set(value) {
+            components[2] = value
+            dirty = true
+        }
 
     fun set(other: Point2D) = set(other.x, other.y, 0f)
     fun set(other: Point3D) = set(other.x, other.y, other.z)

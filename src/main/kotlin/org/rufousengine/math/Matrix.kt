@@ -1,9 +1,12 @@
 package org.rufousengine.math
 
+import org.rufousengine.utils.DirtyFlag
 import java.util.*
 
 sealed class Matrix(val components: FloatArray) {
     abstract val dimensions: Int
+
+    var dirty by DirtyFlag()
 
     operator fun get(row: Int, column: Int) = if(row in 0 until dimensions && column in 0 until dimensions)
         components[dimensions * row + column]
@@ -77,16 +80,28 @@ class Matrix2(e00: Float, e01: Float, e10: Float, e11: Float): Matrix(floatArray
 
     inline var e00: Float
         get() = components[0]
-        set(value) { components[0] = value }
+        set(value) {
+            components[0] = value
+            dirty = true
+        }
     inline var e01: Float
         get() = components[1]
-        set(value) { components[1] = value }
+        set(value) {
+            components[1] = value
+            dirty = true
+        }
     inline var e10: Float
         get() = components[2]
-        set(value) { components[2] = value }
+        set(value) {
+            components[2] = value
+            dirty = true
+        }
     inline var e11: Float
         get() = components[3]
-        set(value) { components[3] = value }
+        set(value) {
+            components[3] = value
+            dirty = true
+        }
 
     fun set(other: Matrix2) = set(other.e00, other.e01, other.e10, other.e11)
     fun set(c0: Vector2, c1: Vector2) = set(c0.x, c1.x, c0.y, c1.y)
@@ -127,31 +142,58 @@ class Matrix3(e00: Float, e01: Float, e02: Float, e10: Float, e11: Float, e12: F
 
     inline var e00: Float
         get() = components[0]
-        set(value) { components[0] = value }
+        set(value) {
+            components[0] = value
+            dirty = true
+        }
     inline var e01: Float
         get() = components[1]
-        set(value) { components[1] = value }
+        set(value) {
+            components[1] = value
+            dirty = true
+        }
     inline var e02: Float
         get() = components[2]
-        set(value) { components[2] = value }
+        set(value) {
+            components[2] = value
+            dirty = true
+        }
     inline var e10: Float
         get() = components[3]
-        set(value) { components[3] = value }
+        set(value) {
+            components[3] = value
+            dirty = true
+        }
     inline var e11: Float
         get() = components[4]
-        set(value) { components[4] = value }
+        set(value) {
+            components[4] = value
+            dirty = true
+        }
     inline var e12: Float
         get() = components[5]
-        set(value) { components[5] = value }
+        set(value) {
+            components[5] = value
+            dirty = true
+        }
     inline var e20: Float
         get() = components[6]
-        set(value) { components[6] = value }
+        set(value) {
+            components[6] = value
+            dirty = true
+        }
     inline var e21: Float
         get() = components[7]
-        set(value) { components[7] = value }
+        set(value) {
+            components[7] = value
+            dirty = true
+        }
     inline var e22: Float
         get() = components[8]
-        set(value) { components[8] = value }
+        set(value) {
+            components[8] = value
+            dirty = true
+        }
 
     fun set(other: Matrix3) = set(other.e00, other.e01, other.e02, other.e10, other.e11, other.e12, other.e20, other.e21, other.e22)
     fun set(c0: Vector3, c1: Vector3, c2: Vector3) = set(c0.x, c1.x, c2.x, c0.y, c1.y, c2.y, c0.z, c1.z, c2.z)
@@ -197,52 +239,100 @@ class Matrix4(e00: Float, e01: Float, e02: Float, e03: Float, e10: Float, e11: F
 
     inline var e00: Float
         get() = components[0]
-        set(value) { components[0] = value }
+        set(value) {
+            components[0] = value
+            dirty = true
+        }
     inline var e01: Float
         get() = components[1]
-        set(value) { components[1] = value }
+        set(value) {
+            components[1] = value
+            dirty = true
+        }
     inline var e02: Float
         get() = components[2]
-        set(value) { components[2] = value }
+        set(value) {
+            components[2] = value
+            dirty = true
+        }
     inline var e03: Float
         get() = components[3]
-        set(value) { components[3] = value }
+        set(value) {
+            components[3] = value
+            dirty = true
+        }
     inline var e10: Float
         get() = components[4]
-        set(value) { components[4] = value }
+        set(value) {
+            components[4] = value
+            dirty = true
+        }
     inline var e11: Float
         get() = components[5]
-        set(value) { components[5] = value }
+        set(value) {
+            components[5] = value
+            dirty = true
+        }
     inline var e12: Float
         get() = components[6]
-        set(value) { components[6] = value }
+        set(value) {
+            components[6] = value
+            dirty = true
+        }
     inline var e13: Float
         get() = components[7]
-        set(value) { components[7] = value }
+        set(value) {
+            components[7] = value
+            dirty = true
+        }
     inline var e20: Float
         get() = components[8]
-        set(value) { components[8] = value }
+        set(value) {
+            components[8] = value
+            dirty = true
+        }
     inline var e21: Float
         get() = components[9]
-        set(value) { components[9] = value }
+        set(value) {
+            components[9] = value
+            dirty = true
+        }
     inline var e22: Float
         get() = components[10]
-        set(value) { components[10] = value }
+        set(value) {
+            components[10] = value
+            dirty = true
+        }
     inline var e23: Float
         get() = components[11]
-        set(value) { components[11] = value }
+        set(value) {
+            components[11] = value
+            dirty = true
+        }
     inline var e30: Float
         get() = components[12]
-        set(value) { components[12] = value }
+        set(value) {
+            components[12] = value
+            dirty = true
+        }
     inline var e31: Float
         get() = components[13]
-        set(value) { components[13] = value }
+        set(value) {
+            components[13] = value
+            dirty = true
+        }
     inline var e32: Float
         get() = components[14]
-        set(value) { components[14] = value }
+        set(value) {
+            components[14] = value
+            dirty = true
+        }
     inline var e33: Float
         get() = components[15]
-        set(value) { components[15] = value }
+        set(value) {
+            components[15] = value
+            dirty = true
+        }
 
     fun set(other: Matrix4) = set(other.e00, other.e01, other.e02, other.e03, other.e10, other.e11, other.e12, other.e13, other.e20, other.e21, other.e22, other.e23, other.e30, other.e31, other.e32, other.e33)
     fun set(c0: Vector4, c1: Vector4, c2: Vector4, c3: Vector4) = set(c0.x, c1.x, c2.x, c3.x, c0.y, c1.y, c2.y, c3.y, c0.z, c1.z, c2.z, c3.z, c0.w, c1.w, c2.w, c3.w)

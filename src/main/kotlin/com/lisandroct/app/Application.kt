@@ -1,9 +1,12 @@
 package com.lisandroct.app
 
+import com.lisandroct.app.components.Rotator
+import com.lisandroct.app.components.Sinusoidal
 import org.rufousengine.Rufous
 import org.rufousengine.ecs.*
 import org.rufousengine.ecs.components.Camera
 import org.rufousengine.ecs.components.Model
+import org.rufousengine.ecs.components.OmniLight
 import org.rufousengine.ecs.components.Transform
 import org.rufousengine.editor.MeshesLoader
 import org.rufousengine.editor.TextureLoader
@@ -18,18 +21,12 @@ class Application {
     private val frankieMeshes = MeshesLoader.load(Files.local("models/frankie/frankie.obj"))
     private val tex0 = TextureLoader.load(Files.local("models/frankie/frankie-diffuse.png"))
     private val tex1 = TextureLoader.load(Files.local("models/frankie/env-diffuse.png"))
-    private val mat0 = Materials.Gouraud().apply {
+    private val mat0 = Materials.BlinnPhong().apply {
         texture = tex0
-        lightPosition.set(6f, 0f, -3f)
     }
-    private val mat1 = Materials.Gouraud().apply {
+    private val mat1 = Materials.BlinnPhong().apply {
         texture = tex1
-        lightPosition.set(6f, 0f, -3f)
     }
-
-    private val omniLightGizmo = TextureLoader.load(Files.local("textures/omni-light-gizmo.png"))
-
-    var accum = 0f
 
     init {
         val frankie = Entity()
@@ -44,14 +41,29 @@ class Application {
             setMaterial(1, 1)
         }
 
+        val cameraHolder = Entity()
+        cameraHolder.add<Transform>()
+        cameraHolder.add<Rotator>()
 
         val camera = Entity()
         val cameraTransform = camera.add<Transform>()
         cameraTransform?.apply {
-            position.set(0f, 32.5f * 6f, -120f * 6f)
-            rotation.set(15f, -180f, 0f)
+            position.set(0f, 197f, 720f)
+            rotation.set(-15f, 0f, 0f)
+            parent = cameraHolder.get()
         }
         camera.add<Camera>()
+
+        val omniLight = Entity()
+        val omniLightTransform = omniLight.add<Transform>()
+        omniLightTransform?.apply {
+            position.set(6f, 0f, -3f)
+        }
+        omniLight.add<OmniLight>()
+        omniLight.add<Sinusoidal>()?.apply {
+            speed = 3f
+            amplitude = 10f
+        }
 
         ScrollEvent += ::scroll
     }

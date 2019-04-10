@@ -487,6 +487,12 @@ fun multiply(a: Matrix2, b: Matrix2, out: Matrix2 = Matrix2()) : Matrix2 {
     )
 }
 /**
+ * Multiplies [a] with [b] with [c] and stores the result in [out].
+ *
+ * @return The [out] matrix for chaining.
+ */
+fun multiply(a: Matrix2, b: Matrix2, c: Matrix2, out: Matrix2 = Matrix2()) = multiply(a, multiply(b, c, out), out)
+/**
  * Multiplies [a] with [b] and stores the result in [out].
  *
  * @return The [out] matrix for chaining.
@@ -518,6 +524,12 @@ fun multiply(a: Matrix3, b: Matrix3, out: Matrix3 = Matrix3()) : Matrix3 {
             e20, e21, e22
     )
 }
+/**
+ * Multiplies [a] with [b] with [c] and stores the result in [out].
+ *
+ * @return The [out] matrix for chaining.
+ */
+fun multiply(a: Matrix3, b: Matrix3, c: Matrix3, out: Matrix3 = Matrix3()) = multiply(a, multiply(b, c, out), out)
 /**
  * Multiplies [a] with [b] and stores the result in [out].
  *
@@ -559,6 +571,12 @@ fun multiply(a: Matrix4, b: Matrix4, out: Matrix4 = Matrix4()) : Matrix4 {
             e30, e31, e32, e33
     )
 }
+/**
+ * Multiplies [a] with [b] with [c] and stores the result in [out].
+ *
+ * @return The [out] matrix for chaining.
+ */
+fun multiply(a: Matrix4, b: Matrix4, c: Matrix4, out: Matrix4 = Matrix4()) = multiply(a, multiply(b, c, out), out)
 
 /**
  * Multiplies [matrix] with [vector] and stores the result in [out].
