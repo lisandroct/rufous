@@ -7,12 +7,12 @@ import org.rufousengine.math.cos
 import org.rufousengine.math.sin
 
 object SinusoidalSystem : System(1) {
-    private val entities = mutableListOf<Entity>()
+    private val entities = Family(arrayOf(Transform::class, Sinusoidal::class))
 
     private var accum = 0f
 
     init {
-        EntityChangeEvent += ::onEntityChange
+        entities.subscribe()
     }
 
     override fun update() {
@@ -22,17 +22,6 @@ object SinusoidalSystem : System(1) {
             val sinusoidal = entity.getUnsafe<Sinusoidal>()
 
             transform.position.y = cos(accum * sinusoidal.speed) * sinusoidal.amplitude
-        }
-    }
-
-    private fun onEntityChange(entity: Entity) {
-        val transform = entity.get<Transform>()
-        val sinusoidal = entity.get<Sinusoidal>()
-
-        if(transform == null || sinusoidal == null) {
-            entities.remove(entity)
-        } else {
-            entities.add(entity)
         }
     }
 }

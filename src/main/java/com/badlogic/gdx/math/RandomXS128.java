@@ -14,7 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.badlogic.gdx.math;
+package com.badlogic.gdx.math;
 
 import java.util.Random;
 

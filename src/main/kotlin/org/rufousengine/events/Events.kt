@@ -6,6 +6,10 @@ sealed class Event<T: Function<Unit>> {
     operator fun plusAssign(handler: T) {
         handlers.add(handler)
     }
+
+    operator fun minusAssign(handler: T) {
+        handlers.remove(handler)
+    }
 }
 
 open class Event0 : Event<() -> Unit>() {

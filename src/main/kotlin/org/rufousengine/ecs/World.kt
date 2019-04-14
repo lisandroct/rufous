@@ -6,6 +6,7 @@ import org.rufousengine.Resources
 import org.rufousengine.ecs.systems.DebugSystem
 import org.rufousengine.ecs.systems.RenderingSystem
 import org.rufousengine.events.Event1
+import org.rufousengine.events.Event2
 import kotlin.reflect.KClass
 
 object World {
@@ -18,7 +19,7 @@ object World {
     private val componentManagers = hashMapOf<KClass<out Component>, ComponentManager<out Component>>()
     private val componentTypes = mutableListOf<KClass<out Component>>()
 
-    private val entitiesByComponent = hashMapOf<Component, Entity>()
+    private val entitiesByComponent = hashMapOf<Long, Int>()
 
     init {
         systems.add(RenderingSystem)
@@ -45,6 +46,7 @@ object World {
         }
 
         Resources.register(entity)
+        EntityAddedEvent(entity)
 
         return entity
     }
@@ -56,13 +58,14 @@ object World {
         }
 
         for(type in componentTypes) {
-            destroyComponent(entity, type)
+            removeComponent(entity, type)
         }
 
         freeEntities.add(index)
         freeEntitiesSet.add(index)
 
         Resources.unregister(entity)
+        EntityDestroyedEvent(entity)
 
         return true
     }
@@ -81,28 +84,39 @@ object World {
         val manager = getManager(type)
 
         val component = manager.add(entity) ?: return null
-        entitiesByComponent[component] = entity
+        component.active = true
+        entitiesByComponent[component.id] = entity.index
 
-        EntityChangeEvent(entity)
 
         return component
     }
 
-    fun <T: Component> destroyComponent(entity: Entity, type: KClass<T>): Boolean {
+    fun <T: Component> removeComponent(entity: Entity, type: KClass<T>): Boolean {
         val manager = getManager(type)
 
         val component = manager.remove(entity) ?: return false
-        entitiesByComponent.remove(component)
+        component.active = false
+        entitiesByComponent.remove(component.id)
 
-        EntityChangeEvent(entity)
+        ComponentRemovedEvent(entity, component)
 
         return true
     }
 
-    internal fun destroyComponent(component: Component): Boolean {
-        val entity = entitiesByComponent[component] ?: return false
+    fun getEntity(component: Component) : Entity? {
+        val index = entitiesByComponent[component.id] ?: return null
+        return entities[index]
+    }
 
-        return destroyComponent(entity, component::class)
+    internal fun getBitIndex(type: KClass<out Component>): Int {
+        val manager = getManager(type)
+        return manager.bitIndex
+    }
+
+    internal fun removeComponent(component: Component): Boolean {
+        val entity = getEntity(component) ?: return false
+
+        return removeComponent(entity, component::class)
     }
 
     private fun <T: Component> getManager(type: KClass<T>): ComponentManager<T> {
@@ -110,7 +124,7 @@ object World {
         if(componentManagers.containsKey(type)) {
             manager = componentManagers[type] as ComponentManager<T>
         } else {
-            manager = ComponentManager(type)
+            manager = ComponentManager(componentTypes.size, type)
             componentTypes.add(type)
             componentManagers[type] = manager
         }
@@ -124,6 +138,10 @@ fun Entity() = World.createEntity()
 inline fun <reified T: Component> Entity.get() = World.getComponent(this, T::class)
 inline fun <reified T: Component> Entity.getUnsafe() = World.getComponentUnsafe(this, T::class)
 inline fun <reified T: Component> Entity.add() = World.addComponent(this, T::class)
-inline fun <reified T: Component> Entity.remove() = World.destroyComponent(this, T::class)
+inline fun <reified T: Component> Entity.remove() = World.removeComponent(this, T::class)
 
-object EntityChangeEvent : Event1<Entity>()
+inline val Component.entity
+    get() = World.getEntity(this)
+
+object EntityAddedEvent : Event1<Entity>()
+object EntityDestroyedEvent : Event1<Entity>()

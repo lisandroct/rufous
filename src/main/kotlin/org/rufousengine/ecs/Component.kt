@@ -9,6 +9,6 @@ abstract class Component : Resource() {
     var active = true
 
     final override fun destroy() {
-        World.destroyComponent(this)
+        World.removeComponent(this)
     }
 }

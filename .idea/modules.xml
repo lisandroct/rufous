@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/com.lisandroct.rufous.rufous.iml" filepath="$PROJECT_DIR$/.idea/modules/com.lisandroct.rufous.rufous.iml" />
+      <module fileurl="file://$PROJECT_DIR$/rufous.iml" filepath="$PROJECT_DIR$/rufous.iml" />
     </modules>
   </component>
 </project>

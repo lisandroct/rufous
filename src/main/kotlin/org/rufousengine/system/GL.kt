@@ -2,18 +2,11 @@
 
 package org.rufousengine.system
 
-import org.lwjgl.opengl.ARBFramebufferObject.glGenerateMipmap
 import org.lwjgl.opengl.GL.createCapabilities
 import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL20
 import org.lwjgl.opengl.GL30.*
-import org.lwjgl.system.MemoryStack
-import org.rufousengine.graphics.Material
-import org.rufousengine.graphics.Mesh
-import org.rufousengine.graphics.Texture
 import org.rufousengine.math.*
-import sun.security.pkcs11.P11TlsKeyMaterialGenerator
-import java.nio.ByteBuffer
 
 object GL {
     init {

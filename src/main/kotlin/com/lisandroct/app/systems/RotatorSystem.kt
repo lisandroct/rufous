@@ -5,10 +5,10 @@ import org.rufousengine.ecs.*
 import org.rufousengine.ecs.components.Transform
 
 object RotatorSystem : System(1) {
-    private val entities = mutableListOf<Entity>()
+    private val entities = Family(arrayOf(Transform::class, Rotator::class))
 
     init {
-        EntityChangeEvent += ::onEntityChange
+        entities.subscribe()
     }
 
     override fun update() {
@@ -17,17 +17,6 @@ object RotatorSystem : System(1) {
             val rotator = entity.getUnsafe<Rotator>()
 
             transform.rotation.y += rotator.speed
-        }
-    }
-
-    private fun onEntityChange(entity: Entity) {
-        val transform = entity.get<Transform>()
-        val rotator = entity.get<Rotator>()
-
-        if(transform == null || rotator == null) {
-            entities.remove(entity)
-        } else {
-            entities.add(entity)
         }
     }
 }

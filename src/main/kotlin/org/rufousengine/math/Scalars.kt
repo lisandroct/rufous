@@ -2,7 +2,7 @@
 
 package org.rufousengine.math
 
-import org.badlogic.gdx.math.RandomXS128
+import com.badlogic.gdx.math.RandomXS128
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
