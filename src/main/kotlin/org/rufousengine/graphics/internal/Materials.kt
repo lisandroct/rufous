@@ -10,6 +10,145 @@ import org.rufousengine.math.Point3D
 import org.rufousengine.system.GL
 
 object Materials {
+    private val vsGouraud: String = """
+            |#version 330 core
+            |layout (location = 0) in vec3 aPosition;
+            |layout (location = 2) in vec3 aNormal;
+            |layout (location = 3) in vec2 aUv;
+            |
+            |uniform mat4 uWorld;
+            |uniform mat4 uInverse;
+            |uniform mat4 uView;
+            |uniform mat4 uProjection;
+            |
+            |out vec3 position;
+            |out vec3 normal;
+            |out vec2 uv;
+            |
+            |out struct FSInputs {
+            |    vec3 ambient;
+            |    vec3 diffuse;
+            |    vec3 specular;
+            |} fs;
+            |
+            |struct Texture {
+            |    sampler2D sampler;
+            |    vec4 color;
+            |};
+            |
+            |uniform struct Parameters {
+            |    vec3 cameraPosition;
+            |    vec4 lightColor;
+            |    vec3 lightPosition;
+            |    Texture texture;
+            |} parameters;
+            |
+            |vec4 textureColor(Texture tex, vec2 uv) {
+            |    return texture(tex.sampler, uv) * tex.color;
+            |};
+            |
+            |vec3 ambient() {
+            |    float ambientStrength = 0.4;
+            |
+            |    return ambientStrength * parameters.lightColor.rgb;
+            |}
+            |
+            |vec3 diffuse() {
+            |    vec3 norm = normalize(normal);
+            |    vec3 lightDirection = normalize(parameters.lightPosition - position);
+            |
+            |    float diff = max(dot(norm, lightDirection), 0.0);
+            |
+            |    return diff * parameters.lightColor.rgb;
+            |}
+            |
+            |vec3 specular() {
+            |    float specularStrength = 0.5;
+            |
+            |    vec3 norm = normalize(normal);
+            |    vec3 lightDirection = normalize(parameters.lightPosition - position);
+            |
+            |    vec3 viewDirection = normalize(parameters.cameraPosition - position);
+            |    vec3 reflectDirection = reflect(-lightDirection, norm);
+            |    float spec = pow(max(dot(viewDirection, reflectDirection), 0.0), 32);
+            |
+            |    return specularStrength * spec * parameters.lightColor.rgb;
+            |}
+            |
+            |void vertex() {
+            |    fs.ambient = ambient();
+            |    fs.diffuse = diffuse();
+            |    fs.specular = specular();
+            |}
+            |
+            |void main()
+            |{
+            |    position = vec3(uWorld * vec4(aPosition, 1.0));
+            |    normal = mat3(transpose(uInverse)) * aNormal;
+            |    uv = aUv;
+            |    vertex();
+            |    gl_Position = uProjection * uView * vec4(position, 1.0f);
+            |}
+            |""".trimMargin()
+
+    private val fsGouraud: String = """
+            |#version 330 core
+            |
+            |in vec3 position;
+            |in vec3 normal;
+            |in vec2 uv;
+            |out vec4 color;
+            |
+            |struct Properties {
+            |    vec3 ambient;
+            |    vec3 diffuse;
+            |    vec3 specular;
+            |    vec4 objectColor;
+            |} properties;
+            |
+            |in struct FSInputs {
+            |    vec3 ambient;
+            |    vec3 diffuse;
+            |    vec3 specular;
+            |} fs;
+            |
+            |struct Texture {
+            |    sampler2D sampler;
+            |    vec4 color;
+            |};
+            |
+            |uniform struct Parameters {
+            |    vec3 cameraPosition;
+            |    vec4 lightColor;
+            |    vec3 lightPosition;
+            |    Texture texture;
+            |} parameters;
+            |
+            |vec4 textureColor(Texture tex, vec2 uv) {
+            |    return texture(tex.sampler, uv) * tex.color;
+            |};
+            |
+            |void fragment() {
+            |    properties.ambient = fs.ambient;
+            |    properties.diffuse = fs.diffuse;
+            |    properties.specular = fs.specular;
+            |    properties.objectColor = textureColor(parameters.texture, uv);
+            |}
+            |
+            |void shade() {
+            |    color = vec4(properties.ambient + properties.diffuse + properties.specular, 1.0) * properties.objectColor;
+            |
+            |    float gamma = 2.2;
+            |    color.rgb = pow(color.rgb, vec3(1.0/gamma));
+            |}
+            |
+            |void main()
+            |{
+            |    fragment();
+            |    shade();
+            |}
+            |""".trimMargin()
+
     private val vsPhong: String = """
             |#version 330 core
             |layout (location = 0) in vec3 aPosition;
@@ -17,6 +156,7 @@ object Materials {
             |layout (location = 3) in vec2 aUv;
             |
             |uniform mat4 uWorld;
+            |uniform mat4 uInverse;
             |uniform mat4 uView;
             |uniform mat4 uProjection;
             |
@@ -43,7 +183,7 @@ object Materials {
             |void main()
             |{
             |    position = vec3(uWorld * vec4(aPosition, 1.0));
-            |    normal = mat3(transpose(inverse(uWorld))) * aNormal;
+            |    normal = mat3(transpose(uInverse)) * aNormal;
             |    uv = aUv;
             |    gl_Position = uProjection * uView * vec4(position, 1.0f);
             |}
@@ -129,35 +269,68 @@ object Materials {
             |}
             |""".trimMargin()
 
-    private val vsError: String = """
+    private val vsDebugQuad: String = """
             |#version 330 core
             |layout (location = 0) in vec3 aPosition;
+            |layout (location = 3) in vec2 aUv;
             |
             |uniform mat4 uWorld;
+            |uniform mat4 uInverse;
             |uniform mat4 uView;
             |uniform mat4 uProjection;
             |
             |out vec3 position;
+            |out vec2 uv;
+            |
+            |struct Texture {
+            |    sampler2D sampler;
+            |    vec4 color;
+            |};
+            |
+            |uniform struct Parameters {
+            |    Texture texture;
+            |    vec4 tint;
+            |} parameters;
+            |
+            |vec4 textureColor(Texture tex, vec2 uv) {
+            |    return texture(tex.sampler, uv) * tex.color;
+            |};
             |
             |void main()
             |{
             |    position = vec3(uWorld * vec4(aPosition, 1.0));
+            |    uv = aUv;
             |    gl_Position = uProjection * uView * vec4(position, 1.0f);
             |}
             |""".trimMargin()
 
-    private val fsError: String = """
+    private val fsDebugQuad: String = """
             |#version 330 core
             |
             |in vec3 position;
+            |in vec2 uv;
             |out vec4 color;
             |
             |struct Properties {
             |    vec4 color;
             |} properties;
             |
+            |struct Texture {
+            |    sampler2D sampler;
+            |    vec4 color;
+            |};
+            |
+            |uniform struct Parameters {
+            |    Texture texture;
+            |    vec4 tint;
+            |} parameters;
+            |
+            |vec4 textureColor(Texture tex, vec2 uv) {
+            |    return texture(tex.sampler, uv) * tex.color;
+            |};
+            |
             |void fragment() {
-            |    properties.color = vec4(1.0, 0.0, 1.0, 1.0);
+            |    properties.color = textureColor(parameters.texture, uv) * parameters.tint;
             |}
             |
             |void shade() {
@@ -177,6 +350,7 @@ object Materials {
             |layout (location = 3) in vec2 aUv;
             |
             |uniform mat4 uWorld;
+            |uniform mat4 uInverse;
             |uniform mat4 uView;
             |uniform mat4 uProjection;
             |
@@ -247,224 +421,13 @@ object Materials {
             |}
             |""".trimMargin()
 
-    private val vsDebugQuad: String = """
-            |#version 330 core
-            |layout (location = 0) in vec3 aPosition;
-            |layout (location = 3) in vec2 aUv;
-            |
-            |uniform mat4 uWorld;
-            |uniform mat4 uView;
-            |uniform mat4 uProjection;
-            |
-            |out vec3 position;
-            |out vec2 uv;
-            |
-            |struct Texture {
-            |    sampler2D sampler;
-            |    vec4 color;
-            |};
-            |
-            |uniform struct Parameters {
-            |    Texture texture;
-            |    vec4 tint;
-            |} parameters;
-            |
-            |vec4 textureColor(Texture tex, vec2 uv) {
-            |    return texture(tex.sampler, uv) * tex.color;
-            |};
-            |
-            |void main()
-            |{
-            |    position = vec3(uWorld * vec4(aPosition, 1.0));
-            |    uv = aUv;
-            |    gl_Position = uProjection * uView * vec4(position, 1.0f);
-            |}
-            |""".trimMargin()
-
-    private val fsDebugQuad: String = """
-            |#version 330 core
-            |
-            |in vec3 position;
-            |in vec2 uv;
-            |out vec4 color;
-            |
-            |struct Properties {
-            |    vec4 color;
-            |} properties;
-            |
-            |struct Texture {
-            |    sampler2D sampler;
-            |    vec4 color;
-            |};
-            |
-            |uniform struct Parameters {
-            |    Texture texture;
-            |    vec4 tint;
-            |} parameters;
-            |
-            |vec4 textureColor(Texture tex, vec2 uv) {
-            |    return texture(tex.sampler, uv) * tex.color;
-            |};
-            |
-            |void fragment() {
-            |    properties.color = textureColor(parameters.texture, uv) * parameters.tint;
-            |}
-            |
-            |void shade() {
-            |    color = properties.color;
-            |}
-            |
-            |void main()
-            |{
-            |    fragment();
-            |    shade();
-            |}
-            |""".trimMargin()
-
-    private val vsGouraud: String = """
-            |#version 330 core
-            |layout (location = 0) in vec3 aPosition;
-            |layout (location = 2) in vec3 aNormal;
-            |layout (location = 3) in vec2 aUv;
-            |
-            |uniform mat4 uWorld;
-            |uniform mat4 uView;
-            |uniform mat4 uProjection;
-            |
-            |out vec3 position;
-            |out vec3 normal;
-            |out vec2 uv;
-            |
-            |out struct FSInputs {
-            |    vec3 ambient;
-            |    vec3 diffuse;
-            |    vec3 specular;
-            |} fs;
-            |
-            |struct Texture {
-            |    sampler2D sampler;
-            |    vec4 color;
-            |};
-            |
-            |uniform struct Parameters {
-            |    vec3 cameraPosition;
-            |    vec4 lightColor;
-            |    vec3 lightPosition;
-            |    Texture texture;
-            |} parameters;
-            |
-            |vec4 textureColor(Texture tex, vec2 uv) {
-            |    return texture(tex.sampler, uv) * tex.color;
-            |};
-            |
-            |vec3 ambient() {
-            |    float ambientStrength = 0.4;
-            |
-            |    return ambientStrength * parameters.lightColor.rgb;
-            |}
-            |
-            |vec3 diffuse() {
-            |    vec3 norm = normalize(normal);
-            |    vec3 lightDirection = normalize(parameters.lightPosition - position);
-            |
-            |    float diff = max(dot(norm, lightDirection), 0.0);
-            |
-            |    return diff * parameters.lightColor.rgb;
-            |}
-            |
-            |vec3 specular() {
-            |    float specularStrength = 0.5;
-            |
-            |    vec3 norm = normalize(normal);
-            |    vec3 lightDirection = normalize(parameters.lightPosition - position);
-            |
-            |    vec3 viewDirection = normalize(parameters.cameraPosition - position);
-            |    vec3 reflectDirection = reflect(-lightDirection, norm);
-            |    float spec = pow(max(dot(viewDirection, reflectDirection), 0.0), 32);
-            |
-            |    return specularStrength * spec * parameters.lightColor.rgb;
-            |}
-            |
-            |void vertex() {
-            |    fs.ambient = ambient();
-            |    fs.diffuse = diffuse();
-            |    fs.specular = specular();
-            |}
-            |
-            |void main()
-            |{
-            |    position = vec3(uWorld * vec4(aPosition, 1.0));
-            |    normal = mat3(transpose(inverse(uWorld))) * aNormal;
-            |    uv = aUv;
-            |    vertex();
-            |    gl_Position = uProjection * uView * vec4(position, 1.0f);
-            |}
-            |""".trimMargin()
-
-    private val fsGouraud: String = """
-            |#version 330 core
-            |
-            |in vec3 position;
-            |in vec3 normal;
-            |in vec2 uv;
-            |out vec4 color;
-            |
-            |struct Properties {
-            |    vec3 ambient;
-            |    vec3 diffuse;
-            |    vec3 specular;
-            |    vec4 objectColor;
-            |} properties;
-            |
-            |in struct FSInputs {
-            |    vec3 ambient;
-            |    vec3 diffuse;
-            |    vec3 specular;
-            |} fs;
-            |
-            |struct Texture {
-            |    sampler2D sampler;
-            |    vec4 color;
-            |};
-            |
-            |uniform struct Parameters {
-            |    vec3 cameraPosition;
-            |    vec4 lightColor;
-            |    vec3 lightPosition;
-            |    Texture texture;
-            |} parameters;
-            |
-            |vec4 textureColor(Texture tex, vec2 uv) {
-            |    return texture(tex.sampler, uv) * tex.color;
-            |};
-            |
-            |void fragment() {
-            |    properties.ambient = fs.ambient;
-            |    properties.diffuse = fs.diffuse;
-            |    properties.specular = fs.specular;
-            |    properties.objectColor = textureColor(parameters.texture, uv);
-            |}
-            |
-            |void shade() {
-            |    color = vec4(properties.ambient + properties.diffuse + properties.specular, 1.0) * properties.objectColor;
-            |
-            |    float gamma = 2.2;
-            |    color.rgb = pow(color.rgb, vec3(1.0/gamma));
-            |}
-            |
-            |void main()
-            |{
-            |    fragment();
-            |    shade();
-            |}
-            |""".trimMargin()
-
     private val vsUnlit: String = """
             |#version 330 core
             |layout (location = 0) in vec3 aPosition;
             |layout (location = 3) in vec2 aUv;
             |
             |uniform mat4 uWorld;
+            |uniform mat4 uInverse;
             |uniform mat4 uView;
             |uniform mat4 uProjection;
             |
@@ -531,6 +494,49 @@ object Materials {
             |}
             |""".trimMargin()
 
+    private val vsError: String = """
+            |#version 330 core
+            |layout (location = 0) in vec3 aPosition;
+            |
+            |uniform mat4 uWorld;
+            |uniform mat4 uInverse;
+            |uniform mat4 uView;
+            |uniform mat4 uProjection;
+            |
+            |out vec3 position;
+            |
+            |void main()
+            |{
+            |    position = vec3(uWorld * vec4(aPosition, 1.0));
+            |    gl_Position = uProjection * uView * vec4(position, 1.0f);
+            |}
+            |""".trimMargin()
+
+    private val fsError: String = """
+            |#version 330 core
+            |
+            |in vec3 position;
+            |out vec4 color;
+            |
+            |struct Properties {
+            |    vec4 color;
+            |} properties;
+            |
+            |void fragment() {
+            |    properties.color = vec4(1.0, 0.0, 1.0, 1.0);
+            |}
+            |
+            |void shade() {
+            |    color = properties.color;
+            |}
+            |
+            |void main()
+            |{
+            |    fragment();
+            |    shade();
+            |}
+            |""".trimMargin()
+
     private val vsBlinnPhong: String = """
             |#version 330 core
             |layout (location = 0) in vec3 aPosition;
@@ -538,6 +544,7 @@ object Materials {
             |layout (location = 3) in vec2 aUv;
             |
             |uniform mat4 uWorld;
+            |uniform mat4 uInverse;
             |uniform mat4 uView;
             |uniform mat4 uProjection;
             |
@@ -564,7 +571,7 @@ object Materials {
             |void main()
             |{
             |    position = vec3(uWorld * vec4(aPosition, 1.0));
-            |    normal = mat3(transpose(inverse(uWorld))) * aNormal;
+            |    normal = mat3(transpose(uInverse)) * aNormal;
             |    uv = aUv;
             |    gl_Position = uProjection * uView * vec4(position, 1.0f);
             |}
@@ -649,135 +656,6 @@ object Materials {
             |}
             |""".trimMargin()
 
-    class Phong : Material(vsPhong, fsPhong) {
-        private val cameraPositionLocation: Int = GL.getUniformLocation(program,
-                "parameters.cameraPosition")
-
-        val cameraPosition: Point3D = Point3D()
-
-        private val lightColorLocation: Int = GL.getUniformLocation(program,
-                "parameters.lightColor")
-
-        val lightColor: ColorFloat = ColorFloat()
-
-        private val lightPositionLocation: Int = GL.getUniformLocation(program,
-                "parameters.lightPosition")
-
-        val lightPosition: Point3D = Point3D()
-
-        private val textureLocation: Int = GL.getUniformLocation(program,
-                "parameters.texture.sampler")
-
-        private var _texture: Texture = Textures.white
-
-        var texture: Texture?
-            get() = if(_texture != Textures.white) _texture else null
-            set(value) {
-                _texture = value ?: Textures.white
-            }
-
-        private val textureColorLocation: Int = GL.getUniformLocation(program,
-                "parameters.texture.color")
-
-        val textureColor: ColorFloat = ColorFloat()
-
-        init {
-            GL.useProgram(program)
-            GL.setUniformInt(textureLocation, 0)
-        }
-
-        override fun setParameters() {
-            GL.setUniformPoint(cameraPositionLocation, cameraPosition)
-            GL.setUniformColor(lightColorLocation, lightColor)
-            GL.setUniformPoint(lightPositionLocation, lightPosition)
-            val texture = texture
-            if(texture != null) {
-                GL.setUniformColor(textureColorLocation, Colors.white)
-            } else {
-                GL.setUniformColor(textureColorLocation, textureColor)
-            }
-            GL.bindTexture(_texture.name, 0)
-        }
-    }
-
-    class Error : Material(vsError, fsError)
-
-    class Test : Material(vsTest, fsTest) {
-        private val textureLocation: Int = GL.getUniformLocation(program,
-                "parameters.texture.sampler")
-
-        private var _texture: Texture = Textures.white
-
-        var texture: Texture?
-            get() = if(_texture != Textures.white) _texture else null
-            set(value) {
-                _texture = value ?: Textures.white
-            }
-
-        private val textureColorLocation: Int = GL.getUniformLocation(program,
-                "parameters.texture.color")
-
-        val textureColor: ColorFloat = ColorFloat()
-
-        private val timeLocation: Int = GL.getUniformLocation(program, "parameters.time")
-
-        var time: Float = 0f
-
-        init {
-            GL.useProgram(program)
-            GL.setUniformInt(textureLocation, 0)
-        }
-
-        override fun setParameters() {
-            val texture = texture
-            if(texture != null) {
-                GL.setUniformColor(textureColorLocation, Colors.white)
-            } else {
-                GL.setUniformColor(textureColorLocation, textureColor)
-            }
-            GL.bindTexture(_texture.name, 0)
-            GL.setUniformFloat(timeLocation, time)
-        }
-    }
-
-    class DebugQuad : Material(vsDebugQuad, fsDebugQuad) {
-        private val textureLocation: Int = GL.getUniformLocation(program,
-                "parameters.texture.sampler")
-
-        private var _texture: Texture = Textures.white
-
-        var texture: Texture?
-            get() = if(_texture != Textures.white) _texture else null
-            set(value) {
-                _texture = value ?: Textures.white
-            }
-
-        private val textureColorLocation: Int = GL.getUniformLocation(program,
-                "parameters.texture.color")
-
-        val textureColor: ColorFloat = ColorFloat()
-
-        private val tintLocation: Int = GL.getUniformLocation(program, "parameters.tint")
-
-        val tint: ColorFloat = ColorFloat()
-
-        init {
-            GL.useProgram(program)
-            GL.setUniformInt(textureLocation, 0)
-        }
-
-        override fun setParameters() {
-            val texture = texture
-            if(texture != null) {
-                GL.setUniformColor(textureColorLocation, Colors.white)
-            } else {
-                GL.setUniformColor(textureColorLocation, textureColor)
-            }
-            GL.bindTexture(_texture.name, 0)
-            GL.setUniformColor(tintLocation, tint)
-        }
-    }
-
     class Gouraud : Material(vsGouraud, fsGouraud) {
         private val cameraPositionLocation: Int = GL.getUniformLocation(program,
                 "parameters.cameraPosition")
@@ -829,6 +707,133 @@ object Materials {
         }
     }
 
+    class Phong : Material(vsPhong, fsPhong) {
+        private val cameraPositionLocation: Int = GL.getUniformLocation(program,
+                "parameters.cameraPosition")
+
+        val cameraPosition: Point3D = Point3D()
+
+        private val lightColorLocation: Int = GL.getUniformLocation(program,
+                "parameters.lightColor")
+
+        val lightColor: ColorFloat = ColorFloat()
+
+        private val lightPositionLocation: Int = GL.getUniformLocation(program,
+                "parameters.lightPosition")
+
+        val lightPosition: Point3D = Point3D()
+
+        private val textureLocation: Int = GL.getUniformLocation(program,
+                "parameters.texture.sampler")
+
+        private var _texture: Texture = Textures.white
+
+        var texture: Texture?
+            get() = if(_texture != Textures.white) _texture else null
+            set(value) {
+                _texture = value ?: Textures.white
+            }
+
+        private val textureColorLocation: Int = GL.getUniformLocation(program,
+                "parameters.texture.color")
+
+        val textureColor: ColorFloat = ColorFloat()
+
+        init {
+            GL.useProgram(program)
+            GL.setUniformInt(textureLocation, 0)
+        }
+
+        override fun setParameters() {
+            GL.setUniformPoint(cameraPositionLocation, cameraPosition)
+            GL.setUniformColor(lightColorLocation, lightColor)
+            GL.setUniformPoint(lightPositionLocation, lightPosition)
+            val texture = texture
+            if(texture != null) {
+                GL.setUniformColor(textureColorLocation, Colors.white)
+            } else {
+                GL.setUniformColor(textureColorLocation, textureColor)
+            }
+            GL.bindTexture(_texture.name, 0)
+        }
+    }
+
+    class DebugQuad : Material(vsDebugQuad, fsDebugQuad) {
+        private val textureLocation: Int = GL.getUniformLocation(program,
+                "parameters.texture.sampler")
+
+        private var _texture: Texture = Textures.white
+
+        var texture: Texture?
+            get() = if(_texture != Textures.white) _texture else null
+            set(value) {
+                _texture = value ?: Textures.white
+            }
+
+        private val textureColorLocation: Int = GL.getUniformLocation(program,
+                "parameters.texture.color")
+
+        val textureColor: ColorFloat = ColorFloat()
+
+        private val tintLocation: Int = GL.getUniformLocation(program, "parameters.tint")
+
+        val tint: ColorFloat = ColorFloat()
+
+        init {
+            GL.useProgram(program)
+            GL.setUniformInt(textureLocation, 0)
+        }
+
+        override fun setParameters() {
+            val texture = texture
+            if(texture != null) {
+                GL.setUniformColor(textureColorLocation, Colors.white)
+            } else {
+                GL.setUniformColor(textureColorLocation, textureColor)
+            }
+            GL.bindTexture(_texture.name, 0)
+            GL.setUniformColor(tintLocation, tint)
+        }
+    }
+
+    class Test : Material(vsTest, fsTest) {
+        private val textureLocation: Int = GL.getUniformLocation(program,
+                "parameters.texture.sampler")
+
+        private var _texture: Texture = Textures.white
+
+        var texture: Texture?
+            get() = if(_texture != Textures.white) _texture else null
+            set(value) {
+                _texture = value ?: Textures.white
+            }
+
+        private val textureColorLocation: Int = GL.getUniformLocation(program,
+                "parameters.texture.color")
+
+        val textureColor: ColorFloat = ColorFloat()
+
+        private val timeLocation: Int = GL.getUniformLocation(program, "parameters.time")
+
+        var time: Float = 0f
+
+        init {
+            GL.useProgram(program)
+            GL.setUniformInt(textureLocation, 0)
+        }
+
+        override fun setParameters() {
+            val texture = texture
+            if(texture != null) {
+                GL.setUniformColor(textureColorLocation, Colors.white)
+            } else {
+                GL.setUniformColor(textureColorLocation, textureColor)
+            }
+            GL.bindTexture(_texture.name, 0)
+            GL.setUniformFloat(timeLocation, time)
+        }
+    }
+
     class Unlit : Material(vsUnlit, fsUnlit) {
         private val textureLocation: Int = GL.getUniformLocation(program,
                 "parameters.texture.sampler")
@@ -861,6 +866,8 @@ object Materials {
             GL.bindTexture(_texture.name, 0)
         }
     }
+
+    class Error : Material(vsError, fsError)
 
     class BlinnPhong : Material(vsBlinnPhong, fsBlinnPhong) {
         private val cameraPositionLocation: Int = GL.getUniformLocation(program,

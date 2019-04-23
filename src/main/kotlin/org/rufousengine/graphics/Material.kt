@@ -9,11 +9,13 @@ abstract class Material(vertexShaderSource: String, fragmentShaderSource: String
     val program = GL.ShaderProgram(GL.VertexShader(vertexShaderSource), GL.FragmentShader(fragmentShaderSource))
 
     private val worldLocation = GL.getUniformLocation(program, "uWorld")
+    private val inverseLocation = GL.getUniformLocation(program, "uInverse")
     private val viewLocation = GL.getUniformLocation(program, "uView")
     private val projectionLocation = GL.getUniformLocation(program, "uProjection")
 
-    fun setTransformParameters(world: Matrix4, view: Matrix4, projection: Matrix4) {
+    fun setTransformParameters(world: Matrix4, inverse: Matrix4, view: Matrix4, projection: Matrix4) {
         GL.setUniformMatrix(worldLocation, world)
+        GL.setUniformMatrix(inverseLocation, inverse)
         GL.setUniformMatrix(viewLocation, view)
         GL.setUniformMatrix(projectionLocation, projection)
     }

@@ -46,7 +46,7 @@ object RenderingSystem : System(0) {
                     }
 
                     GL.useProgram(material.program)
-                    material.setTransformParameters(transform.world, cameraTransform.inverse, camera.projection)
+                    material.setTransformParameters(transform.world, transform.inverse, cameraTransform.inverse, camera.projection)
                     material.setParameters()
 
                     GL.bindVertexArray(mesh.vao)

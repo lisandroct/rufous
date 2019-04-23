@@ -26,6 +26,7 @@ private fun buildVertexShader(name: String, model: ShadingModel, requires: Requi
         }
         appendln()
         appendln("uniform mat4 uWorld;")
+        appendln("uniform mat4 uInverse;")
         appendln("uniform mat4 uView;")
         appendln("uniform mat4 uProjection;")
         appendln()
@@ -52,7 +53,7 @@ private fun buildVertexShader(name: String, model: ShadingModel, requires: Requi
         for (attribute in requires) {
             when (attribute) {
                 VertexAttribute.position -> appendln("    ${attribute.name} = vec3(uWorld * vec4(${attribute.glslLayoutName}, 1.0));")
-                VertexAttribute.normal -> appendln("    ${attribute.name} = mat3(transpose(inverse(uWorld))) * ${attribute.glslLayoutName};")
+                VertexAttribute.normal -> appendln("    ${attribute.name} = mat3(transpose(uInverse)) * ${attribute.glslLayoutName};")
                 else -> appendln("    ${attribute.name} = ${attribute.glslLayoutName};")
             }
         }
@@ -410,6 +411,8 @@ fun main() {
         materialsBuilder.addProperty(vsSpec)
                 .addProperty(fsSpec)
                 .addType(typeSpec)
+
+        println(type)
     }
 
     val materialsSpec = materialsBuilder.build()

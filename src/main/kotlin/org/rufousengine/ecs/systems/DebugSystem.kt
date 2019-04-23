@@ -32,6 +32,7 @@ object DebugSystem : System(0) {
 
     private val quadMaterial = Materials.DebugQuad()
     private val cQuadTransform = Matrix4()
+    private val cInverseTransform = Matrix4()
 
     private val omniLightGizmo = TextureLoader.load(Files.local("textures/omni-light-gizmo.png"))
 
@@ -57,13 +58,14 @@ object DebugSystem : System(0) {
                 //val s = Scale(transform.scale.x, transform.scale.y, transform.scale.z)
                 val r = RotationZ(cameraTransform.worldRotation.z) * RotationY(cameraTransform.worldRotation.y) * RotationX(cameraTransform.worldRotation.x)
                 multiply(t, r, cQuadTransform)
+                inverse(cQuadTransform, cInverseTransform)
 
                 entity.get<OmniLight>()?.let {
                     quadMaterial.texture = omniLightGizmo
                     //quadMaterial.tint.set(tint)
 
                     GL.useProgram(quadMaterial.program)
-                    quadMaterial.setTransformParameters(cQuadTransform, cameraTransform.inverse, camera.projection)
+                    quadMaterial.setTransformParameters(cQuadTransform, cInverseTransform, cameraTransform.inverse, camera.projection)
                     quadMaterial.setParameters()
 
                     GL.bindVertexArray(quad.vao)
