@@ -2,11 +2,12 @@
 
 package org.rufousengine.system
 
+import org.lwjgl.opengl.*
 import org.lwjgl.opengl.GL.createCapabilities
-import org.lwjgl.opengl.GL11
-import org.lwjgl.opengl.GL20
 import org.lwjgl.opengl.GL30.*
+import org.lwjgl.system.MemoryUtil
 import org.rufousengine.math.*
+import kotlin.IllegalArgumentException
 
 object GL {
     init {
@@ -73,9 +74,65 @@ object GL {
         glBindTexture(GL_TEXTURE_2D, id)
     }
 
-    inline fun unbindTexture(slot: Int) {
-        glActiveTexture(GL_TEXTURE0 + slot)
-        glBindTexture(GL_TEXTURE_2D, 0)
+    inline fun unbindTexture(slot: Int) = bindTexture(0, slot)
+
+    inline fun generateTextureImage(width: Int, height: Int, pixels: ByteArray, format: TextureFormat) {
+        val buffer = MemoryUtil.memAlloc(pixels.size)
+        buffer.put(pixels)
+        buffer.flip()
+        glTexImage2D(GL_TEXTURE_2D, 0, format.nativeInternal, width, height, 0, format.native, GL_UNSIGNED_BYTE, buffer)
+        MemoryUtil.memFree(buffer)
+    }
+
+    inline fun setTextureWrap(s: TextureWrap, t: TextureWrap) {
+        setTextureWrap(s, s = true)
+        setTextureWrap(t, t = true)
+    }
+
+    inline fun setTextureWrap(wrap: TextureWrap, s: Boolean = false, t: Boolean = false) {
+        if(s) {
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap.native)
+        }
+        if(t) {
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap.native)
+        }
+    }
+
+    inline fun setTextureFilter(min: TextureFilter, mag: TextureFilter) {
+        setTextureFilter(min, min = true)
+        setTextureFilter(mag, mag = true)
+    }
+
+    inline fun setTextureFilter(filter: TextureFilter, min: Boolean = false, mag: Boolean = false) {
+        if(min) {
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter.native)
+        }
+        if(mag) {
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter.native)
+        }
+    }
+
+    inline fun generateMipmaps() {
+        ARBFramebufferObject.glGenerateMipmap(GL_TEXTURE_2D)
+    }
+
+    enum class TextureFormat(val native: Int, val nativeInternal: Int) {
+        RGB(GL_RGB, GL_RGB8),
+        RGBA(GL_RGBA, GL_RGBA8),
+        SRGB(GL_RGB, GL_SRGB8),
+        SRGBA(GL_RGBA, GL_SRGB8_ALPHA8)
+    }
+
+    enum class TextureWrap(val native: Int) {
+        Repeat(GL_REPEAT), Mirror(GL_MIRRORED_REPEAT), Clamp(GL_CLAMP_TO_EDGE)
+    }
+    enum class TextureFilter(val native: Int) {
+        Linear(GL_LINEAR),
+        Nearest(GL_NEAREST),
+        MipmapLinearLinear(GL_LINEAR_MIPMAP_LINEAR),
+        MipmapLinearNearest(GL_LINEAR_MIPMAP_NEAREST),
+        MipmapNearestLinear(GL_NEAREST_MIPMAP_LINEAR),
+        MipmapNearestNearest(GL_NEAREST_MIPMAP_NEAREST)
     }
 
     // -----------------------------------------------------------------------------------------------------------------
@@ -180,4 +237,34 @@ object GL {
         is Matrix4 -> GL20.glUniformMatrix4fv(location, true, value.components)
     }
     inline fun setUniformColor(location: Int, color: ColorFloat) = glUniform4fv(location, color.components)
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+    inline fun generateFramebuffer() = glGenFramebuffers()
+    inline fun destroyFramebuffer(buffer: Int) = glDeleteFramebuffers(buffer)
+
+    inline fun bindFrameBuffer(buffer: Int, read: Boolean = true, write: Boolean = true) {
+        val target = when {
+            read && write -> GL_FRAMEBUFFER
+            read -> GL_READ_FRAMEBUFFER
+            write -> GL_DRAW_FRAMEBUFFER
+            else -> throw IllegalArgumentException("The framebuffer must be set to read or write")
+        }
+
+        glBindFramebuffer(target, buffer)
+    }
+
+    inline fun unbindFrameBuffer(buffer: Int) = bindFrameBuffer(0)
+    /*inline fun generateBuffer() = glGenBuffers()
+    inline fun destroyBuffer(buffer: Int) = glDeleteBuffers(buffer)
+
+    inline fun bindVertexBuffer(vbo: Int) = glBindBuffer(GL_ARRAY_BUFFER, vbo)
+    inline fun unbindVertexBuffer() = bindVertexBuffer(0)
+
+    inline fun setVertexBufferData(vertices: FloatArray)  = glBufferData(GL_ARRAY_BUFFER, vertices, GL_STATIC_DRAW)
+
+    inline fun bindIndexBuffer(ibo: Int) = glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo)
+    inline fun unbindIndexBuffer() = bindIndexBuffer(0)
+
+    inline fun setIndexBufferData(indices: IntArray) = glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices, GL_STATIC_DRAW)*/
 }
