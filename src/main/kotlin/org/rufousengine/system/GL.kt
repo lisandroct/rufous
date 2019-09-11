@@ -5,8 +5,11 @@ package org.rufousengine.system
 import org.lwjgl.opengl.*
 import org.lwjgl.opengl.GL.createCapabilities
 import org.lwjgl.opengl.GL30.*
+import org.lwjgl.opengl.GL32.GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS
 import org.lwjgl.system.MemoryUtil
+import org.lwjgl.system.MemoryUtil.NULL
 import org.rufousengine.math.*
+import java.nio.ByteBuffer
 import kotlin.IllegalArgumentException
 
 object GL {
@@ -76,12 +79,18 @@ object GL {
 
     inline fun unbindTexture(slot: Int) = bindTexture(0, slot)
 
-    inline fun generateTextureImage(width: Int, height: Int, pixels: ByteArray, format: TextureFormat) {
-        val buffer = MemoryUtil.memAlloc(pixels.size)
-        buffer.put(pixels)
-        buffer.flip()
-        glTexImage2D(GL_TEXTURE_2D, 0, format.nativeInternal, width, height, 0, format.native, GL_UNSIGNED_BYTE, buffer)
-        MemoryUtil.memFree(buffer)
+    inline fun generateTextureImage(width: Int, height: Int, pixels: ByteArray?, format: TextureFormat) {
+        if(pixels == null) {
+            glTexImage2D(GL_TEXTURE_2D, 0, format.nativeInternal, width, height, 0, format.native, format.nativeType, NULL)
+        } else {
+            val buffer = MemoryUtil.memAlloc(pixels.size)
+            buffer.put(pixels)
+            buffer.flip()
+
+            glTexImage2D(GL_TEXTURE_2D, 0, format.nativeInternal, width, height, 0, format.native, format.nativeType, buffer)
+
+            MemoryUtil.memFree(buffer)
+        }
     }
 
     inline fun setTextureWrap(s: TextureWrap, t: TextureWrap) {
@@ -112,15 +121,20 @@ object GL {
         }
     }
 
+    inline fun setAutomaticMipmap(value: Boolean) = glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, if(value) GL_TRUE else GL_FALSE)
+
     inline fun generateMipmaps() {
         ARBFramebufferObject.glGenerateMipmap(GL_TEXTURE_2D)
     }
 
-    enum class TextureFormat(val native: Int, val nativeInternal: Int) {
-        RGB(GL_RGB, GL_RGB8),
-        RGBA(GL_RGBA, GL_RGBA8),
-        SRGB(GL_RGB, GL_SRGB8),
-        SRGBA(GL_RGBA, GL_SRGB8_ALPHA8)
+    enum class TextureFormat(val native: Int, val nativeInternal: Int, val nativeType: Int) {
+        RGB(GL_RGB, GL_RGB8, GL_UNSIGNED_BYTE),
+        RGBA(GL_RGBA, GL_RGBA8, GL_UNSIGNED_BYTE),
+        SRGB(GL_RGB, GL_SRGB8, GL_UNSIGNED_BYTE),
+        SRGBA(GL_RGBA, GL_SRGB8_ALPHA8, GL_UNSIGNED_BYTE),
+        Depth(GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE),
+        Stencil(GL_STENCIL_ATTACHMENT, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE),
+        DepthStencil(GL_DEPTH_STENCIL, GL_DEPTH24_STENCIL8, GL_UNSIGNED_INT_24_8)
     }
 
     enum class TextureWrap(val native: Int) {
@@ -240,21 +254,148 @@ object GL {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
+    inline fun generateRenderbuffer() = glGenRenderbuffers()
+    inline fun deleteRenderbuffer(buffer: Int) = glDeleteRenderbuffers(buffer)
+
+    inline fun bindRenderbuffer(buffer: Int) = glBindRenderbuffer(GL_RENDERBUFFER, buffer)
+
+    inline fun unbindRenderbuffer() = bindRenderbuffer(0)
+
+    inline fun generateRenderbufferStorage(width: Int, height: Int, format: TextureFormat) = glRenderbufferStorage(GL_RENDERBUFFER, format.nativeInternal, width, height)
+    inline fun generateRenderbufferStorageMultisample(width: Int, height: Int, format: TextureFormat, samples: Int) = glRenderbufferStorageMultisample(GL_RENDERBUFFER, samples, format.nativeInternal, width, height)
+
+// ---------------------------------------------------------------------------------------------------------------------
+
     inline fun generateFramebuffer() = glGenFramebuffers()
-    inline fun destroyFramebuffer(buffer: Int) = glDeleteFramebuffers(buffer)
+    inline fun deleteFramebuffer(buffer: Int) = glDeleteFramebuffers(buffer)
 
     inline fun bindFrameBuffer(buffer: Int, read: Boolean = true, write: Boolean = true) {
         val target = when {
             read && write -> GL_FRAMEBUFFER
             read -> GL_READ_FRAMEBUFFER
             write -> GL_DRAW_FRAMEBUFFER
-            else -> throw IllegalArgumentException("The framebuffer must be set to read or write")
+            else -> throw IllegalArgumentException("The framebuffer must be set to readable or write")
         }
 
         glBindFramebuffer(target, buffer)
     }
 
-    inline fun unbindFrameBuffer(buffer: Int) = bindFrameBuffer(0)
+    inline fun unbindFrameBuffer(read: Boolean = true, write: Boolean = true) = bindFrameBuffer(0, read, write)
+
+    inline fun attachTextureToFramebuffer(texture: Int, attachment: FramebufferAttachment, read: Boolean = true, write: Boolean = true) {
+        val target = when {
+            read && write -> GL_FRAMEBUFFER
+            read -> GL_READ_FRAMEBUFFER
+            write -> GL_DRAW_FRAMEBUFFER
+            else -> throw IllegalArgumentException("The framebuffer must be set to readable or write")
+        }
+
+        glFramebufferTexture2D(target, attachment.native, GL_TEXTURE_2D, texture, 0)
+    }
+
+    inline fun attachRenderbufferToFramebuffer(buffer: Int, attachment: FramebufferAttachment, read: Boolean = true, write: Boolean = true) {
+        val target = when {
+            read && write -> GL_FRAMEBUFFER
+            read -> GL_READ_FRAMEBUFFER
+            write -> GL_DRAW_FRAMEBUFFER
+            else -> throw IllegalArgumentException("The framebuffer must be set to readable or write")
+        }
+
+        glFramebufferRenderbuffer(target, attachment.native, GL_RENDERBUFFER, buffer)
+    }
+
+    enum class FramebufferAttachment(val native: Int) {
+        Color0(GL_COLOR_ATTACHMENT0),
+        Color1(GL_COLOR_ATTACHMENT1),
+        Color2(GL_COLOR_ATTACHMENT2),
+        Color3(GL_COLOR_ATTACHMENT3),
+        Color4(GL_COLOR_ATTACHMENT4),
+        Color5(GL_COLOR_ATTACHMENT5),
+        Color6(GL_COLOR_ATTACHMENT6),
+        Color7(GL_COLOR_ATTACHMENT7),
+        Color8(GL_COLOR_ATTACHMENT8),
+        Color9(GL_COLOR_ATTACHMENT9),
+        Color10(GL_COLOR_ATTACHMENT10),
+        Color11(GL_COLOR_ATTACHMENT11),
+        Color12(GL_COLOR_ATTACHMENT12),
+        Color13(GL_COLOR_ATTACHMENT13),
+        Color14(GL_COLOR_ATTACHMENT14),
+        Color15(GL_COLOR_ATTACHMENT15),
+        Color16(GL_COLOR_ATTACHMENT16),
+        Color17(GL_COLOR_ATTACHMENT17),
+        Color18(GL_COLOR_ATTACHMENT18),
+        Color19(GL_COLOR_ATTACHMENT19),
+        Color20(GL_COLOR_ATTACHMENT20),
+        Color21(GL_COLOR_ATTACHMENT21),
+        Color22(GL_COLOR_ATTACHMENT22),
+        Color23(GL_COLOR_ATTACHMENT23),
+        Color24(GL_COLOR_ATTACHMENT24),
+        Color25(GL_COLOR_ATTACHMENT25),
+        Color26(GL_COLOR_ATTACHMENT26),
+        Color27(GL_COLOR_ATTACHMENT27),
+        Color28(GL_COLOR_ATTACHMENT28),
+        Color29(GL_COLOR_ATTACHMENT29),
+        Color30(GL_COLOR_ATTACHMENT30),
+        Color31(GL_COLOR_ATTACHMENT31),
+        Depth(GL_DEPTH_ATTACHMENT),
+        Stencil(GL_STENCIL_ATTACHMENT),
+        DepthStencil(GL_DEPTH_STENCIL_ATTACHMENT)
+    }
+
+    inline fun isFramebufferComplete(read: Boolean = true, write: Boolean = true) = getFramebufferStatus(read, write) == FramebufferStatus.Complete
+
+    inline fun getFramebufferStatus(read: Boolean = true, write: Boolean = true) : FramebufferStatus {
+        val target = when {
+            read && write -> GL_FRAMEBUFFER
+            read -> GL_READ_FRAMEBUFFER
+            write -> GL_DRAW_FRAMEBUFFER
+            else -> throw IllegalArgumentException("The framebuffer must be set to readable or write")
+        }
+
+        return when(glCheckFramebufferStatus(target)) {
+            GL_FRAMEBUFFER_COMPLETE -> FramebufferStatus.Complete
+            GL_FRAMEBUFFER_UNDEFINED -> FramebufferStatus.Undefined
+            GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT -> FramebufferStatus.IncompleteAttachment
+            GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT -> FramebufferStatus.MissingAttachment
+            GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER -> FramebufferStatus.IncompleteDrawBuffer
+            GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER -> FramebufferStatus.IncompleteReadBuffer
+            GL_FRAMEBUFFER_UNSUPPORTED -> FramebufferStatus.Unsupported
+            GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE -> FramebufferStatus.IncompleteMultisample
+            GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS -> FramebufferStatus.IncompleteLayerTargets
+            else -> FramebufferStatus.Undefined
+        }
+    }
+
+    inline fun blitFramebuffer(srcX0: Int, srcY0: Int, srcX1: Int, srcY1: Int, dstX0: Int, dstY0: Int, dstX1: Int, dstY2: Int, filter: TextureFilter, color: Boolean = true, depth: Boolean = true, stencil: Boolean = true) {
+        if(filter != TextureFilter.Nearest && filter != TextureFilter.Linear) {
+            throw IllegalArgumentException("filter must be either Nearest or Linear")
+        }
+
+        var mask = 0
+        if(color) {
+            mask = mask or GL_COLOR_BUFFER_BIT
+        }
+        if(depth) {
+            mask = mask or GL_DEPTH_BUFFER_BIT
+        }
+        if(stencil) {
+            mask = mask or GL_STENCIL_BUFFER_BIT
+        }
+
+        glBlitFramebuffer(srcX0, srcY0, srcX1, srcY1, dstX0, dstY0, dstX1, dstY2, mask, filter.native)
+    }
+
+    enum class FramebufferStatus(val native: Int) {
+        Complete(GL_FRAMEBUFFER_COMPLETE),
+        Undefined(GL_FRAMEBUFFER_UNDEFINED),
+        IncompleteAttachment(GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT),
+        MissingAttachment(GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT),
+        IncompleteDrawBuffer(GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER),
+        IncompleteReadBuffer(GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER),
+        Unsupported(GL_FRAMEBUFFER_UNSUPPORTED),
+        IncompleteMultisample(GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE),
+        IncompleteLayerTargets(GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS)
+    }
     /*inline fun generateBuffer() = glGenBuffers()
     inline fun destroyBuffer(buffer: Int) = glDeleteBuffers(buffer)
 

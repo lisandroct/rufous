@@ -34,7 +34,7 @@ object DebugSystem : System(0) {
     private val cQuadTransform = Matrix4()
     private val cInverseTransform = Matrix4()
 
-    private val omniLightGizmo = TextureLoader.load(Files.local("textures/omni-light-gizmo.png"))
+    private val omniLightGizmo = TextureLoader.load(Files.local("textures/omni-light-gizmo.png"), alpha = true, sRGB = false)
 
     init {
         GL.setClearColor(29 / 255f, 22 / 255f, 21 / 255f, 1f)
@@ -46,7 +46,7 @@ object DebugSystem : System(0) {
     }
 
     override fun update() {
-        //GL.disableDepthTest()
+        GL.enableDepthTest()
         for(cameraEntity in cameras) {
             val cameraTransform = cameraEntity.getUnsafe<Transform>()
             val camera = cameraEntity.getUnsafe<Camera>()

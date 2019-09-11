@@ -12,15 +12,14 @@ import org.rufousengine.editor.MeshesLoader
 import org.rufousengine.editor.TextureLoader
 import org.rufousengine.events.mouse.ScrollEvent
 import org.rufousengine.files.Files
-import org.rufousengine.graphics.*
 import org.rufousengine.graphics.internal.Materials
 import org.rufousengine.math.*
 import org.rufousengine.system.GL
 
 class Application {
     private val frankieMeshes = MeshesLoader.load(Files.local("models/frankie/frankie.obj"))
-    private val tex0 = TextureLoader.load(Files.local("models/frankie/frankie-diffuse.png"))
-    private val tex1 = TextureLoader.load(Files.local("models/frankie/env-diffuse.png"))
+    private val tex0 = TextureLoader.load(Files.local("models/frankie/frankie-diffuse.png"), alpha = false, sRGB = true)
+    private val tex1 = TextureLoader.load(Files.local("models/frankie/env-diffuse.png"), alpha = false, sRGB = true)
     private val mat0 = Materials.BlinnPhong().apply {
         texture = tex0
     }
@@ -52,7 +51,7 @@ class Application {
             rotation.set(-15f, 0f, 0f)
             parent = cameraHolder.get()
         }
-        camera.add<Camera>()
+        val cam = camera.add<Camera>()
 
         val omniLight = Entity()
         val omniLightTransform = omniLight.add<Transform>()
@@ -65,7 +64,11 @@ class Application {
             amplitude = 10f
         }
 
-        ScrollEvent += ::scroll
+        if(cam != null) {
+            ScrollEvent += { _, y ->
+                cam.fieldOfView = clamp(cam.fieldOfView - y, 1f, 179.5f)
+            }
+        }
     }
 
     /*
@@ -90,10 +93,6 @@ class Application {
 
     fun resize(width: Int, height: Int) {
         GL.setViewport(0, 0, width, height)
-    }
-
-    private fun scroll(x: Float, y: Float) {
-        //fieldOfView = clamp(fieldOfView - y, 0.1f, 180f)
     }
 }
 

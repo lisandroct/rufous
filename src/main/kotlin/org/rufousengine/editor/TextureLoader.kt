@@ -4,11 +4,16 @@ import org.lwjgl.stb.STBImage.*
 import org.lwjgl.system.MemoryStack
 import org.lwjgl.system.MemoryUtil
 import org.rufousengine.files.File
+import org.rufousengine.graphics.FilterMode
 import org.rufousengine.graphics.Texture
-import java.nio.ByteBuffer
+import org.rufousengine.graphics.TextureFormat
 
 object TextureLoader {
-    fun load(file: File, sRGB: Boolean = true) : Texture {
+    init {
+        stbi_set_flip_vertically_on_load(false)
+    }
+
+    fun load(file: File, alpha: Boolean, sRGB: Boolean) : Texture {
         if(!file.exists || !file.isFile) {
             throw Exception("Error loading function")
         }
@@ -28,9 +33,7 @@ object TextureLoader {
             val comp = stack.mallocInt(1)
 
             /* Load image */
-            stbi_set_flip_vertically_on_load(false)
-
-            val image = stbi_load_from_memory(buffer, w, h, comp, 4) ?: throw RuntimeException(stbi_failure_reason())
+            val image = stbi_load_from_memory(buffer, w, h, comp, if(alpha) 4 else 3) ?: throw RuntimeException(stbi_failure_reason())
 
             /* Get width and height of image */
             width = w[0]
@@ -47,6 +50,20 @@ object TextureLoader {
 
         MemoryUtil.memFree(buffer)
 
-        return Texture(width, height, pixels.toByteArray(), sRGB)
+        val format = if(alpha) {
+            if(sRGB) {
+                TextureFormat.sRGBA
+            } else {
+                TextureFormat.RGBA
+            }
+        } else {
+            if(sRGB) {
+                TextureFormat.sRGB
+            } else {
+                TextureFormat.RGB
+            }
+        }
+
+        return Texture(width, height, pixels.toByteArray(), FilterMode.Trilinear, format)
     }
 }
