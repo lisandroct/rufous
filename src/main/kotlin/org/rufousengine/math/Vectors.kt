@@ -18,6 +18,9 @@ inline val Vector.isUnit: Boolean
 /** Whether all components are 1. */
 inline val Vector.isOne: Boolean
     get() = components.all { it.isOne() }
+/** Whether all components are 1. */
+inline val Vector.isValid: Boolean
+    get() = components.none { it.isNaN() && it.isFinite() }
 
 /** The smallest between all components. */
 inline val Vector.minComponent : Float
@@ -1017,6 +1020,13 @@ inline fun Vector3.multiplyLeft(matrix: Matrix3) = multiply(matrix, this, this)
  * @return This vector for chaining.
  */
 inline fun Vector3.multiplyLeft(matrix: Matrix4) = multiply(matrix, this, this)
+
+/**
+ * Rotates this vector with [quaternion].
+ *
+ * @return This vector for chaining.
+ */
+inline fun Vector3.rotate(quaternion: Quaternion) = rotate(quaternion, this, this)
 
 // ---
 

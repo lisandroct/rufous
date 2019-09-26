@@ -12,7 +12,7 @@ class DirtyFlag {
     }
 
     operator fun setValue(thisRef: Any?, property: KProperty<*>, value: Boolean) {
-        if(!value || flag) {
+        if(!value) {
             return
         }
 

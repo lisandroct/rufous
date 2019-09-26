@@ -4,12 +4,10 @@ package org.rufousengine.system
 
 import org.lwjgl.opengl.*
 import org.lwjgl.opengl.GL.createCapabilities
-import org.lwjgl.opengl.GL30.*
-import org.lwjgl.opengl.GL32.GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS
+import org.lwjgl.opengl.GL32.*
 import org.lwjgl.system.MemoryUtil
 import org.lwjgl.system.MemoryUtil.NULL
 import org.rufousengine.math.*
-import java.nio.ByteBuffer
 import kotlin.IllegalArgumentException
 
 object GL {
@@ -227,7 +225,13 @@ object GL {
 
     // -----------------------------------------------------------------------------------------------------------------
 
-    inline fun drawElements(indicesCount: Int) = glDrawElements(GL_TRIANGLES, indicesCount, GL_UNSIGNED_INT, 0)
+    inline fun drawElements(indicesCount: Int, mode: DrawModes = DrawModes.TRIANGLES) = glDrawElements(mode.native, indicesCount, GL_UNSIGNED_INT, 0)
+
+    enum class DrawModes(val native: Int) {
+        TRIANGLES(GL_TRIANGLES),
+        LINES(GL_LINES),
+        POINTS(GL_POINTS)
+    }
 
     // -----------------------------------------------------------------------------------------------------------------
 

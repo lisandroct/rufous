@@ -2,6 +2,11 @@
 
 package org.rufousengine.math
 
+import kotlin.math.abs
+import kotlin.math.asin
+import kotlin.math.atan2
+import kotlin.math.sign
+
 /**
  * Sets [matrix] as a rotation matrix through [angle] about the x axis.
  *
@@ -97,6 +102,22 @@ fun rotation(degrees: Float, axis: Vector3, matrix: Matrix4): Matrix4 {
 
     return rotationUnsafe(degrees, axis, matrix)
 }
+/**
+ * Sets [matrix] as a rotation matrix that corresponds to [quaternion].
+ *
+ * If [quaternion] is known to be a unit quaternion, [rotationUnsafe] is a cheaper alternative.
+ *
+ * @return The [matrix] for chaining.
+ */
+fun rotation(quaternion: Quaternion, matrix: Matrix4): Matrix4 {
+    if(quaternion.isIdentity) {
+        return identity(matrix)
+    }
+
+    val quaternion = cQuaternion(quaternion).normalize()
+
+    return rotationUnsafe(quaternion, matrix)
+}
 
 /**
  * Sets [matrix] as a rotation matrix through [degrees] about [axis].
@@ -157,6 +178,33 @@ fun rotationUnsafe(degrees: Float, axis: Vector3, matrix: Matrix4): Matrix4 {
             c + x * axis.x, axay - saz, axaz + say, 0f,
             axay + saz, c + y * axis.y, ayaz - sax, 0f,
             axaz - say, ayaz + sax, c + z * axis.z, 0f,
+            0f, 0f, 0f, 1f
+    )
+}
+/**
+ * Sets [matrix] as a rotation matrix that corresponds to [quaternion].
+ *
+ * @return The [matrix] for chaining.
+ */
+fun rotationUnsafe(quaternion: Quaternion, matrix: Matrix4): Matrix4 {
+    if(quaternion.isIdentity) {
+        return identity(matrix)
+    }
+
+    val x2 = quaternion.x * quaternion.x
+    val y2 = quaternion.y * quaternion.y
+    val z2 = quaternion.z * quaternion.z
+    val xy = quaternion.x * quaternion.y
+    val xz = quaternion.x * quaternion.z
+    val yz = quaternion.y * quaternion.z
+    val wx = quaternion.w * quaternion.x
+    val wy = quaternion.w * quaternion.y
+    val wz = quaternion.w * quaternion.z
+
+    return matrix.set(
+            1f - 2f * (y2 + z2), 2f * (xy - wz), 2f * (xz + wy), 0f,
+            2f * (xy + wz), 1f - 2f * (x2 + z2), 2f * (yz - wx), 0f,
+            2f * (xz - wy), 2f * (yz + wx), 1f - 2f * (x2 + y2), 0f,
             0f, 0f, 0f, 1f
     )
 }
@@ -453,6 +501,61 @@ inline fun translation(point: Point3D, matrix: Matrix4) = matrix.set(
         0f, 0f, 0f, 1f
 )
 
+fun lookAt(eye: Point3D, target: Point3D, quaternion: Quaternion): Quaternion {
+    val forwardVector = normalize(target - eye)
+
+    val rotAxis = cross(Vector3(0f, 0f, -1f), forwardVector)
+    val dot = dot(Vector3(0f, 0f, -1f), forwardVector)
+
+    return quaternion.set(rotAxis.x, rotAxis.y, rotAxis.z, dot + 1).normalize()
+}
+fun rotation(degrees: Float, axis: Vector3, quaternion: Quaternion): Quaternion {
+    if(degrees.isZero()) {
+        return identity(quaternion)
+    }
+
+    val hdegrees = degrees * 0.5f
+    val s = sin(hdegrees)
+    val c = cos(hdegrees)
+
+    return quaternion.set(axis.x * s, axis.y * s, axis.z * s, c)
+}
+fun euler(quaternion: Quaternion, vector: Vector3) : Vector3 {
+    // roll (x-axis rotation)
+    val sinrCosp = 2 * (quaternion.w * quaternion.x + quaternion.y * quaternion.z)
+    val cosrCosp = 1 - 2 * (quaternion.x * quaternion.x + quaternion.y * quaternion.y)
+    vector.x = atan2(sinrCosp, cosrCosp)
+
+    // pitch (y-axis rotation)
+    val sinp = 2 * (quaternion.w * quaternion.y - quaternion.z * quaternion.x)
+    if (abs(sinp) >= 1)
+        vector.y = (PI / 2) * sinp.sign // use 90 degrees if out of range
+    else
+        vector.y = asin(sinp)
+
+    // yaw (z-axis rotation)
+    val sinyCosp = 2 * (quaternion.w * quaternion.z + quaternion.x * quaternion.y)
+    val cosyCosp = 1 - 2 * (quaternion.y * quaternion.y + quaternion.z * quaternion.z)
+    vector.z = atan2(sinyCosp, cosyCosp)
+
+    return vector.scale(RADIANS_TO_DEGREES)
+}
+fun quaternion(euler: Vector3, quaternion: Quaternion) : Quaternion {
+    val cy = cos(euler.z * 0.5f)
+    val sy = sin(euler.z * 0.5f)
+    val cp = cos(euler.y * 0.5f)
+    val sp = sin(euler.y * 0.5f)
+    val cr = cos(euler.x * 0.5f)
+    val sr = sin(euler.x * 0.5f)
+
+    quaternion.w = cy * cp * cr + sy * sp * sr
+    quaternion.x = cy * cp * sr - sy * sp * cr
+    quaternion.y = sy * cp * sr + cy * sp * cr
+    quaternion.z = sy * cp * cr - cy * sp * sr
+
+    return quaternion
+}
+
 // ---------------------------------------------------------------------------------------------------------------------
 
 /** Creates a rotation matrix through [angle] about the x axis. */
@@ -465,6 +568,8 @@ inline fun RotationZ(degrees: Float) = rotationZ(degrees, Matrix4())
 inline fun Rotation(degrees: Float, axis: Vector2) = rotation(degrees, axis, Matrix4())
 /** Creates a rotation matrix through [degrees] about [axis]. */
 inline fun Rotation(degrees: Float, axis: Vector3) = rotation(degrees, axis, Matrix4())
+/** Creates a rotation matrix that corresponds to [quaternion]. */
+inline fun Rotation(quaternion: Quaternion) = rotation(quaternion, Matrix4())
 
 /** Creates a reflection matrix through the plane perpendicular to [axis]. */
 inline fun Reflection(axis: Vector2) = reflection(axis, Matrix4())

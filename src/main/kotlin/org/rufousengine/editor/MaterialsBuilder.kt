@@ -6,6 +6,7 @@ import org.rufousengine.graphics.Texture
 import org.rufousengine.graphics.VertexAttribute
 import org.rufousengine.math.*
 import org.reflections.Reflections
+import org.rufousengine.Disposable
 import org.rufousengine.files.Files
 import org.rufousengine.graphics.internal.GType
 import org.rufousengine.graphics.internal.GValue
@@ -145,7 +146,7 @@ private fun StringBuilder.appendFunctions(parameters: GValuesList) {
     if(parameters.any { it.type == GType.Texture }) {
         appendln("vec4 textureColor(Texture tex, vec2 uv) {")
         appendln("    return texture(tex.sampler, uv) * tex.color;")
-        appendln("};")
+        appendln("}")
         appendln()
     }
 }

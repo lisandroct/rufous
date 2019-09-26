@@ -7,6 +7,8 @@ import org.lwjgl.system.MemoryUtil.NULL
 
 typealias ResizeCallback = (Long, Int, Int) -> Unit
 typealias ScrollCallback = (Long, Double, Double) -> Unit
+typealias MouseMoveCallback = (Long, Double, Double) -> Unit
+typealias MouseButtonCallback = (Long, Int, Int, Int) -> Unit
 
 object Context {
     private const val glVersionMajor = 3
@@ -48,8 +50,12 @@ object Context {
         return window
     }
 
+    fun setTitle(window: Long, title: String) = glfwSetWindowTitle(window, title)
+
     fun setResizeCallback(window: Long, callback: ResizeCallback) = glfwSetFramebufferSizeCallback(window, callback)
     fun setScrollCallback(window: Long, callback: ScrollCallback) = glfwSetScrollCallback(window, callback)
+    fun setMouseMoveCallback(window: Long, callback: MouseMoveCallback) = glfwSetCursorPosCallback(window, callback)
+    fun setMouseButtonCallback(window: Long, callback: MouseButtonCallback) = glfwSetMouseButtonCallback(window, callback)
 
     fun getShouldClose(window: Long) = glfwWindowShouldClose(window)
 
@@ -64,4 +70,8 @@ object Context {
     fun swapBuffers(window: Long) = glfwSwapBuffers(window)
 
     fun pollEvents() = glfwPollEvents()
+
+    // -----------------------------------------------------------------------------------------------------------------
+
+    fun getMouseButton(window: Long, button: Int) = glfwGetMouseButton(window, button)
 }

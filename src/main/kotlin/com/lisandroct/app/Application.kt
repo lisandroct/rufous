@@ -2,12 +2,15 @@ package com.lisandroct.app
 
 import com.lisandroct.app.components.Rotator
 import com.lisandroct.app.components.Sinusoidal
+import com.lisandroct.app.systems.RotatorSystem
+import com.lisandroct.app.systems.SinusoidalSystem
+import org.rufousengine.App
 import org.rufousengine.Rufous
 import org.rufousengine.ecs.*
-import org.rufousengine.ecs.components.Camera
-import org.rufousengine.ecs.components.Model
-import org.rufousengine.ecs.components.OmniLight
-import org.rufousengine.ecs.components.Transform
+import org.rufousengine.components.Camera
+import org.rufousengine.components.Model
+import org.rufousengine.components.OmniLight
+import org.rufousengine.components.Transform
 import org.rufousengine.editor.MeshesLoader
 import org.rufousengine.editor.TextureLoader
 import org.rufousengine.events.mouse.ScrollEvent
@@ -15,8 +18,10 @@ import org.rufousengine.files.Files
 import org.rufousengine.graphics.internal.Materials
 import org.rufousengine.math.*
 import org.rufousengine.system.GL
+import org.rufousengine.systems.DebugSystem
+import org.rufousengine.systems.RenderingSystem
 
-class Application {
+class Application : App("Rufous Application") {
     private val frankieMeshes = MeshesLoader.load(Files.local("models/frankie/frankie.obj"))
     private val tex0 = TextureLoader.load(Files.local("models/frankie/frankie-diffuse.png"), alpha = false, sRGB = true)
     private val tex1 = TextureLoader.load(Files.local("models/frankie/env-diffuse.png"), alpha = false, sRGB = true)
@@ -28,6 +33,11 @@ class Application {
     }
 
     init {
+        World.subscribeSystem(RenderingSystem)
+        World.subscribeSystem(DebugSystem)
+        World.subscribeSystem(RotatorSystem)
+        World.subscribeSystem(SinusoidalSystem)
+
         val frankie = Entity()
         frankie.add<Transform>()
         val frankieModel = frankie.add<Model>()
@@ -52,6 +62,10 @@ class Application {
             parent = cameraHolder.get()
         }
         val cam = camera.add<Camera>()
+        cam?.apply {
+            near = 700f
+            far = 760f
+        }
 
         val omniLight = Entity()
         val omniLightTransform = omniLight.add<Transform>()
@@ -91,11 +105,11 @@ class Application {
         Graphics.render(omniLightGizmo, mat0.lightPosition, view, projection, mat0.lightColor)
     }*/
 
-    fun resize(width: Int, height: Int) {
+    override fun resize(width: Int, height: Int) {
         GL.setViewport(0, 0, width, height)
     }
 }
 
 fun main() {
-    Rufous("Rufous Application", 1280, 720)
+    Rufous(Application::class, 1280, 720)
 }

@@ -1,13 +1,11 @@
-package org.rufousengine.ecs.systems
+package org.rufousengine.systems
 
-import org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT
-import org.lwjgl.opengl.GL11.GL_NEAREST
-import org.lwjgl.opengl.GL30.glBlitFramebuffer
+import org.lwjgl.opengl.GL11.*
 import org.rufousengine.ecs.*
-import org.rufousengine.ecs.components.Camera
-import org.rufousengine.ecs.components.Model
-import org.rufousengine.ecs.components.OmniLight
-import org.rufousengine.ecs.components.Transform
+import org.rufousengine.components.Camera
+import org.rufousengine.components.Model
+import org.rufousengine.components.OmniLight
+import org.rufousengine.components.Transform
 import org.rufousengine.graphics.*
 import org.rufousengine.graphics.internal.Materials
 import org.rufousengine.system.GL
@@ -102,7 +100,7 @@ object RenderingSystem : System(0) {
                     material.setParameters()
 
                     GL.bindVertexArray(mesh.vao)
-                    GL.drawElements(mesh.count)
+                    GL.drawElements(mesh.count, GL.DrawModes.LINES)
                     GL.unbindVertexArray()
                 }
             }

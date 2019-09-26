@@ -2,6 +2,7 @@
 
 package org.rufousengine.math
 
+import org.rufousengine.utils.DirtyFlag
 import java.util.*
 import kotlin.math.sqrt
 
@@ -16,21 +17,34 @@ import kotlin.math.sqrt
  */
 class Quaternion(x: Float = 0f, y: Float = 0f, z: Float = 0f, w: Float = 1f) {
     val components = floatArrayOf(x, y, z, w)
+    var dirty by DirtyFlag()
 
     constructor(other: Quaternion) : this(other.x, other.y, other.z, other.w)
 
     inline var x: Float
         get() = components[0]
-        set(value) { components[0] = value }
+        set(value) {
+            components[0] = value
+            dirty = true
+        }
     inline var y: Float
         get() = components[1]
-        set(value) { components[1] = value }
+        set(value) {
+            components[1] = value
+            dirty = true
+        }
     inline var z: Float
         get() = components[2]
-        set(value) { components[2] = value }
+        set(value) {
+            components[2] = value
+            dirty = true
+        }
     inline var w: Float
         get() = components[3]
-        set(value) { components[3] = value }
+        set(value) {
+            components[3] = value
+            dirty = true
+        }
 
     operator fun component1() = get(0)
     operator fun component2() = get(1)
@@ -45,6 +59,7 @@ class Quaternion(x: Float = 0f, y: Float = 0f, z: Float = 0f, w: Float = 1f) {
     operator fun set(index: Int, value: Float) = if(index !in 0..3) { throw IllegalArgumentException("index must be in 0..3") }
     else {
         components[index] = value
+        dirty = true
     }
 
     fun set(other: Quaternion) = set(other.x, other.y, other.z, other.w)
@@ -98,6 +113,8 @@ inline val Quaternion.isZero: Boolean
     get() = components.all { it.isZero() }
 
 inline fun Quaternion.getVectorPart(out: Vector3 = Vector3()) = out.set(x, y, z)
+
+inline fun identity(out: Quaternion) = out.set(0f, 0f, 0f, 1f)
 
 /**
  * Negates every component of [quaternion] and stores the result in [out].
@@ -165,6 +182,34 @@ inline fun multiply(a: Quaternion, b: Quaternion, out: Quaternion = Quaternion()
         a.w * b.z + a.x * b.y - a.y * b.x + a.z * b.w,
         a.w * b.w - a.x * b.x - a.y * b.y - a.z * b.z
 )
+
+/**
+ * Rotates [v] with [q] and stores the result in [out].
+ *
+ * If [q] is known to be a unit quaternion, [rotateUnsafe] is a cheaper alternative.
+ *
+ * @return The [out] vector for chaining.
+ */
+fun rotate(q: Quaternion, v: Vector3, out: Vector3 = Vector3()) : Vector3 {
+    val axis = cQuaternion(q).normalize()
+
+    return rotateUnsafe(q, v, out)
+}
+
+/**
+ * Rotates [v] with [q] and stores the result in [out].
+ *
+ * [q] must be a unit quaternion.
+ *
+ * @return The [out] vector for chaining.
+ */
+fun rotateUnsafe(q: Quaternion, v: Vector3, out: Vector3 = Vector3()) : Vector3 {
+    //TODO("Avoid resources allocation")
+    val b = q.getVectorPart(Vector3())
+    val b2 = b.x * b.x + b.y * b.y + b.z * b.z
+
+    return out.set(v * (q.w * q.w - b2) + b * (dot(v, b) * 2) + cross(b, v, Vector3()) * (q.w * 2))
+}
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -243,3 +288,11 @@ inline fun Quaternion.multiply(other: Quaternion) = multiply(this, other, this)
  * @return This quaternion for chaining.
  */
 inline fun Quaternion.multiplyLeft(other: Quaternion) = multiply(other, this, this)
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+private val a by lazy { Quaternion() }
+private val b by lazy { Quaternion() }
+private val q by lazy { Quaternion() }
+
+fun cQuaternion(other: Quaternion) = q.set(other)

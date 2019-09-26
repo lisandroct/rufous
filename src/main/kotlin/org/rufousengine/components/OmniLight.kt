@@ -1,4 +1,4 @@
-package org.rufousengine.ecs.components
+package org.rufousengine.components
 
 import org.rufousengine.ecs.Component
 import org.rufousengine.math.*

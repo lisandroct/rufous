@@ -92,15 +92,15 @@ fun perspective(fieldOfView: Float, aspectRatio: Float, near: Float, far: Float,
         throw IllegalArgumentException("far must be greater than near.")
     }
 
-    val fov = fieldOfView.toRadians()
-    val tfov = 1 / tan(fov * 0.5f)
-    val zm = far - near
-    val zp = far + near
+    val tan = tan(fieldOfView * 0.5f)
+    val t = tan * near
+    val r = t * aspectRatio
 
-    val e00 = tfov / aspectRatio
-    val e11 = tfov
-    val e22 = -zp / zm
-    val e23 = -(2f * far * near) / zm
+    val e00 = near / r
+    val e11 = near / t
+    val a = 1 / (far - near)
+    val e22 = -(far + near) * a
+    val e23 = (-2f * far * near) * a
 
     return matrix.set(
             e00, 0f, 0f, 0f,

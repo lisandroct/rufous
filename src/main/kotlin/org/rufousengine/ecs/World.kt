@@ -3,10 +3,9 @@ package org.rufousengine.ecs
 import com.lisandroct.app.systems.RotatorSystem
 import com.lisandroct.app.systems.SinusoidalSystem
 import org.rufousengine.Resources
-import org.rufousengine.ecs.systems.DebugSystem
-import org.rufousengine.ecs.systems.RenderingSystem
+import org.rufousengine.systems.DebugSystem
+import org.rufousengine.systems.RenderingSystem
 import org.rufousengine.events.Event1
-import org.rufousengine.events.Event2
 import kotlin.reflect.KClass
 
 object World {
@@ -21,12 +20,7 @@ object World {
 
     private val entitiesByComponent = hashMapOf<Long, Int>()
 
-    init {
-        systems.add(RenderingSystem)
-        systems.add(DebugSystem)
-        systems.add(RotatorSystem)
-        systems.add(SinusoidalSystem)
-    }
+    fun subscribeSystem(system: System) = systems.add(system)
 
     fun update() {
         for(system in systems) {
@@ -86,7 +80,6 @@ object World {
         val component = manager.add(entity) ?: return null
         component.active = true
         entitiesByComponent[component.id] = entity.index
-
 
         return component
     }

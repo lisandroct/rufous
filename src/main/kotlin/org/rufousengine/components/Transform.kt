@@ -1,4 +1,4 @@
-package org.rufousengine.ecs.components
+package org.rufousengine.components
 
 import org.rufousengine.ecs.Component
 import org.rufousengine.math.*
@@ -8,28 +8,31 @@ import kotlin.properties.Delegates
 class Transform : Component() {
     val position = Point3D()
     val scale = Vector3(1f, 1f, 1f)
-    val rotation = Vector3()
+    val rotation = Quaternion()
 
     private val _worldPosition = Point3D()
     val worldPosition: Point3D
         get() {
-            _worldPosition.set(position)
+            val parentPosition = parent?.worldPosition ?: Point3D()
+            val parentRotation = parent?.worldRotation ?: Quaternion()
 
-            val parent = parent?.worldPosition
-            if(parent != null) {
-                _worldPosition.add(parent.x, parent.y, parent.z)
-            }
+            _worldPosition.set(parentPosition)
+
+            val c = cVector(position.x, position.y, position.z)
+            c.rotate(parentRotation)
+
+            _worldPosition.add(c)
 
             return _worldPosition
         }
-    private val _worldRotation = Vector3()
-    val worldRotation: Vector3
+    private val _worldRotation = Quaternion()
+    val worldRotation: Quaternion
         get() {
             _worldRotation.set(rotation)
 
             val parent = parent?.worldRotation
             if(parent != null) {
-                _worldRotation.add(parent)
+                _worldRotation.multiply(parent)
             }
 
             return _worldRotation
@@ -67,7 +70,7 @@ class Transform : Component() {
             if(localDirty) {
                 val t = Translation(position)
                 val s = Scale(scale.x, scale.y, scale.z)
-                val r = RotationZ(rotation.z) * RotationY(rotation.y) * RotationX(rotation.x)
+                val r = Rotation(rotation)
 
                 multiply(t, s, r, _local)
 
@@ -108,6 +111,30 @@ class Transform : Component() {
             }
 
             return _inverse
+        }
+
+    private val _up = Vector3()
+    val up: Vector3
+        get() {
+            _up.set(0f, 1f, 0f).rotate(worldRotation)
+
+            return _up
+        }
+
+    private val _forward = Vector3()
+    val forward: Vector3
+        get() {
+            _forward.set(0f, 0f, 1f).rotate(worldRotation)
+
+            return _forward
+        }
+
+    private val _left = Vector3()
+    val left: Vector3
+        get() {
+            _left.set(1f, 0f, 0f).rotate(worldRotation)
+
+            return _left
         }
 
     private fun checkDirty() {

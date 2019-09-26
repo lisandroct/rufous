@@ -27,9 +27,10 @@ sealed class Vector(val components: FloatArray) {
         else -> components[index]
     }
 
-    operator fun set(index: Int, value: Float) = if(index in 0..(dimensions - 1))
+    operator fun set(index: Int, value: Float) = if(index in 0 until dimensions) {
         components[index] = value
-    else throw IllegalArgumentException("index must be in 0..${ dimensions - 1 }")
+        dirty = true
+    } else throw IllegalArgumentException("index must be in 0..${ dimensions - 1 }")
 
     override fun toString() = components.joinToString(prefix = "(", postfix = ")")
 

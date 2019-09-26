@@ -1,9 +1,9 @@
-package org.rufousengine.ecs.systems
+package org.rufousengine.systems
 
 import org.rufousengine.ecs.*
-import org.rufousengine.ecs.components.Camera
-import org.rufousengine.ecs.components.OmniLight
-import org.rufousengine.ecs.components.Transform
+import org.rufousengine.components.Camera
+import org.rufousengine.components.OmniLight
+import org.rufousengine.components.Transform
 import org.rufousengine.editor.TextureLoader
 import org.rufousengine.files.Files
 import org.rufousengine.graphics.Mesh
