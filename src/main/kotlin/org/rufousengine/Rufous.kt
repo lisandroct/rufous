@@ -8,7 +8,6 @@ import org.rufousengine.events.mouse.MouseButtonPressed
 import org.rufousengine.events.mouse.MouseButtonReleased
 import org.rufousengine.events.mouse.MouseMoveEvent
 import org.rufousengine.events.mouse.ScrollEvent
-import org.rufousengine.math.Vector
 import org.rufousengine.math.Vector2
 import org.rufousengine.math.isValid
 import org.rufousengine.system.*
@@ -19,7 +18,7 @@ import kotlin.reflect.full.createInstance
 class Rufous(appClass: KClass<out App>, width: Int, height: Int) {
     private val window = Context.Window(width, height, 4,true, "Rufous")
     private val app: App
-    private val mousePosition = Vector2(Float.NaN, Float.NaN)
+    private var mousePosition = Vector2(Float.NaN, Float.NaN)
 
     init {
         Context.setCurrent(window)
@@ -88,7 +87,7 @@ class Rufous(appClass: KClass<out App>, width: Int, height: Int) {
             MouseMoveEvent(x - mousePosition.x, y - mousePosition.y)
         }
 
-        mousePosition.set(x, y)
+        mousePosition = Vector2(x, y)
     }
     private fun mouseButton(window: Long, button: Int, action: Int, mod: Int) {
         if(action == GLFW_PRESS) {

@@ -65,7 +65,7 @@ object ViewportSystem : System(0) {
         if(middleClick) {
             val cameraTransform = cameras[0].getUnsafe<Transform>()
             val target = cameraTransform.parent
-            val c = cVector(target!!.left).scale(-x * 0.01f)
+            val c = target!!.left * (-x * 0.01f)
             cameraTransform.position.add(c)
             target?.position?.add(c)
             //c.set(cameraTransform.up).scale(y * 0.01f)
@@ -100,7 +100,7 @@ object ViewportSystem : System(0) {
     private fun scroll(x: Float, y: Float) {
         val cameraTransform = cameras[0].getUnsafe<Transform>()
         val target = cameraTransform.parent
-        val c = cVector(cameraTransform.forward).scale(-y * 0.5f)
+        val c = cameraTransform.forward * (-y * 0.5f)
         cameraTransform.position.add(c)
     }
 }

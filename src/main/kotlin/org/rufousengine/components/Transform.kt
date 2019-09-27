@@ -6,9 +6,9 @@ import org.rufousengine.utils.DirtyFlag
 import kotlin.properties.Delegates
 
 class Transform : Component() {
-    val position = Point3D()
-    val scale = Vector3(1f, 1f, 1f)
-    val rotation = Quaternion()
+    var position = Point3D()
+    var scale = Vector3(1f, 1f, 1f)
+    var rotation = Quaternion()
 
     private val _worldPosition = Point3D()
     val worldPosition: Point3D
@@ -18,7 +18,7 @@ class Transform : Component() {
 
             _worldPosition.set(parentPosition)
 
-            val c = cVector(position.x, position.y, position.z)
+            val c = Vector3(position.x, position.y, position.z)
             c.rotate(parentRotation)
 
             _worldPosition.add(c)
@@ -116,7 +116,7 @@ class Transform : Component() {
     private val _up = Vector3()
     val up: Vector3
         get() {
-            _up.set(0f, 1f, 0f).rotate(worldRotation)
+            Vector3.y.rotate(worldRotation)
 
             return _up
         }
@@ -124,7 +124,7 @@ class Transform : Component() {
     private val _forward = Vector3()
     val forward: Vector3
         get() {
-            _forward.set(0f, 0f, 1f).rotate(worldRotation)
+            Vector3.z.rotate(worldRotation)
 
             return _forward
         }
@@ -132,7 +132,7 @@ class Transform : Component() {
     private val _left = Vector3()
     val left: Vector3
         get() {
-            _left.set(1f, 0f, 0f).rotate(worldRotation)
+            Vector3.x.rotate(worldRotation)
 
             return _left
         }

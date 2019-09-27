@@ -8,6 +8,7 @@ import org.rufousengine.editor.components.EditorOnly
 import org.rufousengine.editor.components.Grid
 import org.rufousengine.graphics.internal.Materials
 import org.rufousengine.math.Trigonometry.tan
+import org.rufousengine.math.Vector3
 
 object GridSystem : System(0) {
     private val cameras = Family(arrayOf(Transform::class, Camera::class, EditorOnly::class))
@@ -37,7 +38,7 @@ object GridSystem : System(0) {
 
             gridTransform.position.set(cameraPosition.x + t * cameraForward.x, 0f, cameraPosition.z + t * cameraForward.z)
         }
-        gridTransform.scale.set(grid.radius * 2f, 1f, grid.radius * 2f)
+        gridTransform.scale = Vector3(grid.radius * 2f, 1f, grid.radius * 2f)
 
         material.center.set(gridTransform.position)
         material.tfov = tan(camera.getUnsafe<Camera>().fieldOfView * 0.5f)
