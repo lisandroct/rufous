@@ -2,8 +2,7 @@
 
 package org.rufousengine.math
 
-import org.rufousengine.utils.DirtyFlag
-import java.util.*
+import java.lang.Exception
 
 data class Matrix2(val e00: Float, val e01: Float, val e10: Float, val e11: Float) {
     constructor() : this(1f, 0f, 0f, 1f)
@@ -371,7 +370,7 @@ fun inverse(matrix: Matrix4) = when {
 
         val denominator = matrix.e22 * matrix.e33 - matrix.e23 * matrix.e32
         if(denominator.isZero()) {
-            throw SingularMatrixException("matrix's determinant is 0 and the matrix is non invertible.")
+            throw SingularMatrixException()
         }
         val invDenominator = 1 / denominator
 
@@ -428,7 +427,7 @@ fun inverse(matrix: Matrix4) = when {
         // det = s.dot(v) + t.dot(u)
         val det = dot(s, v) + dot(t, u)
         if(det.isZero()) {
-            throw SingularMatrixException("matrix's determinant is 0 and the matrix is non invertible.")
+            throw SingularMatrixException()
         }
         val invDet = 1 / det
 
@@ -810,3 +809,5 @@ fun submatrix(matrix: Matrix4, row: Int, column: Int) : Matrix3 {
 
     return Matrix3(c0, c1, c2)
 }
+
+class SingularMatrixException : Exception("Matrix's determinant is 0 and the matrix is non invertible.")
