@@ -14,7 +14,8 @@ import kotlin.math.acos
  * @property[y] The y component.
  * @constructor Creates a two-dimensional vector pointing towards ([x], [y]).
  */
-data class Vector2(val x: Float = 0f, val y: Float = 0f) {
+data class Vector2(val x: Float, val y: Float) {
+    constructor() : this(0f, 0f)
     constructor(v: Float) : this(v, v)
     constructor(other: Vector2) : this(other.x, other.y)
     constructor(point: Point2D) : this(point.x, point.y)
@@ -92,13 +93,14 @@ inline operator fun Float.minus(vector: Vector2) = add(-vector, this)
  * @property[z] The z component.
  * @constructor Creates a three-dimensional vector pointing towards ([x], [y], [z]).
  */
-data class Vector3(val x: Float = 0f, val y: Float = 0f, val z: Float = 0f) {
+data class Vector3(val x: Float, val y: Float, val z: Float) {
+    constructor() : this(0f, 0f, 0f)
     constructor(v: Float) : this(v, v, v)
-    constructor(other: Vector2) : this(other.x, other.y)
+    constructor(other: Vector2) : this(other.x, other.y, 0f)
     constructor(other: Vector2, z: Float) : this(other.x, other.y, z)
     constructor(x: Float, other: Vector2) : this(x, other.x, other.y)
     constructor(other: Vector3) : this(other.x, other.y, other.z)
-    constructor(point: Point2D) : this(point.x, point.y)
+    constructor(point: Point2D) : this(point.x, point.y, 0f)
     constructor(point: Point2D, z: Float) : this(point.x, point.y, z)
     constructor(x: Float, point: Point2D) : this(x, point.x, point.y)
     constructor(point: Point3D) : this(point.x, point.y, point.z)
@@ -180,23 +182,24 @@ inline infix fun Vector3.X(other: Vector3) = cross(this, other)
  * @property[w] The w component.
  * @constructor Creates a four-dimensional vector pointing towards ([x], [y], [z], [w]).
  */
-data class Vector4(val x: Float = 0f, val y: Float = 0f, val z: Float = 0f, val w: Float = 0f) {
+data class Vector4(val x: Float, val y: Float, val z: Float, val w: Float) {
+    constructor() : this(0f, 0f, 0f, 0f)
     constructor(v: Float) : this(v, v, v, v)
-    constructor(other: Vector2) : this(other.x, other.y)
+    constructor(other: Vector2) : this(other.x, other.y, 0f, 0f)
     constructor(a: Vector2, b: Vector2) : this(a.x, b.y, b.x, b.y)
     constructor(other: Vector2, z: Float, w: Float) : this(other.x, other.y, z, w)
     constructor(x: Float, other: Vector2, w: Float) : this(x, other.x, other.y, w)
     constructor(x: Float, y: Float, other: Vector2) : this(x, y, other.x, other.y)
-    constructor(other: Vector3) : this(other.x, other.y, other.z)
+    constructor(other: Vector3) : this(other.x, other.y, other.z, 0f)
     constructor(other: Vector3, w: Float) : this(other.x, other.y, other.z, w)
     constructor(x: Float, other: Vector3) : this(x, other.x, other.y, other.z)
     constructor(other: Vector4) : this(other.x, other.y, other.z, other.w)
-    constructor(point: Point2D) : this(point.x, point.y)
+    constructor(point: Point2D) : this(point.x, point.y, 0f, 0f)
     constructor(a: Point2D, b: Point2D) : this(a.x, b.y, b.x, b.y)
     constructor(point: Point2D, z: Float, w: Float) : this(point.x, point.y, z, w)
     constructor(x: Float, point: Point2D, w: Float) : this(x, point.x, point.y, w)
     constructor(x: Float, y: Float, point: Point2D) : this(x, y, point.x, point.y)
-    constructor(point: Point3D) : this(point.x, point.y, point.z)
+    constructor(point: Point3D) : this(point.x, point.y, point.z, 0f)
     constructor(point: Point3D, w: Float) : this(point.x, point.y, point.z, w)
     constructor(x: Float, point: Point3D) : this(x, point.x, point.y, point.z)
 

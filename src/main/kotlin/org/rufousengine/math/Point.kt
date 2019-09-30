@@ -15,7 +15,8 @@ import kotlin.math.floor
  * @property[y] The y component.
  * @constructor Creates a point at ([x], [y]).
  */
-data class Point2D(val x: Float = 0f, val y: Float = 0f) {
+data class Point2D(val x: Float, val y: Float) {
+    constructor() : this(0f, 0f)
     constructor(v: Float) : this(v, v)
     constructor(other: Point2D) : this(other.x, other.y)
     constructor(vector: Vector2) : this(vector.x, vector.y)
@@ -69,13 +70,14 @@ inline operator fun Point2D.minus(other: Point3D) = subtract(this, other)
  * @property[z] The y component.
  * @constructor Creates a point at ([x], [y], [z]).
  */
-class Point3D(val x: Float = 0f, val y: Float = 0f, val z: Float = 0f) {
+class Point3D(val x: Float, val y: Float, val z: Float) {
+    constructor() : this(0f, 0f, 0f)
     constructor(vector: Float) : this(vector, vector, vector)
-    constructor(other: Point2D) : this(other.x, other.y)
+    constructor(other: Point2D) : this(other.x, other.y, 0f)
     constructor(other: Point2D, z: Float) : this(other.x, other.y, z)
     constructor(x: Float, other: Point2D) : this(x, other.x, other.y)
     constructor(other: Point3D) : this(other.x, other.y, other.z)
-    constructor(vector: Vector2) : this(vector.x, vector.y)
+    constructor(vector: Vector2) : this(vector.x, vector.y, 0f)
     constructor(vector: Vector2, z: Float) : this(vector.x, vector.y, z)
     constructor(x: Float, vector: Vector2) : this(x, vector.x, vector.y)
     constructor(vector: Vector3) : this(vector.x, vector.y, vector.z)
