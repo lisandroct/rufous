@@ -119,5 +119,5 @@ fun transformSafe(q: Quaternion, v: Vector3) = transform(q.normalized, v)
 fun transform(q: Quaternion, v: Vector3) : Vector3 {
     val b = q.vectorPart
 
-    return v * (q.w * q.w - b.magnitudeSquared) + b * (dot(v, b) * 2f) + b X v * (q.w * 2f)
+    return v * (q.w * q.w - b.magnitudeSquared) + b * (dot(v, b) * 2f) + cross(b, v) * (q.w * 2f)
 }

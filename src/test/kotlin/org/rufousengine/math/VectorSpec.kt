@@ -410,8 +410,8 @@ object VectorsSpec : Spek({
             }
 
             describe("cross product") {
-                val c = a X b
-                val d = b X a
+                val c = cross(a, b)
+                val d = cross(b, a)
 
                 it("should be orthogonal to a and b") {
                     assert(c).isOrthogonalTo(a)

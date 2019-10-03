@@ -43,6 +43,7 @@ object GridSystem : System(0) {
         material.center = gridTransform.position
         material.tfov = tan(camera.getUnsafe<Camera>().fieldOfView * 0.5f)
         material.cameraPosition = cameraTransform.worldPosition
+        println(cameraTransform.worldPosition)
         material.radius = grid.radius
         material.distance = grid.distance
         material.size = grid.size

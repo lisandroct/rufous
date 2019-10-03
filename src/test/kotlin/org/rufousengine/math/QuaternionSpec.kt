@@ -99,7 +99,7 @@ object QuaternionSpec : Spek({
                     val v2 = b.vectorPart
                     val s1 = a.w
                     val s2 = b.w
-                    val expected = Quaternion((v1 X v2) + s1 * v2 + s2 * v1, s1 * s2 - dot(v1, v2))
+                    val expected = Quaternion(cross(v1, v2) + s1 * v2 + s2 * v1, s1 * s2 - dot(v1, v2))
 
                     for (i in 0 until 4) {
                         assert(result[i]).isEqualTo(expected[i])

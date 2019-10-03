@@ -167,8 +167,6 @@ inline operator fun Vector3.minus(other: Vector4) = subtract(this, other)
 inline operator fun Vector3.plus(scalar: Float) = add(this, scalar)
 inline operator fun Vector3.minus(scalar: Float) = add(this, -scalar)
 
-inline infix fun Vector3.X(other: Vector3) = cross(this, other)
-
 /**
  * A four-dimensional vector.
  *

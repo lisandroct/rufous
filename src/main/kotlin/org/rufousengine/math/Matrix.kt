@@ -298,9 +298,9 @@ fun inverse(matrix: Matrix3) : Matrix3 {
     val b = matrix[1]
     val c = matrix[2]
 
-    var r0 = b X c
-    var r1 = c X a
-    var r2 = a X b
+    var r0 = cross(b, c)
+    var r1 = cross(c, a)
+    var r2 = cross(a, b)
 
     val invDet = 1 / dot(r2, c)
 
@@ -321,8 +321,8 @@ fun inverse(matrix: Matrix4) = when {
         val c = Vector3(matrix.e02, matrix.e12, matrix.e22)
         val d = Vector3(matrix.e03, matrix.e13, matrix.e23)
 
-        var s = a X b
-        var t = c X d
+        var s = cross(a, b)
+        var t = cross(c, d)
 
         val det = dot(s, c)
         if(det.isZero()) {
@@ -335,8 +335,8 @@ fun inverse(matrix: Matrix4) = when {
 
         val v = c * invDet
 
-        val r0 = b X v
-        val r1 = v X a
+        val r0 = cross(b, v)
+        val r1 = cross(v, a)
 
         Matrix4(
                 r0.x, r0.y, r0.z, -dot(b, t),
@@ -377,8 +377,8 @@ fun inverse(matrix: Matrix4) = when {
         val z = matrix.e32
         val w = matrix.e33
 
-        var s = a X b
-        var t = c X d
+        var s = cross(a, b)
+        var t = cross(c, d)
         var u = a * y - b * x
         var v = c * w - d * z
 
@@ -393,10 +393,10 @@ fun inverse(matrix: Matrix4) = when {
         u *= invDet
         v *= invDet
 
-        val r0 = (b X v) + t * y
-        val r1 = (v X a) - t * x
-        val r2 = (d X u) + s * w
-        val r3 = (u X c) - s * z
+        val r0 = cross(b, v) + t * y
+        val r1 = cross(v, a) - t * x
+        val r2 = cross(d, u) + s * w
+        val r3 = cross(u, c) - s * z
 
         Matrix4(
                 r0.x, r0.y, r0.z, -dot(b, t),
