@@ -40,10 +40,12 @@ inline val Matrix2.transpose
     get() = transpose(this)
 
 inline val Matrix2.isIdentity: Boolean
-    get() = this == Matrix2.identity
+    get() = e00.isOne() && e01.isZero() &&
+            e10.isZero() && e11.isOne()
 /** Whether all elements are zero except. */
 inline val Matrix2.isZero: Boolean
-    get() = this == Matrix2.zero
+    get() = e00.isZero() && e01.isZero() &&
+            e10.isZero() && e11.isZero()
 /** Whether this matrix is orthogonal (i.e., all rows (or columns) are orthonormal between each other). */
 val Matrix2.isOrthogonal: Boolean
     get() {
@@ -56,6 +58,7 @@ val Matrix2.isOrthogonal: Boolean
 inline operator fun Matrix2.unaryPlus() = this
 inline operator fun Matrix2.unaryMinus() = Matrix2(-e00, -e01, -e10, -e11)
 inline operator fun Matrix2.times(scalar: Float) = scale(this, scalar)
+inline operator fun Float.times(matrix: Matrix2) = matrix.times(this)
 inline operator fun Matrix2.div(scalar: Float) = times(1 / scalar)
 inline operator fun Matrix2.plus(other: Matrix2) = add(this, other)
 inline operator fun Matrix2.minus(other: Matrix2) = subtract(this, other)
@@ -99,10 +102,14 @@ inline val Matrix3.transpose
     get() = transpose(this)
 
 inline val Matrix3.isIdentity: Boolean
-    get() = this == Matrix3.identity
+    get() = e00.isOne() && e01.isZero() && e02.isZero() &&
+            e10.isZero() && e11.isOne() && e12.isZero() &&
+            e20.isZero() && e21.isZero() && e22.isOne()
 /** Whether all elements are zero except. */
 inline val Matrix3.isZero: Boolean
-    get() = this == Matrix3.zero
+    get() = e00.isZero() && e01.isZero() && e02.isZero() &&
+            e10.isZero() && e11.isZero() && e12.isZero() &&
+            e20.isZero() && e21.isZero() && e22.isZero()
 /** Whether this matrix is orthogonal (i.e., all rows (or columns) are orthonormal between each other). */
 val Matrix3.isOrthogonal: Boolean
     get() {
@@ -120,6 +127,7 @@ val Matrix3.isOrthogonal: Boolean
 inline operator fun Matrix3.unaryPlus() = this
 inline operator fun Matrix3.unaryMinus() = Matrix3(-e00, -e01, -e02, -e10, -e11, -e12, -e20, -e21, -e22)
 inline operator fun Matrix3.times(scalar: Float) = scale(this, scalar)
+inline operator fun Float.times(matrix: Matrix3) = matrix.times(this)
 inline operator fun Matrix3.div(scalar: Float) = times(1 / scalar)
 inline operator fun Matrix3.plus(other: Matrix3) = add(this, other)
 inline operator fun Matrix3.minus(other: Matrix3) = subtract(this, other)
@@ -138,7 +146,7 @@ class Matrix4(val e00: Float, val e01: Float, val e02: Float, val e03: Float, va
         0 -> Vector4(e00, e10, e20, e30)
         1 -> Vector4(e01, e11, e21, e31)
         2 -> Vector4(e02, e12, e22, e32)
-        3 -> Vector4(e02, e12, e22, e33)
+        3 -> Vector4(e03, e13, e23, e33)
         else -> throw IllegalArgumentException("column must be in 0..3")
     }
     inline operator fun get(row: Int, column: Int) = this[column][row]
@@ -169,10 +177,16 @@ inline val Matrix4.transpose
     get() = transpose(this)
 
 inline val Matrix4.isIdentity: Boolean
-    get() = this == Matrix4.identity
+    get() = e00.isOne() && e01.isZero() && e02.isZero() && e03.isZero() &&
+            e10.isZero() && e11.isOne() && e12.isZero() && e13.isZero() &&
+            e20.isZero() && e21.isZero() && e22.isOne() && e23.isZero() &&
+            e30.isZero() && e31.isZero() && e32.isZero() && e33.isOne()
 /** Whether all elements are zero except. */
 inline val Matrix4.isZero: Boolean
-    get() = this == Matrix4.zero
+    get() = e00.isZero() && e01.isZero() && e02.isZero() && e03.isZero() &&
+            e10.isZero() && e11.isZero() && e12.isZero() && e13.isZero() &&
+            e20.isZero() && e21.isZero() && e22.isZero() && e23.isZero() &&
+            e30.isZero() && e31.isZero() && e32.isZero() && e33.isZero()
 /** Whether the last row is (0, 0, 0, 1) */
 val Matrix4.isTransformation: Boolean
     get() = e30.isZero() && e31.isZero() && e32.isZero() && e33.isOne()
@@ -200,6 +214,7 @@ val Matrix4.isOrthogonal: Boolean
 inline operator fun Matrix4.unaryPlus() = this
 inline operator fun Matrix4.unaryMinus() = Matrix4(-e00, -e01, -e02, -e03, -e10, -e11, -e12, -e13, -e20, -e21, -e22, -e23, -e30, -e31, -e32, -e33)
 inline operator fun Matrix4.times(scalar: Float) = scale(this, scalar)
+inline operator fun Float.times(matrix: Matrix4) = matrix.times(this)
 inline operator fun Matrix4.div(scalar: Float) = times(1 / scalar)
 inline operator fun Matrix4.plus(other: Matrix4) = add(this, other)
 inline operator fun Matrix4.minus(other: Matrix4) = subtract(this, other)
@@ -299,24 +314,19 @@ fun inverse(matrix: Matrix3) : Matrix3 {
 /** Inverts [matrix]. */
 fun inverse(matrix: Matrix4) = when {
     matrix.isIdentity -> matrix
-    matrix.isOrthogonal -> transpose(matrix) // if Matrix is orthogonal then inv(Matrix) = transpose(Matrix)
+    matrix.isOrthogonal -> transpose(matrix)
     matrix.isTransformation -> {
         val a = Vector3(matrix.e00, matrix.e10, matrix.e20)
         val b = Vector3(matrix.e01, matrix.e11, matrix.e21)
         val c = Vector3(matrix.e02, matrix.e12, matrix.e22)
         val d = Vector3(matrix.e03, matrix.e13, matrix.e23)
 
-        // s = a.cross(b)
         var s = a X b
-        // t = c.cross(d)
         var t = c X d
-        // u = a.scale(y) - b.scale(x) = 0
-        // v = c.scale(w) - d.scale(z) = c
 
-        // det = s.dot(v) + t.dot(u) = s.dot(c)
         val det = dot(s, c)
         if(det.isZero()) {
-            throw SingularMatrixException("matrix's determinant is 0 and the matrix is non invertible.")
+            throw SingularMatrixException()
         }
         val invDet = 1 / det
 
@@ -325,12 +335,8 @@ fun inverse(matrix: Matrix4) = when {
 
         val v = c * invDet
 
-        // r0 = b.cross(v) + t.scale(y) = b.cross(v)
         val r0 = b X v
-        // r1 = v.cross(a) - t.scale(x) = v.cross(a)
         val r1 = v X a
-        // r2 = d.cross(u) + s.scale(w) = s
-        // r3 = u.cross(c) - s.scale(z) = 0
 
         Matrix4(
                 r0.x, r0.y, r0.z, -dot(b, t),
@@ -340,62 +346,18 @@ fun inverse(matrix: Matrix4) = when {
         )
     }
     matrix.isProjection -> {
-        // a = (e00, 0, 0)
-        // b = (0, e11, 0)
-        // c = (0, 0, e22)
-        // d = (0, 0, e23)
-
-        // x = 0
-        // y = 0
-        // z = e32
-        // w = e33
-
-        // s = a.cross(b) = (0, 0, a.x * b.y) = (0, 0, e00 * e11)
-        // t = c.cross(d) = 0
-        // u = a.scale(y) - b.scale(x) = 0 - 0 = 0
-        // v = c.scale(w) - d.scale(z) = (0, 0, c.z * w - d.z * z) = (0, 0, e22 * e33 - e23 * e32)
-
-        // det = s.dot(v) + t.dot(u) = s.dot(v) + 0 = s.dot(v) = s.z * v.z = (e00 * e11) * (e22 * e33 - e23 * e32)
-        // invDet = 1 / det
-
-        // s = (0, 0, 1 / (e22 * e33 - e23 * e32))
-        // t = 0
-        // u = 0
-        // v = (0, 0, 1 / (e00 * e11))
-
-        // r0 = b.cross(v) + t.scale(y) = b.cross(v) = (b.y * v.z, 0, 0) = (e11 / (e00 * e11), 0, 0) = (1 / e00, 0, 0)
-        // r1 = v.cross(a) - t.scale(x) = v.cross(a) = (0, v.z * a.x, 0) = (0, e00 / (e00 * e11), 0) = (0, 1 / e11, 0)
-        // r2 = d.cross(u) + s.scale(w) = s.scale(w) = (0, 0, e33 / (e22 * e33 - e23 * e32))
-        // r3 = u.cross(c) - s.scale(z) = -s.scale(z) = (0, 0, -e32 / (e22 * e33 - e23 * e32))
-
-        val denominator = matrix.e22 * matrix.e33 - matrix.e23 * matrix.e32
-        if(denominator.isZero()) {
+        val d = matrix.e22 * matrix.e33 - matrix.e23 * matrix.e32
+        if(d.isZero()) {
             throw SingularMatrixException()
         }
-        val invDenominator = 1 / denominator
+        val invD = 1 / d
 
-        // e00 = r0.x
         val e00 = 1 / matrix.e00
-        // e01 = r0.y = 0
-        // e02 = r0.z = 0
-        // e03 = -b.dot(t) = 0
-        // e10 = r1.x = 0
-        // e11 = r1.y
         val e11 = 1 / matrix.e11
-        // e12 = r1.z = 0
-        // e13 = a.dot(t) = 0
-        // e20 = r2.x = 0
-        // e21 = r2.y = 0
-        // e22 = r2.z = e33 / (e22 * e33 - e23 * e32)
-        val e22 = matrix.e33 * invDenominator
-        // e23 = -d.dot(s) = -e23 / (e22 * e33 - e23 * e32)
-        val e23 = -matrix.e23 * invDenominator
-        // e30 = r3.x = 0
-        // e31 = r3.y = 0
-        // e32 = r3.z = -e32 / (e22 * e33 - e23 * e32)
-        val e32 = -matrix.e32 * invDenominator
-        // e33 = c.dot(s) = e22 / (e22 * e33 - e23 * e32)
-        val e33 = matrix.e22 * invDenominator
+        val e22 = matrix.e33 * invD
+        val e23 = -matrix.e23 * invD
+        val e32 = -matrix.e32 * invD
+        val e33 = matrix.e22 * invD
 
         Matrix4(
                 e00, 0f, 0f, 0f,
@@ -415,16 +377,11 @@ fun inverse(matrix: Matrix4) = when {
         val z = matrix.e32
         val w = matrix.e33
 
-        // s = a.cross(b)
         var s = a X b
-        // t = c.cross(d)
         var t = c X d
-        // u = a.scale(y) - b.scale(x)
         var u = a * y - b * x
-        // v = c.scale(w) - d.scale(z)
         var v = c * w - d * z
 
-        // det = s.dot(v) + t.dot(u)
         val det = dot(s, v) + dot(t, u)
         if(det.isZero()) {
             throw SingularMatrixException()
@@ -436,14 +393,10 @@ fun inverse(matrix: Matrix4) = when {
         u *= invDet
         v *= invDet
 
-        // r0 = b.cross(v) + t.scale(y)
-        val r0 = b X v + t * y
-        // r1 = v.cross(a) - t.scale(x)
-        val r1 = v X a - t * x
-        // r2 = d.cross(u) + s.scale(w)
-        val r2 = d X u + s * w
-        // r3 = u.cross(c) - s.scale(z)
-        val r3 = u X c - s * z
+        val r0 = (b X v) + t * y
+        val r1 = (v X a) - t * x
+        val r2 = (d X u) + s * w
+        val r3 = (u X c) - s * z
 
         Matrix4(
                 r0.x, r0.y, r0.z, -dot(b, t),

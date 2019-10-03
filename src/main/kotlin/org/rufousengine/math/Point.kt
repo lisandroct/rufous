@@ -224,13 +224,13 @@ inline fun subtract(point: Point3D, vector: Vector2) = Point3D(point.x - vector.
 inline fun subtract(point: Point3D, vector: Vector3) = Point3D(point.x - vector.x, point.y - vector.y, point.z - vector.z)
 
 /** Returns the direction vector pointing from [b] towards [a]. */
-inline fun subtract(a: Point2D, b: Point2D) = Point2D(a.x - b.x, a.y - b.y)
+inline fun subtract(a: Point2D, b: Point2D) = Vector2(a.x - b.x, a.y - b.y)
 
 /** Returns the direction vector pointing from [b] towards [a]. */
-inline fun subtract(a: Point2D, b: Point3D) = Point3D(a.x - b.x, a.y - b.y, -b.z)
+inline fun subtract(a: Point2D, b: Point3D) = Vector3(a.x - b.x, a.y - b.y, -b.z)
 
 /** Returns the direction vector pointing from [b] towards [a]. */
-inline fun subtract(a: Point3D, b: Point2D) = Point3D(a.x - b.x, a.y - b.y, a.z)
+inline fun subtract(a: Point3D, b: Point2D) = Vector3(a.x - b.x, a.y - b.y, a.z)
 
 /** Returns the direction vector pointing from [b] towards [a]. */
-inline fun subtract(a: Point3D, b: Point3D) = Point3D(a.x - b.x, a.y - b.y, a.z - b.z)
+inline fun subtract(a: Point3D, b: Point3D) = Vector3(a.x - b.x, a.y - b.y, a.z - b.z)

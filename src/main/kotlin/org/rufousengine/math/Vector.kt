@@ -61,8 +61,8 @@ inline val Vector2.isOne: Boolean
     get() = x.isOne() && y.isOne()
 /** Whether all components are 1. */
 inline val Vector2.isValid: Boolean
-    get() = !x.isNaN() && !x.isFinite() &&
-            !y.isNaN() && !y.isFinite()
+    get() = !x.isNaN() && x.isFinite() &&
+            !y.isNaN() && y.isFinite()
 
 inline val Vector2.normalized: Vector2
     get() = normalize(this)
@@ -70,6 +70,7 @@ inline val Vector2.normalized: Vector2
 inline operator fun Vector2.unaryPlus() = this
 inline operator fun Vector2.unaryMinus() = Vector2(-x, -y)
 inline operator fun Vector2.times(scalar: Float) = scale(this, scalar)
+inline operator fun Float.times(vector: Vector2) = vector.times(this)
 inline operator fun Vector2.div(scalar: Float) = times(1 / scalar)
 inline operator fun Vector2.plus(other: Vector2) = add(this, other)
 inline operator fun Vector2.plus(other: Vector3) = add(this, other)
@@ -80,8 +81,6 @@ inline operator fun Vector2.minus(other: Vector4) = subtract(this, other)
 
 inline operator fun Vector2.plus(scalar: Float) = add(this, scalar)
 inline operator fun Vector2.minus(scalar: Float) = add(this, -scalar)
-inline operator fun Float.plus(vector: Vector2) = add(vector, this)
-inline operator fun Float.minus(vector: Vector2) = add(-vector, this)
 
 /**
  * A three-dimensional vector.
@@ -146,9 +145,9 @@ inline val Vector3.isOne: Boolean
     get() = x.isOne() && y.isOne() && z.isOne()
 /** Whether all components are 1. */
 inline val Vector3.isValid: Boolean
-    get() = !x.isNaN() && !x.isFinite() &&
-            !y.isNaN() && !y.isFinite() &&
-            !z.isNaN() && !z.isFinite()
+    get() = !x.isNaN() && x.isFinite() &&
+            !y.isNaN() && y.isFinite() &&
+            !z.isNaN() && z.isFinite()
 
 inline val Vector3.normalized: Vector3
     get() = normalize(this)
@@ -156,6 +155,7 @@ inline val Vector3.normalized: Vector3
 inline operator fun Vector3.unaryPlus() = this
 inline operator fun Vector3.unaryMinus() = Vector3(-x, -y, -z)
 inline operator fun Vector3.times(scalar: Float) = scale(this, scalar)
+inline operator fun Float.times(vector: Vector3) = vector.times(this)
 inline operator fun Vector3.div(scalar: Float) = times(1 / scalar)
 inline operator fun Vector3.plus(other: Vector2) = add(this, other)
 inline operator fun Vector3.plus(other: Vector3) = add(this, other)
@@ -166,8 +166,6 @@ inline operator fun Vector3.minus(other: Vector4) = subtract(this, other)
 
 inline operator fun Vector3.plus(scalar: Float) = add(this, scalar)
 inline operator fun Vector3.minus(scalar: Float) = add(this, -scalar)
-inline operator fun Float.plus(vector: Vector3) = add(vector, this)
-inline operator fun Float.minus(vector: Vector3) = add(-vector, this)
 
 inline infix fun Vector3.X(other: Vector3) = cross(this, other)
 
@@ -243,10 +241,10 @@ inline val Vector4.isOne: Boolean
     get() = x.isOne() && y.isOne() && z.isOne() && w.isOne()
 /** Whether all components are 1. */
 inline val Vector4.isValid: Boolean
-    get() = !x.isNaN() && !x.isFinite() &&
-            !y.isNaN() && !y.isFinite() &&
-            !z.isNaN() && !z.isFinite() &&
-            !w.isNaN() && !w.isFinite()
+    get() = !x.isNaN() && x.isFinite() &&
+            !y.isNaN() && y.isFinite() &&
+            !z.isNaN() && z.isFinite() &&
+            !w.isNaN() && w.isFinite()
 
 inline val Vector4.normalized: Vector4
     get() = normalize(this)
@@ -254,6 +252,7 @@ inline val Vector4.normalized: Vector4
 inline operator fun Vector4.unaryPlus() = this
 inline operator fun Vector4.unaryMinus() = Vector4(-x, -y, -z, -w)
 inline operator fun Vector4.times(scalar: Float) = scale(this, scalar)
+inline operator fun Float.times(vector: Vector4) = vector.times(this)
 inline operator fun Vector4.div(scalar: Float) = times(1 / scalar)
 inline operator fun Vector4.plus(other: Vector2) = add(this, other)
 inline operator fun Vector4.plus(other: Vector3) = add(this, other)
@@ -264,8 +263,6 @@ inline operator fun Vector4.minus(other: Vector4) = subtract(this, other)
 
 inline operator fun Vector4.plus(scalar: Float) = add(this, scalar)
 inline operator fun Vector4.minus(scalar: Float) = add(this, -scalar)
-inline operator fun Float.plus(vector: Vector4) = add(vector, this)
-inline operator fun Float.minus(vector: Vector4) = add(-vector, this)
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -528,11 +525,11 @@ inline fun add(a: Vector3, b: Vector2) = Vector3(a.x + b.x, a.y + b.y, a.z)
 /** Adds [a] and [b]. */
 inline fun add(a: Vector3, b: Vector3) = Vector3(a.x + b.x, a.y + b.y, a.z + b.z)
 
-/** Adds [scalar] to every component of [vector]. */
-inline fun add(vector: Vector4, scalar: Float) = Vector4(vector.x + scalar, vector.y + scalar, vector.z + scalar, vector.w + scalar)
-
 /** Adds [a] and [b]. */
 inline fun add(a: Vector3, b: Vector4) = Vector4(a.x + b.x, a.y + b.y, a.z + b.z, b.w)
+
+/** Adds [scalar] to every component of [vector]. */
+inline fun add(vector: Vector4, scalar: Float) = Vector4(vector.x + scalar, vector.y + scalar, vector.z + scalar, vector.w + scalar)
 
 /** Adds [a] and [b]. */
 inline fun add(a: Vector4, b: Vector2) = Vector4(a.x + b.x, a.y + b.y, a.z, a.w)

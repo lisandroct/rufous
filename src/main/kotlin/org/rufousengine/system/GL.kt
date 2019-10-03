@@ -240,20 +240,14 @@ object GL {
     inline fun setUniformBoolean(location: Int, value: Boolean) = setUniformInt(location, if (value) 1 else 0)
     inline fun setUniformInt(location: Int, value: Int) = glUniform1i(location, value)
     inline fun setUniformFloat(location: Int, value: Float) = glUniform1f(location, value)
-    inline fun setUniformVector(location: Int, value: Vector) = when(value) {
-        is Vector2 -> glUniform2fv(location, value.components)
-        is Vector3 -> glUniform3fv(location, value.components)
-        is Vector4 -> glUniform4fv(location, value.components)
-    }
-    inline fun setUniformPoint(location: Int, value: Point) = when(value) {
-        is Point2D -> glUniform2fv(location, value.components)
-        is Point3D -> glUniform3fv(location, value.components)
-    }
-    inline fun setUniformMatrix(location: Int, value: Matrix) = when(value) {
-        is Matrix2 -> GL20.glUniformMatrix2fv(location, true, value.components)
-        is Matrix3 -> GL20.glUniformMatrix3fv(location, true, value.components)
-        is Matrix4 -> GL20.glUniformMatrix4fv(location, true, value.components)
-    }
+    fun setUniformVector(location: Int, value: Vector2) = glUniform2fv(location, value.components)
+    fun setUniformVector(location: Int, value: Vector3) = glUniform3fv(location, value.components)
+    fun setUniformVector(location: Int, value: Vector4) = glUniform4fv(location, value.components)
+    fun setUniformPoint(location: Int, value: Point2D) = glUniform2fv(location, value.components)
+    fun setUniformPoint(location: Int, value: Point3D) = glUniform3fv(location, value.components)
+    fun setUniformMatrix(location: Int, value: Matrix2) = glUniformMatrix2fv(location, true, value.components)
+    fun setUniformMatrix(location: Int, value: Matrix3) = glUniformMatrix3fv(location, true, value.components)
+    fun setUniformMatrix(location: Int, value: Matrix4) = glUniformMatrix4fv(location, true, value.components)
     inline fun setUniformColor(location: Int, color: ColorFloat) = glUniform4fv(location, color.components)
 
 // ---------------------------------------------------------------------------------------------------------------------

@@ -774,17 +774,17 @@ object Materials {
         private val cameraPositionLocation: Int = GL.getUniformLocation(program,
                 "parameters.cameraPosition")
 
-        val cameraPosition: Point3D = Point3D()
+        var cameraPosition: Point3D = Point3D()
 
         private val lightColorLocation: Int = GL.getUniformLocation(program,
                 "parameters.lightColor")
 
-        val lightColor: ColorFloat = ColorFloat()
+        var lightColor: ColorFloat = ColorFloat()
 
         private val lightPositionLocation: Int = GL.getUniformLocation(program,
                 "parameters.lightPosition")
 
-        val lightPosition: Point3D = Point3D()
+        var lightPosition: Point3D = Point3D()
 
         private val textureLocation: Int = GL.getUniformLocation(program,
                 "parameters.texture.sampler")
@@ -824,12 +824,12 @@ object Materials {
     class Grid : Material(vsGrid, fsGrid) {
         private val centerLocation: Int = GL.getUniformLocation(program, "parameters.center")
 
-        val center: Point3D = Point3D()
+        var center: Point3D = Point3D()
 
         private val cameraPositionLocation: Int = GL.getUniformLocation(program,
                 "parameters.cameraPosition")
 
-        val cameraPosition: Point3D = Point3D()
+        var cameraPosition: Point3D = Point3D()
 
         private val tfovLocation: Int = GL.getUniformLocation(program, "parameters.tfov")
 
@@ -861,17 +861,17 @@ object Materials {
         private val cameraPositionLocation: Int = GL.getUniformLocation(program,
                 "parameters.cameraPosition")
 
-        val cameraPosition: Point3D = Point3D()
+        var cameraPosition: Point3D = Point3D()
 
         private val lightColorLocation: Int = GL.getUniformLocation(program,
                 "parameters.lightColor")
 
-        val lightColor: ColorFloat = ColorFloat()
+        var lightColor: ColorFloat = ColorFloat()
 
         private val lightPositionLocation: Int = GL.getUniformLocation(program,
                 "parameters.lightPosition")
 
-        val lightPosition: Point3D = Point3D()
+        var lightPosition: Point3D = Point3D()
 
         private val textureLocation: Int = GL.getUniformLocation(program,
                 "parameters.texture.sampler")
@@ -952,17 +952,17 @@ object Materials {
         private val cameraPositionLocation: Int = GL.getUniformLocation(program,
                 "parameters.cameraPosition")
 
-        val cameraPosition: Point3D = Point3D()
+        var cameraPosition: Point3D = Point3D()
 
         private val lightColorLocation: Int = GL.getUniformLocation(program,
                 "parameters.lightColor")
 
-        val lightColor: ColorFloat = ColorFloat()
+        var lightColor: ColorFloat = ColorFloat()
 
         private val lightPositionLocation: Int = GL.getUniformLocation(program,
                 "parameters.lightPosition")
 
-        val lightPosition: Point3D = Point3D()
+        var lightPosition: Point3D = Point3D()
 
         private val textureLocation: Int = GL.getUniformLocation(program,
                 "parameters.texture.sampler")

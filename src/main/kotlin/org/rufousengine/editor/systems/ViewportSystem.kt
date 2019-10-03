@@ -1,7 +1,5 @@
 package org.rufousengine.editor.systems
 
-import org.lwjgl.opengl.GL11
-import org.lwjgl.opengl.GL11.glLineWidth
 import org.rufousengine.components.Camera
 import org.rufousengine.components.Model
 import org.rufousengine.components.Transform
@@ -66,18 +64,18 @@ object ViewportSystem : System(0) {
             val cameraTransform = cameras[0].getUnsafe<Transform>()
             val target = cameraTransform.parent
             val c = target!!.left * (-x * 0.01f)
-            cameraTransform.position.add(c)
-            target?.position?.add(c)
+            cameraTransform.position += c
+            target.position += c
             //c.set(cameraTransform.up).scale(y * 0.01f)
             //cameraTransform.position.add(c)
             //target?.position?.add(c)
         } else if(rightClick) {
             val cameraTransform = cameras[0].getUnsafe<Transform>()
             val target = cameraTransform.parent
-            val q = rotation(-x * 0.1f, Vector3(0f, 1f, 0f), Quaternion())
-            target!!.rotation.multiplyLeft(q)
-            rotation(-y * 0.1f, target!!.left, q)
-            target!!.rotation.multiplyLeft(q)
+            var q = Quaternion(-x * 0.1f, Vector3(0f, 1f, 0f))
+            target!!.rotation = q * target.rotation
+            q = Quaternion(-y * 0.1f, target.left)
+            target.rotation = q * target.rotation
         }
     }
 
@@ -101,6 +99,6 @@ object ViewportSystem : System(0) {
         val cameraTransform = cameras[0].getUnsafe<Transform>()
         val target = cameraTransform.parent
         val c = cameraTransform.forward * (-y * 0.5f)
-        cameraTransform.position.add(c)
+        cameraTransform.position += c
     }
 }

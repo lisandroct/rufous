@@ -57,8 +57,8 @@ class Application : App("Rufous Application") {
         val camera = Entity()
         val cameraTransform = camera.add<Transform>()
         cameraTransform?.apply {
-            position.set(0f, 197f, 720f)
-            rotation.set(-15f, 0f, 0f)
+            position = Point3D(0f, 197f, 720f)
+            rotation = Quaternion(-15f, Vector3.y)
             parent = cameraHolder.get()
         }
         val cam = camera.add<Camera>()
@@ -70,7 +70,7 @@ class Application : App("Rufous Application") {
         val omniLight = Entity()
         val omniLightTransform = omniLight.add<Transform>()
         omniLightTransform?.apply {
-            position.set(6f, 0f, -3f)
+            position = Point3D(6f, 0f, -3f)
         }
         omniLight.add<OmniLight>()
         omniLight.add<Sinusoidal>()?.apply {

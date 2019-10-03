@@ -31,8 +31,6 @@ object DebugSystem : System(0) {
     private val entities = mutableListOf<Entity>()
 
     private val quadMaterial = Materials.DebugQuad()
-    private val cQuadTransform = Matrix4()
-    private val cInverseTransform = Matrix4()
 
     private val omniLightGizmo = TextureLoader.load(Files.local("textures/omni-light-gizmo.png"), alpha = true, sRGB = false)
 
@@ -57,8 +55,8 @@ object DebugSystem : System(0) {
                 val t = Translation(transform.worldPosition)
                 //val s = Scale(transform.scale.x, transform.scale.y, transform.scale.z)
                 val r = RotationZ(cameraTransform.worldRotation.z) * RotationY(cameraTransform.worldRotation.y) * RotationX(cameraTransform.worldRotation.x)
-                multiply(t, r, cQuadTransform)
-                inverse(cQuadTransform, cInverseTransform)
+                val cQuadTransform = t * r
+                val cInverseTransform = cQuadTransform.inverse
 
                 entity.get<OmniLight>()?.let {
                     quadMaterial.texture = omniLightGizmo
