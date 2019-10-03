@@ -24,7 +24,7 @@ object DebugSystem : System(0) {
                     0, 1, 3,
                     1, 2, 3
             ),
-            VertexAttribute.mask(VertexAttribute.position, VertexAttribute.uv)
+            arrayOf(VertexAttribute.position, VertexAttribute.uv)
     )
 
     private var cameras = Family(arrayOf(Transform::class, Camera::class))

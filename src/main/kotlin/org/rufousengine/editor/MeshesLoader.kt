@@ -8,7 +8,7 @@ import org.rufousengine.graphics.Mesh
 import org.rufousengine.graphics.VertexAttribute
 
 object MeshesLoader {
-    fun load(file: File, mask: Int = VertexAttribute.mask(VertexAttribute.position, VertexAttribute.normal, VertexAttribute.uv)) : Array<Mesh> {
+    fun load(file: File, position: Boolean = true, normal: Boolean = true, uv: Boolean = true) : Array<Mesh> {
         if(!file.exists || !file.isFile) {
             throw Exception("Error loading function")
         }
@@ -31,7 +31,7 @@ object MeshesLoader {
         val meshes = mutableListOf<Mesh>()
         while(aiMeshes.remaining() > 0) {
             val aiMesh = AIMesh.create(aiMeshes.get())
-            meshes.add(processMesh(aiMesh, mask))
+            meshes.add(processMesh(aiMesh, position, normal, uv))
         }
 
         aiFreeScene(aiScene)
@@ -39,34 +39,33 @@ object MeshesLoader {
         return meshes.toTypedArray()
     }
 
-    private fun processMesh(aiMesh: AIMesh, mask: Int) : Mesh {
+    private fun processMesh(aiMesh: AIMesh, position: Boolean, normal: Boolean, uv: Boolean) : Mesh {
         val aiPositions = aiMesh.mVertices()
         val count = aiPositions.count()
-        val positions = VertexAttribute.position.isIn(mask)
 
         val aiNormals = aiMesh.mNormals()
-        val normals = VertexAttribute.normal.isIn(mask) && aiNormals != null
+        val normal = normal && aiNormals != null
         val aiUVs = aiMesh.mTextureCoords(0)
-        val uvs = VertexAttribute.uv.isIn(mask) && aiUVs != null
+        val uv = uv && aiUVs != null
 
         val vertices = mutableListOf<Float>()
 
         for(i in 0 until count) {
-            if(positions) {
+            if(position) {
                 val aiPosition = aiPositions.get(i)
                 vertices.add(aiPosition.x())
                 vertices.add(aiPosition.y())
                 vertices.add(aiPosition.z())
             }
 
-            if(normals) {
+            if(normal) {
                 val aiNormal = aiNormals!!.get(i)
                 vertices.add(aiNormal.x())
                 vertices.add(aiNormal.y())
                 vertices.add(aiNormal.z())
             }
 
-            if(uvs) {
+            if(uv) {
                 val aiUV = aiUVs!!.get(i)
                 vertices.add(aiUV.x())
                 vertices.add(aiUV.y())
@@ -86,16 +85,16 @@ object MeshesLoader {
         }
 
         val attributes = mutableListOf<VertexAttribute>()
-        if(positions) {
+        if(position) {
             attributes.add(VertexAttribute.position)
         }
-        if(normals) {
+        if(normal) {
             attributes.add(VertexAttribute.normal)
         }
-        if(uvs) {
+        if(uv) {
             attributes.add(VertexAttribute.uv)
         }
 
-        return Mesh(vertices.toFloatArray(), indices.toIntArray(), VertexAttribute.mask(attributes))
+        return Mesh(vertices.toFloatArray(), indices.toIntArray(), attributes.toTypedArray())
     }
 }

@@ -4,7 +4,7 @@ import org.rufousengine.Disposable
 import org.rufousengine.ManagedResource
 import org.rufousengine.system.GL
 
-class Mesh(vertices: FloatArray, indices: IntArray, vertexLayout: Int) : ManagedResource(), Disposable {
+class Mesh(vertices: FloatArray, indices: IntArray, vertexLayout: Array<VertexAttribute>) : ManagedResource(), Disposable {
     val vao = GL.generateVertexArray()
     private val vbo = GL.generateBuffer()
     private val ibo = GL.generateBuffer()
@@ -18,18 +18,14 @@ class Mesh(vertices: FloatArray, indices: IntArray, vertexLayout: Int) : Managed
         GL.setVertexBufferData(vertices)
 
         var stride = 0
-        for(vertexAttribute in VertexAttribute.all) {
-            if(vertexAttribute.isIn(vertexLayout)) {
-                stride += vertexAttribute.size
-            }
+        for(vertexAttribute in vertexLayout) {
+            stride += vertexAttribute.size
         }
 
         var pointer = 0L
-        for(vertexAttribute in VertexAttribute.all) {
-            if(vertexAttribute.isIn(vertexLayout)) {
-                enableAttribute(vertexAttribute, stride, pointer)
-                pointer += vertexAttribute.size
-            }
+        for(vertexAttribute in vertexLayout) {
+            enableAttribute(vertexAttribute, stride, pointer)
+            pointer += vertexAttribute.size
         }
 
         GL.bindIndexBuffer(ibo)

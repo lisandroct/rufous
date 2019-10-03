@@ -22,6 +22,7 @@ class Editor : App("Editor") {
         World.subscribeSystem(GridSystem)
         World.subscribeSystem(ViewportSystem)
 
+        /*
         val frankie = Entity()
         frankie.add<Transform>()?.apply {
             rotation = ToQuaternion(Vector3(-2f, 45f, -2f))
@@ -46,6 +47,8 @@ class Editor : App("Editor") {
             setMaterial(1, 1)
         }
 
+         */
+
         val cameraParent = Entity()
         val cameraParentTransform = cameraParent.add<Transform>()
         cameraParent.add<EditorOnly>()
@@ -57,7 +60,7 @@ class Editor : App("Editor") {
         camera.add<Camera>()
         camera.add<EditorOnly>()
         cameraParentTransform?.apply {
-            position = Point3D(0f, 0f, 0f)
+            rotation = Quaternion(45f, Vector3.y) * Quaternion(-25f, Vector3.x)
         }
         val grid = Entity()
         grid.add<Transform>()
@@ -76,7 +79,7 @@ class Editor : App("Editor") {
                             0, 3, 1,
                             1, 3, 2
                     ),
-                    VertexAttribute.mask(VertexAttribute.position)
+                    arrayOf(VertexAttribute.position)
             )
             val material = Materials.Grid()
 
