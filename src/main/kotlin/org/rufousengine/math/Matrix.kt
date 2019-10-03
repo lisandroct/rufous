@@ -237,7 +237,7 @@ inline fun determinant(matrix: Matrix3) = matrix.e00 * (matrix.e11 * matrix.e22 
 
 inline fun determinant(matrix: Matrix4) = when {
     matrix.isTransformation -> matrix.e00 * (matrix.e11 * matrix.e22 - matrix.e12 * matrix.e21) - matrix.e01 * (matrix.e10 * matrix.e22 - matrix.e12 * matrix.e20) + matrix.e02 * (matrix.e10 * matrix.e21 - matrix.e11 * matrix.e20)
-    matrix.isProjection -> matrix.e00 * (matrix.e11 * (matrix.e22 * matrix.e33 - matrix.e23 * matrix.e32) - matrix.e12 * (matrix.e23 * matrix.e31 - matrix.e21 * matrix.e33) + matrix.e13 * (matrix.e21 * matrix.e32 - matrix.e22 * matrix.e31))
+    matrix.isProjection -> matrix.e00 * matrix.e11 * (matrix.e22 * matrix.e33 - matrix.e23 * matrix.e32)
     else -> {
         val d0 = matrix.e11 * (matrix.e22 * matrix.e33 - matrix.e23 * matrix.e32) - matrix.e12 * (matrix.e21 * matrix.e33 - matrix.e23 * matrix.e31) + matrix.e13 * (matrix.e21 * matrix.e32 - matrix.e22 * matrix.e31)
         val d1 = matrix.e10 * (matrix.e22 * matrix.e33 - matrix.e23 * matrix.e32) - matrix.e12 * (matrix.e20 * matrix.e33 - matrix.e23 * matrix.e30) + matrix.e13 * (matrix.e20 * matrix.e32 - matrix.e22 * matrix.e30)

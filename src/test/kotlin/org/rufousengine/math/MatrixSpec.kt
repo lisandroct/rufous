@@ -16,7 +16,7 @@ object MatrixSpec : Spek({
             it("should suffice the definition") {
                 var expected = 0f
                 for(i in 0 until 2) {
-                    expected += a[1, i] * pow(-1, 1 + i) * determinant(submatrix(a, 1, i))
+                    expected += a[0, i] * pow(-1, i) * determinant(submatrix(a, 0, i))
                 }
 
                 assert(result).isEqualTo(expected)
@@ -146,7 +146,7 @@ object MatrixSpec : Spek({
             it("should suffice the definition") {
                 var expected = 0f
                 for(i in 0 until 3) {
-                    expected += a[2, i] * pow(-1, 2 + i) * determinant(submatrix(a, 2, i))
+                    expected += a[0, i] * pow(-1, i) * determinant(submatrix(a, 0, i))
                 }
 
                 assert(result).isEqualTo(expected)
@@ -295,7 +295,7 @@ object MatrixSpec : Spek({
             it("should suffice the definition") {
                 var expected = 0f
                 for(i in 0 until 4) {
-                    expected += a[3, i] * pow(-1, 3 + i) * determinant(submatrix(a, 3, i))
+                    expected += a[0, i] * pow(-1, i) * determinant(submatrix(a, 0, i))
                 }
 
                 assert(result).isEqualTo(expected)
@@ -489,6 +489,62 @@ object MatrixSpec : Spek({
 
                         assert(result[i]).isEqualTo(expected)
                     }
+                }
+            }
+        }
+    }
+
+    describe("Transformation") {
+        val a = Translation(rPoint3D()) * Scale(rValue()) * RotationSafe(rValue(), rVector3())
+
+        describe("determinant") {
+            describe("determinant") {
+                val result = determinant(a)
+
+                it("should suffice the definition") {
+                    var expected = 0f
+                    for(i in 0 until 4) {
+                        expected += a[0, i] * pow(-1, i) * determinant(submatrix(a, 0, i))
+                    }
+
+                    assert(result).isEqualTo(expected)
+                }
+            }
+
+            describe("inverse") {
+                val result = inverse(a)
+
+                it("should be inverse") {
+                    assert(a * result).isIdentity()
+                    assert(result * a).isIdentity()
+                }
+            }
+        }
+    }
+
+    describe("Projection") {
+        val a = Perspective(70f, 16f / 9f, 1f, 1000f)
+
+        describe("determinant") {
+            describe("determinant") {
+                val result = determinant(a)
+
+                it("should suffice the definition") {
+                    var expected = 0f
+                    for(i in 0 until 4) {
+                        expected += a[0, i] * pow(-1, i) * determinant(submatrix(a, 0, i))
+                    }
+
+                    assert(result).isEqualTo(expected)
+                }
+            }
+
+            describe("inverse") {
+                val result = inverse(a)
+
+                it("should be inverse") {
+                    assert(a * result).isIdentity()
+                    assert(result * a).isIdentity()
                 }
             }
         }
