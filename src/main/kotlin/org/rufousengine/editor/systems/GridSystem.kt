@@ -31,19 +31,19 @@ object GridSystem : System(0) {
         val cameraForward = cameraTransform.forward
         val gridTransform = entity.getUnsafe<Transform>()
 
+        /*
         if(cameraForward.y <= 0) {
             gridTransform.position = Point3D(cameraTransform.position.x, 0f, cameraTransform.position.z)
         } else {
             val t = -cameraPosition.y / cameraForward.y
 
             gridTransform.position = Point3D(cameraPosition.x + t * cameraForward.x, 0f, cameraPosition.z + t * cameraForward.z)
-        }
+        }*/
         gridTransform.scale = Vector3(grid.radius * 2f, 1f, grid.radius * 2f)
 
         material.center = gridTransform.position
         material.tfov = tan(camera.getUnsafe<Camera>().fieldOfView * 0.5f)
         material.cameraPosition = cameraTransform.worldPosition
-        println(cameraTransform.worldPosition)
         material.radius = grid.radius
         material.distance = grid.distance
         material.size = grid.size

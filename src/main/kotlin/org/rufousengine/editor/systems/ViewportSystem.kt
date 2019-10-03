@@ -62,19 +62,19 @@ object ViewportSystem : System(0) {
     private fun mouseMove(x: Float, y: Float) {
         if(middleClick) {
             val cameraTransform = cameras[0].getUnsafe<Transform>()
-            val target = cameraTransform.parent
-            val c = target!!.left * (-x * 0.01f)
-            cameraTransform.position += c
+            val target = cameraTransform.parent!!
+            var c = target.right * (-x * 0.01f)
+            //cameraTransform.position += c
             target.position += c
-            //c.set(cameraTransform.up).scale(y * 0.01f)
-            //cameraTransform.position.add(c)
-            //target?.position?.add(c)
+            c = target.up * (y * 0.01f)
+            //cameraTransform.position += c
+            target.position += c
         } else if(rightClick) {
             val cameraTransform = cameras[0].getUnsafe<Transform>()
             val target = cameraTransform.parent
             var q = Quaternion(-x * 0.1f, Vector3(0f, 1f, 0f))
             target!!.rotation = q * target.rotation
-            q = Quaternion(-y * 0.1f, target.left)
+            q = Quaternion(-y * 0.1f, target.right)
             target.rotation = q * target.rotation
         }
     }
@@ -98,7 +98,8 @@ object ViewportSystem : System(0) {
     private fun scroll(x: Float, y: Float) {
         val cameraTransform = cameras[0].getUnsafe<Transform>()
         val target = cameraTransform.parent
-        val c = cameraTransform.forward * (-y * 0.5f)
-        cameraTransform.position += c
+        val d = distance(cameraTransform.position, target!!.position)
+        //val c = cameraTransform.forward * (-y * 0.5f)
+        cameraTransform.position += Vector3.z * (-y * d * 0.05f)
     }
 }

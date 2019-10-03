@@ -7,34 +7,58 @@ import kotlin.properties.Delegates.observable
 
 class Transform : Component() {
     var position by observable(Point3D.origin) { _, _, _ ->
-        localDirty = true
         wpDirty = true
+        wrDirty = true
+        localDirty = true
         worldDirty = true
         inverseDirty = true
+        for(child in children) {
+            child.wpDirty = true
+            child.wrDirty = true
+            child.localDirty = true
+            child.worldDirty = true
+            child.inverseDirty = true
+        }
     }
     var scale by observable(Vector3.one) { _, _, _ ->
-        localDirty = true
         wpDirty = true
+        wrDirty = true
+        localDirty = true
         worldDirty = true
         inverseDirty = true
+        for(child in children) {
+            child.wpDirty = true
+            child.wrDirty = true
+            child.localDirty = true
+            child.worldDirty = true
+            child.inverseDirty = true
+        }
     }
     var rotation by observable(Quaternion.identity) { _, _, _ ->
-        localDirty = true
         wpDirty = true
+        wrDirty = true
+        localDirty = true
         worldDirty = true
         inverseDirty = true
+        for(child in children) {
+            child.wpDirty = true
+            child.wrDirty = true
+            child.localDirty = true
+            child.worldDirty = true
+            child.inverseDirty = true
+        }
     }
 
     private var wpDirty by DirtyFlag()
     private var _worldPosition = Point3D()
     val worldPosition: Point3D
         get() {
-            //if(wpDirty) {
+            if(wpDirty) {
                 val parentPosition = parent?.worldPosition ?: Point3D.origin
                 val parentRotation = parent?.worldRotation ?: Quaternion.identity
 
                 _worldPosition = parentPosition + transform(parentRotation, Vector3(position))
-            //}
+            }
 
             return _worldPosition
         }
@@ -42,10 +66,10 @@ class Transform : Component() {
     private var _worldRotation = Quaternion()
     val worldRotation: Quaternion
         get() {
-            //if(wrDirty) {
+            if(wrDirty) {
                 val parentRotation = parent?.worldRotation ?: Quaternion.identity
                 _worldRotation = rotation * parentRotation
-            //}
+            }
 
             return _worldRotation
         }
@@ -56,25 +80,27 @@ class Transform : Component() {
 
         wpDirty = true
         wrDirty = true
+        localDirty = true
         worldDirty = true
+        inverseDirty = true
         for(child in children) {
             child.wpDirty = true
             child.wrDirty = true
+            child.localDirty = true
             child.worldDirty = true
+            child.inverseDirty = true
         }
     }
     private val _children = mutableListOf<Transform>()
     val children: List<Transform> = _children
 
-    private var inverseDirty by DirtyFlag()
-
     private var localDirty by DirtyFlag()
     private var _local = Matrix4()
     val local: Matrix4
         get() {
-            //if(localDirty) {
+            if(localDirty) {
                 _local = Translation(position) * Scale(scale) * Rotation(rotation)
-            //}
+            }
 
             return _local
         }
@@ -83,21 +109,22 @@ class Transform : Component() {
     private var _world = Matrix4()
     val world: Matrix4
         get() {
-            //if(worldDirty) {
+            if(worldDirty) {
                 val parentWorld = parent?.world ?: Matrix4.identity
 
                 _world = parentWorld * local
-            //}
+            }
 
             return _world
         }
 
+    private var inverseDirty by DirtyFlag()
     private var _inverse = Matrix4()
     val inverse: Matrix4
         get() {
-            //if(inverseDirty) {
+            if(inverseDirty) {
                 _inverse = world.inverse
-            //}
+            }
 
             return _inverse
         }
@@ -106,8 +133,8 @@ class Transform : Component() {
         get() = transform(worldRotation, Vector3.y)
 
     val forward: Vector3
-        get() = transform(worldRotation, Vector3.z)
+        get() = transform(worldRotation, -Vector3.z)
 
-    val left: Vector3
+    val right: Vector3
         get() = transform(worldRotation, Vector3.x)
 }
