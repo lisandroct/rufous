@@ -7,20 +7,16 @@ import kotlin.math.asin
 import kotlin.math.atan2
 import kotlin.math.sign
 
-/**
- * Sets [matrix] as a rotation matrix through [angle] about the x axis.
- *
- * @return The [matrix] for chaining.
- */
-fun rotationX(degrees: Float, matrix: Matrix4) : Matrix4 {
+/** Creates a rotation matrix through [angle] about the x axis.  */
+fun RotationX(degrees: Float) : Matrix4 {
     if(degrees.isZero()) {
-        return identity(matrix)
+        return Matrix4.identity
     }
 
     val c = cos(degrees)
     val s = sin(degrees)
 
-    return matrix.set(
+    return Matrix4(
             1f, 0f, 0f, 0f,
             0f, c, -s, 0f,
             0f, s, c, 0f,
@@ -28,20 +24,16 @@ fun rotationX(degrees: Float, matrix: Matrix4) : Matrix4 {
     )
 }
 
-/**
- * Sets [matrix] as a rotation matrix through [angle] about the y axis.
- *
- * @return The [matrix] for chaining.
- */
-fun rotationY(degrees: Float, matrix: Matrix4) : Matrix4 {
+/** Creates a rotation matrix through [angle] about the y axis.  */
+fun RotationY(degrees: Float) : Matrix4 {
     if(degrees.isZero()) {
-        return identity(matrix)
+        return Matrix4.identity
     }
 
     val c = cos(degrees)
     val s = sin(degrees)
 
-    return matrix.set(
+    return Matrix4(
             c, 0f, s, 0f,
             0f, 1f, 0f, 0f,
             -s, 0f, c, 0f,
@@ -49,20 +41,16 @@ fun rotationY(degrees: Float, matrix: Matrix4) : Matrix4 {
     )
 }
 
-/**
- * Sets [matrix] as a rotation matrix through [angle] about the z axis.
- *
- * @return The [matrix] for chaining.
- */
-fun rotationZ(degrees: Float, matrix: Matrix4) : Matrix4 {
+/** Creates a rotation matrix through [angle] about the z axis.  */
+fun RotationZ(degrees: Float) : Matrix4 {
     if(degrees.isZero()) {
-        return identity(matrix)
+        return Matrix4.identity
     }
 
     val c = cos(degrees)
     val s = sin(degrees)
 
-    return matrix.set(
+    return Matrix4(
             c, -s, 0f, 0f,
             s, c, 0f, 0f,
             0f, 0f, 1f, 0f,
@@ -71,64 +59,27 @@ fun rotationZ(degrees: Float, matrix: Matrix4) : Matrix4 {
 }
 
 /**
- * Sets [matrix] as a rotation matrix through [degrees] about [axis].
+ * Creates a rotation matrix through [degrees] about [axis].
  *
- * If [axis] is known to be a unit vector, [rotationUnsafe] is a cheaper alternative.
- *
- * @return The [matrix] for chaining.
+ * If [axis] is known to be a unit vector, [Rotation] is a cheaper alternative.
  */
-fun rotation(degrees: Float, axis: Vector2, matrix: Matrix4): Matrix4 {
-    if(degrees.isZero()) {
-        return identity(matrix)
-    }
-
-    val axis = cVector(axis).normalize()
-
-    return rotationUnsafe(degrees, axis, matrix)
-}
-/**
- * Sets [matrix] as a rotation matrix through [degrees] about [axis].
- *
- * If [axis] is known to be a unit vector, [rotationUnsafe] is a cheaper alternative.
- *
- * @return The [matrix] for chaining.
- */
-fun rotation(degrees: Float, axis: Vector3, matrix: Matrix4): Matrix4 {
-    if(degrees.isZero()) {
-        return identity(matrix)
-    }
-
-    val axis = cVector(axis).normalize()
-
-    return rotationUnsafe(degrees, axis, matrix)
-}
-/**
- * Sets [matrix] as a rotation matrix that corresponds to [quaternion].
- *
- * If [quaternion] is known to be a unit quaternion, [rotationUnsafe] is a cheaper alternative.
- *
- * @return The [matrix] for chaining.
- */
-fun rotation(quaternion: Quaternion, matrix: Matrix4): Matrix4 {
-    if(quaternion.isIdentity) {
-        return identity(matrix)
-    }
-
-    val quaternion = cQuaternion(quaternion).normalize()
-
-    return rotationUnsafe(quaternion, matrix)
-}
+fun RotationSafe(degrees: Float, axis: Vector2) =  Rotation(degrees, axis.normalized)
 
 /**
- * Sets [matrix] as a rotation matrix through [degrees] about [axis].
+ * Creates a rotation matrix through [degrees] about [axis].
+ *
+ * If [axis] is known to be a unit vector, [Rotation] is a cheaper alternative.
+ */
+fun RotationSafe(degrees: Float, axis: Vector3) =  Rotation(degrees, axis.normalized)
+
+/**
+ * Creates a rotation matrix through [degrees] about [axis].
  *
  * [axis] must be a unit vector.
- *
- * @return The [matrix] for chaining.
  */
-fun rotationUnsafe(degrees: Float, axis: Vector2, matrix: Matrix4): Matrix4 {
+fun Rotation(degrees: Float, axis: Vector2): Matrix4 {
     if(degrees.isZero()) {
-        return identity(matrix)
+        return Matrix4.identity
     }
 
     val c = cos(degrees)
@@ -141,23 +92,22 @@ fun rotationUnsafe(degrees: Float, axis: Vector2, matrix: Matrix4): Matrix4 {
     val say = s * axis.y
     val sax = s * axis.x
 
-    return matrix.set(
+    return Matrix4(
             c + x * axis.x, axay, say, 0f,
             axay, c + y * axis.y, -sax, 0f,
             -say, sax, c, 0f,
             0f, 0f, 0f, 1f
     )
 }
+
 /**
- * Sets [matrix] as a rotation matrix through [degrees] about [axis].
+ * Creates a rotation matrix through [degrees] about [axis].
  *
  * [axis] must be a unit vector.
- *
- * @return The [matrix] for chaining.
  */
-fun rotationUnsafe(degrees: Float, axis: Vector3, matrix: Matrix4): Matrix4 {
+fun Rotation(degrees: Float, axis: Vector3): Matrix4 {
     if(degrees.isZero()) {
-        return identity(matrix)
+        return Matrix4.identity
     }
 
     val c = cos(degrees)
@@ -174,21 +124,29 @@ fun rotationUnsafe(degrees: Float, axis: Vector3, matrix: Matrix4): Matrix4 {
     val say = s * axis.y
     val sax = s * axis.x
 
-    return matrix.set(
+    return Matrix4(
             c + x * axis.x, axay - saz, axaz + say, 0f,
             axay + saz, c + y * axis.y, ayaz - sax, 0f,
             axaz - say, ayaz + sax, c + z * axis.z, 0f,
             0f, 0f, 0f, 1f
     )
 }
+
 /**
- * Sets [matrix] as a rotation matrix that corresponds to [quaternion].
+ * Creates a rotation matrix that corresponds to [quaternion].
  *
- * @return The [matrix] for chaining.
+ * If [quaternion] is known to be a unit quaternion, [Rotation] is a cheaper alternative.
  */
-fun rotationUnsafe(quaternion: Quaternion, matrix: Matrix4): Matrix4 {
+fun RotationSafe(quaternion: Quaternion) = Rotation(quaternion.normalized)
+
+/**
+ * Creates a rotation matrix that corresponds to [quaternion].
+ *
+ * [quaternion] must be a unit quaternion.
+ */
+fun Rotation(quaternion: Quaternion): Matrix4 {
     if(quaternion.isIdentity) {
-        return identity(matrix)
+        return Matrix4.identity
     }
 
     val x2 = quaternion.x * quaternion.x
@@ -201,7 +159,7 @@ fun rotationUnsafe(quaternion: Quaternion, matrix: Matrix4): Matrix4 {
     val wy = quaternion.w * quaternion.y
     val wz = quaternion.w * quaternion.z
 
-    return matrix.set(
+    return Matrix4(
             1f - 2f * (y2 + z2), 2f * (xy - wz), 2f * (xz + wy), 0f,
             2f * (xy + wz), 1f - 2f * (x2 + z2), 2f * (yz - wx), 0f,
             2f * (xz - wy), 2f * (yz + wx), 1f - 2f * (x2 + y2), 0f,
@@ -210,43 +168,32 @@ fun rotationUnsafe(quaternion: Quaternion, matrix: Matrix4): Matrix4 {
 }
 
 /**
- * Sets [matrix] as a reflection matrix through the plane perpendicular to [axis].
+ * Creates a reflection matrix through the plane perpendicular to [axis].
  *
- * If [axis] is known to be a unit vector, [reflectionUnsafe] is a cheaper alternative.
- *
- * @return The [matrix] for chaining.
+ * If [axis] is known to be a unit vector, [Reflection] is a cheaper alternative.
  */
-fun reflection(axis: Vector2, matrix: Matrix4): Matrix4 {
-    val axis = cVector(axis).normalize()
+fun ReflectionSafe(axis: Vector2) = Reflection(axis.normalized)
 
-    return reflectionUnsafe(axis, matrix)
-}
 /**
  * Sets [matrix] as a reflection matrix through the plane perpendicular to [axis].
  *
- * If [axis] is known to be a unit vector, [reflectionUnsafe] is a cheaper alternative.
+ * If [axis] is known to be a unit vector, [Reflection] is a cheaper alternative.
  *
  * @return The [matrix] for chaining.
  */
-fun reflection(axis: Vector3, matrix: Matrix4): Matrix4 {
-    val axis = cVector(axis).normalize()
-
-    return reflectionUnsafe(axis, matrix)
-}
+fun ReflectionSafe(axis: Vector3) = Reflection(axis.normalized)
 
 /**
- * Sets [matrix] as a reflection matrix through the plane perpendicular to [axis].
+ * Creates a reflection matrix through the plane perpendicular to [axis].
  *
  * [axis] must be a unit vector.
- *
- * @return The [matrix] for chaining.
  */
-fun reflectionUnsafe(axis: Vector2, matrix: Matrix4): Matrix4 {
+fun Reflection(axis: Vector2): Matrix4 {
     val x = axis.x * -2f
     val y = axis.y * -2f
     val axay = x * axis.y
 
-    return matrix.set(
+    return Matrix4(
             x * axis.x + 1f, axay, 0f, 0f,
             axay, y * axis.y + 1f, 0f, 0f,
             0f, 0f, 1f, 0f,
@@ -254,13 +201,11 @@ fun reflectionUnsafe(axis: Vector2, matrix: Matrix4): Matrix4 {
     )
 }
 /**
- * Sets [matrix] as a reflection matrix through the plane perpendicular to [axis].
+ * Creates a reflection matrix through the plane perpendicular to [axis].
  *
  * [axis] must be a unit vector.
- *
- * @return The [matrix] for chaining.
  */
-fun reflectionUnsafe(axis: Vector3, matrix: Matrix4): Matrix4 {
+fun Reflection(axis: Vector3): Matrix4 {
     val x = axis.x * -2f
     val y = axis.y * -2f
     val z = axis.z * -2f
@@ -268,7 +213,7 @@ fun reflectionUnsafe(axis: Vector3, matrix: Matrix4): Matrix4 {
     val axaz = x * axis.z
     val ayaz = y * axis.z
 
-    return matrix.set(
+    return Matrix4(
             x * axis.x + 1f, axay, axaz, 0f,
             axay, y * axis.y + 1f, ayaz, 0f,
             axaz, ayaz, z * axis.z + 1f, 0f,
@@ -277,57 +222,43 @@ fun reflectionUnsafe(axis: Vector3, matrix: Matrix4): Matrix4 {
 }
 
 /**
- * Sets [matrix] as an involution matrix through the plane perpendicular to [axis].
+ * Creates an involution matrix through the plane perpendicular to [axis].
  *
- * If [axis] is known to be a unit vector, [involutionUnsafe] is a cheaper alternative.
- *
- * @return The [matrix] for chaining.
+ * If [axis] is known to be a unit vector, [Involution] is a cheaper alternative.
  */
-fun involution(axis: Vector2, matrix: Matrix4): Matrix4 {
-    val axis = cVector(axis).normalize()
-
-    return involutionUnsafe(axis, matrix)
-}
-/**
- * Sets [matrix] as an involution matrix through the plane perpendicular to [axis].
- *
- * If [axis] is known to be a unit vector, [involutionUnsafe] is a cheaper alternative.
- *
- * @return The [matrix] for chaining.
- */
-fun involution(axis: Vector3, matrix: Matrix4): Matrix4 {
-    val axis = cVector(axis).normalize()
-
-    return involutionUnsafe(axis, matrix)
-}
+fun InvolutionSafe(axis: Vector2) = Involution(axis.normalized)
 
 /**
- * Sets [matrix] as an involution matrix through the plane perpendicular to [axis].
+ * Creates an involution matrix through the plane perpendicular to [axis].
+ *
+ * If [axis] is known to be a unit vector, [Involution] is a cheaper alternative.
+ */
+fun InvolutionSafe(axis: Vector3) = Involution(axis.normalized)
+
+/**
+ * Creates an involution matrix through the plane perpendicular to [axis].
  *
  * [axis] must be a unit vector.
- *
- * @return The [matrix] for chaining.
  */
-fun involutionUnsafe(axis: Vector2, matrix: Matrix4): Matrix4 {
+fun Involution(axis: Vector2): Matrix4 {
     val x = axis.x * 2f
     val y = axis.y * 2f
     val axay = x * axis.y
 
-    return matrix.set(
+    return Matrix4(
             x * axis.x - 1f, axay, 0f, 0f,
             axay, y * axis.y - 1f, 0f, 0f,
             0f, 0f, -1f, 0f,
             0f, 0f, 0f, 1f
     )
 }
+
 /**
- * Sets [matrix] as an involution matrix through the plane perpendicular to [axis].
+ * Creates an involution matrix through the plane perpendicular to [axis].
  *
  * [axis] must be a unit vector.
- *
- * @return The [matrix] for chaining.
  */
-fun involutionUnsafe(axis: Vector3, matrix: Matrix4): Matrix4 {
+fun Involution(axis: Vector3): Matrix4 {
     val x = axis.x * 2f
     val y = axis.y * 2f
     val z = axis.z * 2f
@@ -335,7 +266,7 @@ fun involutionUnsafe(axis: Vector3, matrix: Matrix4): Matrix4 {
     val axaz = x * axis.z
     val ayaz = y * axis.z
 
-    return matrix.set(
+    return Matrix4(
             x * axis.x - 1f, axay, axaz, 0f,
             axay, y * axis.y - 1f, ayaz, 0f,
             axaz, ayaz, z * axis.z - 1f, 0f,
@@ -343,84 +274,70 @@ fun involutionUnsafe(axis: Vector3, matrix: Matrix4): Matrix4 {
     )
 }
 
-/**
- * Sets [matrix] as a uniform scale matrix by [factor].
- *
- * @return The [matrix] for chaining
- */
-inline fun scale(factor: Float, matrix: Matrix4) = matrix.set(
+/** Creates a uniform scale matrix by [factor]. */
+inline fun Scale(factor: Float) = Matrix4(
         factor, 0f, 0f, 0f,
         0f, factor, 0f, 0f,
         0f, 0f, factor, 0f,
         0f, 0f, 0f, 1f
 )
 
-/**
- * Sets [matrix] as a nonuniform scale matrix by [xFactor] along the x axis, [yFactor] along the y axis and [zFactor] along the z axis.
- *
- * @return The [matrix] for chaining
- */
-inline fun scale(xFactor: Float, yFactor: Float, zFactor: Float, matrix: Matrix4) = matrix.set(
+/** Creates a nonuniform scale matrix by [xFactor] along the x axis, [yFactor] along the y axis and [zFactor] along the z axis. */
+inline fun Scale(xFactor: Float, yFactor: Float, zFactor: Float) = Matrix4(
         xFactor, 0f, 0f, 0f,
         0f, yFactor, 0f, 0f,
         0f, 0f, zFactor, 0f,
         0f, 0f, 0f, 1f
 )
 
+/** Creates a nonuniform scale matrix by [factor].x along the x axis, [factor].y along the y axis and [factor].z along the z axis. */
+inline fun Scale(factor: Vector3) = Matrix4(
+        factor.x, 0f, 0f, 0f,
+        0f, factor.y, 0f, 0f,
+        0f, 0f, factor.z, 0f,
+        0f, 0f, 0f, 1f
+)
+
 /**
- * Sets [matrix] as a scale matrix by [factor] along [axis].
+ * Creates a scale matrix by [factor] along [axis].
  *
- * If [axis] is known to be a unit vector, [scaleUnsafe] is a cheaper alternative.
- *
- * @return The [matrix] for chaining
+ * If [axis] is known to be a unit vector, [Scale] is a cheaper alternative.
  */
-fun scale(factor: Float, axis: Vector2, matrix: Matrix4): Matrix4 {
-    val axis = cVector(axis).normalize()
+fun ScaleSafe(factor: Float, axis: Vector2) = Scale(factor, axis.normalized)
 
-    return scaleUnsafe(factor, axis, matrix)
-}
 /**
- * Sets [matrix] as a scale matrix by [factor] along [axis].
+ * Creates a scale matrix by [factor] along [axis].
  *
- * If [axis] is known to be a unit vector, [scaleUnsafe] is a cheaper alternative.
- *
- * @return The [matrix] for chaining
+ * If [axis] is known to be a unit vector, [Scale] is a cheaper alternative.
  */
-fun scale(factor: Float, axis: Vector3, matrix: Matrix4): Matrix4 {
-    val axis = cVector(axis).normalize()
-
-    return scaleUnsafe(factor, axis, matrix)
-}
+fun ScaleSafe(factor: Float, axis: Vector3) = Scale(factor, axis.normalized)
 
 /**
- * Sets this matrix as a scale matrix by [factor] along [axis].
+ * Creates a scale matrix by [factor] along [axis].
  *
  * [axis] must be a unit vector.
- *
- * @return The [matrix] for chaining
  */
-fun scaleUnsafe(factor: Float, axis: Vector2, matrix: Matrix4): Matrix4 {
+fun Scale(factor: Float, axis: Vector2): Matrix4 {
     val factor = factor - 1f
 
     val x = axis.x * factor
     val y = axis.y * factor
     val axay = x * axis.y
 
-    return matrix.set(
+    return Matrix4(
             x * axis.x + 1f, axay, 0f, 0f,
             axay, y * axis.y + 1f, 0f, 0f,
             0f, 0f, 1f, 0f,
             0f, 0f, 0f, 1f
     )
 }
+
 /**
- * Sets this matrix as a scale matrix by [factor] along [axis].
+ * Creates a scale matrix by [factor] along [axis].
  *
  * [axis] must be a unit vector.
- *
- * @return The [matrix] for chaining
  */
-fun scaleUnsafe(factor: Float, axis: Vector3, matrix: Matrix4): Matrix4 {
+fun Scale(factor: Float, axis: Vector3): Matrix4 {
     val factor = factor - 1f
 
     val x = axis.x * factor
@@ -430,7 +347,7 @@ fun scaleUnsafe(factor: Float, axis: Vector3, matrix: Matrix4): Matrix4 {
     val axaz = x * axis.z
     val ayaz = y * axis.z
 
-    return matrix.set(
+    return Matrix4(
             x * axis.x + 1f, axay, axaz, 0f,
             axay, y * axis.y + 1f, ayaz, 0f,
             axaz, ayaz, z * axis.z + 1f, 0f,
@@ -439,38 +356,72 @@ fun scaleUnsafe(factor: Float, axis: Vector3, matrix: Matrix4): Matrix4 {
 }
 
 /**
- * Sets [matrix] as a skew matrix by [degrees] along the direction [a] based on the projected length along the direction [b].
+ * Creates a skew matrix by [degrees] along the direction [a] based on the projected length along the direction [b].
  *
  * [a] and [b] must be orthonormal.
- *
- * @return The [matrix] for chaining.
  */
-fun skewUnsafe(degrees: Float, a: Vector2, b: Vector2, matrix: Matrix4): Matrix4 {
+fun Skew(degrees: Float, a: Vector2, b: Vector2): Matrix4 {
     val t = tan(degrees)
     val x = a.x * t
     val y = a.y * t
 
-    return matrix.set(
+    return Matrix4(
             x * b.x + 1f, x * b.y, 0f, 0f,
             y * b.x, y * b.y + 1f, 0f, 0f,
             0f, 0f, 1f, 0f,
             0f, 0f, 0f, 1f
     )
 }
+
 /**
- * Sets [matrix] as a skew matrix by [degrees] along the direction [a] based on the projected length along the direction [b].
+ * Creates a skew matrix by [degrees] along the direction [a] based on the projected length along the direction [b].
  *
  * [a] and [b] must be orthonormal.
- *
- * @return The [matrix] for chaining.
  */
-fun skewUnsafe(degrees: Float, a: Vector3, b: Vector3, matrix: Matrix4): Matrix4 {
+fun Skew(degrees: Float, a: Vector2, b: Vector3): Matrix4 {
+    val t = tan(degrees)
+    val x = a.x * t
+    val y = a.y * t
+
+    return Matrix4(
+            x * b.x + 1f, x * b.y, x * b.z, 0f,
+            y * b.x, y * b.y + 1f, y * b.z, 0f,
+            0f, 0f, 1f, 0f,
+            0f, 0f, 0f, 1f
+    )
+}
+
+/**
+ * Creates a skew matrix by [degrees] along the direction [a] based on the projected length along the direction [b].
+ *
+ * [a] and [b] must be orthonormal.
+ */
+fun Skew(degrees: Float, a: Vector3, b: Vector2): Matrix4 {
     val t = tan(degrees)
     val x = a.x * t
     val y = a.y * t
     val z = a.z * t
 
-    return matrix.set(
+    return Matrix4(
+            x * b.x + 1f, x * b.y, 0f, 0f,
+            y * b.x, y * b.y + 1f, 0f, 0f,
+            z * b.x, z * b.y, 1f, 0f,
+            0f, 0f, 0f, 1f
+    )
+}
+
+/**
+ * Creates a skew matrix by [degrees] along the direction [a] based on the projected length along the direction [b].
+ *
+ * [a] and [b] must be orthonormal.
+ */
+fun Skew(degrees: Float, a: Vector3, b: Vector3): Matrix4 {
+    val t = tan(degrees)
+    val x = a.x * t
+    val y = a.y * t
+    val z = a.z * t
+
+    return Matrix4(
             x * b.x + 1f, x * b.y, x * b.z, 0f,
             y * b.x, y * b.y + 1f, y * b.z, 0f,
             z * b.x, z * b.y, z * b.z + 1f, 0f,
@@ -478,69 +429,67 @@ fun skewUnsafe(degrees: Float, a: Vector3, b: Vector3, matrix: Matrix4): Matrix4
     )
 }
 
-/**
- * Sets [matrix] as a translation matrix to [point].
- *
- * @return The [matrix] for chaining.
- */
-inline fun translation(point: Point2D, matrix: Matrix4) = matrix.set(
+/** Creates a translation matrix to [point]. */
+inline fun Translation(point: Point2D) = Matrix4(
         1f, 0f, 0f, point.x,
         0f, 1f, 0f, point.y,
         0f, 0f, 1f, 0f,
         0f, 0f, 0f, 1f
 )
-/**
- * Sets [matrix] as a translation matrix to [point].
- *
- * @return The [matrix] for chaining.
- */
-inline fun translation(point: Point3D, matrix: Matrix4) = matrix.set(
+
+/** Creates a translation matrix to [point]. */
+inline fun Translation(point: Point3D) = Matrix4(
         1f, 0f, 0f, point.x,
         0f, 1f, 0f, point.y,
         0f, 0f, 1f, point.z,
         0f, 0f, 0f, 1f
 )
 
-fun lookAt(eye: Point3D, target: Point3D, quaternion: Quaternion): Quaternion {
+fun LookAt(eye: Point3D, target: Point3D): Quaternion {
     val forwardVector = normalize(target - eye)
 
     val rotAxis = cross(Vector3(0f, 0f, -1f), forwardVector)
     val dot = dot(Vector3(0f, 0f, -1f), forwardVector)
 
-    return quaternion.set(rotAxis.x, rotAxis.y, rotAxis.z, dot + 1).normalize()
+    return Quaternion(rotAxis.x, rotAxis.y, rotAxis.z, dot + 1).normalized
 }
-fun rotation(degrees: Float, axis: Vector3, quaternion: Quaternion): Quaternion {
+
+fun Quaternion(degrees: Float, axis: Vector3): Quaternion {
     if(degrees.isZero()) {
-        return identity(quaternion)
+        return Quaternion.identity
     }
 
     val hdegrees = degrees * 0.5f
     val s = sin(hdegrees)
     val c = cos(hdegrees)
 
-    return quaternion.set(axis.x * s, axis.y * s, axis.z * s, c)
+    return Quaternion(axis.x * s, axis.y * s, axis.z * s, c)
 }
-fun euler(quaternion: Quaternion, vector: Vector3) : Vector3 {
+
+fun ToEuler(quaternion: Quaternion) : Vector3 {
     // roll (x-axis rotation)
     val sinrCosp = 2 * (quaternion.w * quaternion.x + quaternion.y * quaternion.z)
     val cosrCosp = 1 - 2 * (quaternion.x * quaternion.x + quaternion.y * quaternion.y)
-    vector.x = atan2(sinrCosp, cosrCosp)
+    val x = atan2(sinrCosp, cosrCosp) * RADIANS_TO_DEGREES
 
     // pitch (y-axis rotation)
     val sinp = 2 * (quaternion.w * quaternion.y - quaternion.z * quaternion.x)
+    var y: Float
     if (abs(sinp) >= 1)
-        vector.y = (PI / 2) * sinp.sign // use 90 degrees if out of range
+        y = (PI / 2) * sinp.sign // use 90 degrees if out of range
     else
-        vector.y = asin(sinp)
+        y = asin(sinp)
+    y *= RADIANS_TO_DEGREES
 
     // yaw (z-axis rotation)
     val sinyCosp = 2 * (quaternion.w * quaternion.z + quaternion.x * quaternion.y)
     val cosyCosp = 1 - 2 * (quaternion.y * quaternion.y + quaternion.z * quaternion.z)
-    vector.z = atan2(sinyCosp, cosyCosp)
+    val z = atan2(sinyCosp, cosyCosp) * RADIANS_TO_DEGREES
 
-    return vector.scale(RADIANS_TO_DEGREES)
+    return Vector3(x, y, z)
 }
-fun quaternion(euler: Vector3, quaternion: Quaternion) : Quaternion {
+
+fun ToQuaternion(euler: Vector3) : Quaternion {
     val cy = cos(euler.z * 0.5f)
     val sy = sin(euler.z * 0.5f)
     val cp = cos(euler.y * 0.5f)
@@ -548,63 +497,11 @@ fun quaternion(euler: Vector3, quaternion: Quaternion) : Quaternion {
     val cr = cos(euler.x * 0.5f)
     val sr = sin(euler.x * 0.5f)
 
-    quaternion.w = cy * cp * cr + sy * sp * sr
-    quaternion.x = cy * cp * sr - sy * sp * cr
-    quaternion.y = sy * cp * sr + cy * sp * cr
-    quaternion.z = sy * cp * cr - cy * sp * sr
+    val w = cy * cp * cr + sy * sp * sr
+    val x = cy * cp * sr - sy * sp * cr
+    val y = sy * cp * sr + cy * sp * cr
+    val z = sy * cp * cr - cy * sp * sr
 
-    return quaternion
+    return Quaternion(x, y, z, w)
 }
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-/** Creates a rotation matrix through [angle] about the x axis. */
-inline fun RotationX(degrees: Float) = rotationX(degrees, Matrix4())
-/** Creates a rotation matrix through [angle] about the y axis. */
-inline fun RotationY(degrees: Float) = rotationY(degrees, Matrix4())
-/** Creates a rotation matrix through [angle] about the z axis. */
-inline fun RotationZ(degrees: Float) = rotationZ(degrees, Matrix4())
-/** Creates a rotation matrix through [degrees] about [axis]. */
-inline fun Rotation(degrees: Float, axis: Vector2) = rotation(degrees, axis, Matrix4())
-/** Creates a rotation matrix through [degrees] about [axis]. */
-inline fun Rotation(degrees: Float, axis: Vector3) = rotation(degrees, axis, Matrix4())
-/** Creates a rotation matrix that corresponds to [quaternion]. */
-inline fun Rotation(quaternion: Quaternion) = rotation(quaternion, Matrix4())
-
-/** Creates a reflection matrix through the plane perpendicular to [axis]. */
-inline fun Reflection(axis: Vector2) = reflection(axis, Matrix4())
-/** Creates a reflection matrix through the plane perpendicular to [axis]. */
-inline fun Reflection(axis: Vector3) = reflection(axis, Matrix4())
-
-/** Creates an involution matrix through the plane perpendicular to [axis]. */
-inline fun Involution(axis: Vector2) = involution(axis, Matrix4())
-/** Creates an involution matrix through the plane perpendicular to [axis]. */
-inline fun Involution(axis: Vector3) = involution(axis, Matrix4())
-
-/** Creates a uniform scale matrix by [factor]. */
-inline fun Scale(factor: Float) = scale(factor, Matrix4())
-/** Creates a nonuniform scale matrix by [xFactor] along the x axis, [yFactor] along the y axis and [zFactor] along the z axis. */
-inline fun Scale(xFactor: Float, yFactor: Float, zFactor: Float) = scale(xFactor, yFactor, zFactor, Matrix4())
-/** Creates a scale matrix by [factor] along [axis]. */
-inline fun Scale(factor: Float, axis: Vector2) = scale(factor, axis, Matrix4())
-/** Creates a scale matrix by [factor] along [axis]. */
-inline fun Scale(factor: Float, axis: Vector3) = scale(factor, axis, Matrix4())
-
-/**
- * Creates a skew matrix by [degrees] along the direction [a] based on the projected length along the direction [b].
- *
- * [a] and [b] must be orthonormal.
- */
-fun Skew(degrees: Float, a: Vector2, b: Vector2) = skewUnsafe(degrees, a, b, Matrix4())
-/**
- * Creates a skew matrix by [degrees] along the direction [a] based on the projected length along the direction [b].
- *
- * [a] and [b] must be orthonormal.
- */
-fun Skew(degrees: Float, a: Vector3, b: Vector3) = skewUnsafe(degrees, a, b, Matrix4())
-
-/** Creates a translation matrix to [point]. */
-inline fun Translation(point: Point2D) = translation(point, Matrix4())
-/** Creates a translation matrix to [point]. */
-inline fun Translation(point: Point3D) = translation(point, Matrix4())
 

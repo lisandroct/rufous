@@ -86,13 +86,13 @@ object RenderingSystem : System(0) {
                 for (mesh in model.meshes) {
                     val material = model.getMaterial(mesh) ?: errorMaterial
                     if(material is Materials.Gouraud) {
-                        material.lightPosition.set(lights[0].getUnsafe<Transform>().worldPosition)
+                        material.lightPosition = lights[0].getUnsafe<Transform>().worldPosition
                     }
                     if(material is Materials.Phong) {
-                        material.lightPosition.set(lights[0].getUnsafe<Transform>().worldPosition)
+                        material.lightPosition = lights[0].getUnsafe<Transform>().worldPosition
                     }
                     if(material is Materials.BlinnPhong) {
-                        material.lightPosition.set(lights[0].getUnsafe<Transform>().worldPosition)
+                        material.lightPosition = lights[0].getUnsafe<Transform>().worldPosition
                     }
 
                     GL.useProgram(material.program)

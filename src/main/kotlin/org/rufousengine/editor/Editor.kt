@@ -24,8 +24,8 @@ class Editor : App("Editor") {
 
         val frankie = Entity()
         frankie.add<Transform>()?.apply {
-            quaternion(Vector3(0f, 45f, 0f), rotation)
-            position.set(2f, 0f, 0f)
+            rotation = ToQuaternion(Vector3(-2f, 45f, -2f))
+            position = Point3D(2f, 0f, 0f)
         }
         frankie.add<Model>()?.apply {
             val frankieMeshes = MeshesLoader.load(Files.local("models/frankie/frankie.obj"))
@@ -51,7 +51,7 @@ class Editor : App("Editor") {
         cameraParent.add<EditorOnly>()
         val camera = Entity()
         camera.add<Transform>()?.apply {
-            position.set(0f, 0f, 20f)
+            position = Point3D(0f, 5f, 20f)
             parent = cameraParentTransform
         }
         camera.add<Camera>()

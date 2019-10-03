@@ -2,100 +2,44 @@
 
 package org.rufousengine.math
 
-import org.rufousengine.utils.DirtyFlag
-import java.util.*
 import kotlin.math.sqrt
 
 /**
- * An immutable quaternion.
- *
  * @property[x] The x component.
  * @property[y] The y component.
  * @property[z] The z component.
  * @property[w] The w component.
  * @constructor Creates a quaternion.
  */
-class Quaternion(x: Float = 0f, y: Float = 0f, z: Float = 0f, w: Float = 1f) {
-    val components = floatArrayOf(x, y, z, w)
-    var dirty by DirtyFlag()
-
+data class Quaternion(val x: Float, val y: Float, val z: Float, val w: Float) {
+    constructor() : this(0f, 0f, 0f, 1f)
     constructor(other: Quaternion) : this(other.x, other.y, other.z, other.w)
+    constructor(vector: Vector3, scalar: Float) : this(vector.x, vector.y, vector.z, scalar)
 
-    inline var x: Float
-        get() = components[0]
-        set(value) {
-            components[0] = value
-            dirty = true
-        }
-    inline var y: Float
-        get() = components[1]
-        set(value) {
-            components[1] = value
-            dirty = true
-        }
-    inline var z: Float
-        get() = components[2]
-        set(value) {
-            components[2] = value
-            dirty = true
-        }
-    inline var w: Float
-        get() = components[3]
-        set(value) {
-            components[3] = value
-            dirty = true
-        }
+    val components = lazy { floatArrayOf(x, y, z, w) }
 
-    operator fun component1() = get(0)
-    operator fun component2() = get(1)
-    operator fun component3() = get(2)
-    operator fun component4() = get(3)
-
-    operator fun get(index: Int) = if(index !in 0..3) { throw IllegalArgumentException("index must be in 0..3") }
-    else {
-        components[index]
+    inline operator fun get(index: Int) = when(index) {
+        0 -> x
+        1 -> y
+        2 -> z
+        3 -> w
+        else -> throw IllegalArgumentException("index must be in ${0..3}")
     }
 
-    operator fun set(index: Int, value: Float) = if(index !in 0..3) { throw IllegalArgumentException("index must be in 0..3") }
-    else {
-        components[index] = value
-        dirty = true
+    inline operator fun invoke(index: Int) = get(index - 1)
+
+    override fun toString() = "($x, $y, $z, $w)"
+
+    companion object {
+        val identity = Quaternion()
+        val zero = Quaternion(0f, 0f, 0f, 0f)
     }
-
-    fun set(other: Quaternion) = set(other.x, other.y, other.z, other.w)
-    fun set(x: Float = this.x, y: Float = this.y, z: Float = this.z, w: Float = this.w): Quaternion {
-        this.x = x
-        this.y = y
-        this.z = z
-        this.w = w
-
-        return this
-    }
-
-    fun copy() = Quaternion(this)
-
-    override fun toString() = components.joinToString(prefix = "(", postfix = ")")
-
-    override fun equals(other: Any?): Boolean {
-        if(this === other) {
-            return true
-        }
-
-        if(other !is Quaternion) {
-            return false
-        }
-
-        for(i in 0..3) {
-            if(this[i] isNotCloseTo other[i]) {
-                return false
-            }
-        }
-
-        return true
-    }
-
-    override fun hashCode() = Arrays.hashCode(components)
 }
+
+inline val Quaternion.normalized: Quaternion
+    get() = normalize(this)
+inline val Quaternion.conjugated: Quaternion
+    get() = conjugate(this)
 
 inline val Quaternion.magnitude: Float
     get() = sqrt(magnitudeSquared)
@@ -110,189 +54,70 @@ inline val Quaternion.isIdentity: Boolean
     get() = x.isZero() && y.isZero() && z.isZero() && w.isOne()
 /** Whether this quaternion is the zero quaternion. */
 inline val Quaternion.isZero: Boolean
-    get() = components.all { it.isZero() }
+    get() = x.isZero() && y.isZero() && z.isZero() && w.isZero()
 
-inline fun Quaternion.getVectorPart(out: Vector3 = Vector3()) = out.set(x, y, z)
+inline val Quaternion.vectorPart
+    get() = Vector3(x, y, z)
 
-inline fun identity(out: Quaternion) = out.set(0f, 0f, 0f, 1f)
+inline operator fun Quaternion.unaryPlus() = this
+inline operator fun Quaternion.unaryMinus() = negate(this)
+inline operator fun Quaternion.plus(other: Quaternion) = add(this, other)
+inline operator fun Quaternion.minus(other: Quaternion) = subtract(this, other)
+inline operator fun Quaternion.times(scalar: Float) = scale(this, scalar)
+inline operator fun Float.times(quaternion: Quaternion) = quaternion.times(this)
+inline operator fun Quaternion.div(scalar: Float) = times(1 / scalar)
+inline operator fun Quaternion.times(other: Quaternion) = multiply(this, other)
+inline operator fun Quaternion.times(vector: Vector3) = transformSafe(this, vector)
 
-/**
- * Negates every component of [quaternion] and stores the result in [out].
- *
- * @return The [out] quaternion for chaining.
- */
-inline fun negate(quaternion: Quaternion, out: Quaternion = Quaternion()) = out.set(-quaternion.x, -quaternion.y, -quaternion.z, -quaternion.w)
+// ---------------------------------------------------------------------------------------------------------------------
 
-/**
- * Normalizes [quaternion] and stores the result in [out].
- *
- * @return The [out] quaternion for chaining.
- */
-inline fun normalize(quaternion: Quaternion, out: Quaternion = Quaternion()) = scale(quaternion, 1 / quaternion.magnitude, out)
+/** Negates every component of [quaternion]. */
+inline fun negate(quaternion: Quaternion) = Quaternion(-quaternion.x, -quaternion.y, -quaternion.z, -quaternion.w)
 
-/**
- * Conjugates [quaternion] (i.e., it negates the vector part) and stores the result in [out].
- *
- * @return The [out] quaternion for chaining.
- */
-inline fun conjugate(quaternion: Quaternion, out: Quaternion = Quaternion()) = out.set(-quaternion.x, -quaternion.y, -quaternion.z, quaternion.w)
+/** Normalizes [quaternion]. */
+inline fun normalize(quaternion: Quaternion) = quaternion / quaternion.magnitude
 
-/**
- * Inverts [quaternion] and stores the result in [out].
- *
- * @return The [out] quaternion for chaining.
- */
-fun inverse(quaternion: Quaternion, out: Quaternion = Quaternion()): Quaternion {
-    conjugate(quaternion, out)
+/** Conjugates [quaternion] (i.e., it negates the vector part). */
+inline fun conjugate(quaternion: Quaternion) = Quaternion(-quaternion.x, -quaternion.y, -quaternion.z, quaternion.w)
 
-    scale(out, 1 / out.magnitudeSquared, out)
+/** Inverts [quaternion]. */
+fun inverse(quaternion: Quaternion): Quaternion {
+    val conjugated = conjugate(quaternion)
 
-    return out
+    return conjugated / conjugated.magnitudeSquared
 }
 
-/**
- * Scales [quaternion] (i.e., multiplies each component with [scalar]) and stores the result in [out].
- *
- * @return The [out] quaternion for chaining.
- */
-inline fun scale(quaternion: Quaternion, scalar: Float, out: Quaternion = Quaternion()) = out.set(quaternion.x * scalar, quaternion.y * scalar, quaternion.z * scalar, quaternion.w * scalar)
+/** Scales [quaternion] (i.e., multiplies each component with [scalar]). */
+inline fun scale(quaternion: Quaternion, scalar: Float) = Quaternion(quaternion.x * scalar, quaternion.y * scalar, quaternion.z * scalar, quaternion.w * scalar)
 
-/**
- * Adds [b] to [a] and stores the result in [out].
- *
- * @return The [out] quaternion for chaining.
- */
-inline fun add(a: Quaternion, b: Quaternion, out: Quaternion = Quaternion()) = out.set(a.x + b.x, a.y + b.y, a.z + b.z, a.w + b.w)
+/** Adds [b] to [a]. */
+inline fun add(a: Quaternion, b: Quaternion) = Quaternion(a.x + b.x, a.y + b.y, a.z + b.z, a.w + b.w)
 
-/**
- * Subtracts [b] from [a] and stores the result in [out].
- *
- * @return The [out] quaternion for chaining.
- */
-inline fun subtract(a: Quaternion, b: Quaternion, out: Quaternion = Quaternion()) = out.set(a.x - b.x, a.y - b.y, a.z - b.z, a.w - b.w)
+/** Subtracts [b] from [a]. */
+inline fun subtract(a: Quaternion, b: Quaternion) = Quaternion(a.x - b.x, a.y - b.y, a.z - b.z, a.w - b.w)
 
-/**
- * Multiplies [a] with [b] and stores the result in [out].
- *
- * @return The [out] quaternion for chaining.
- */
-inline fun multiply(a: Quaternion, b: Quaternion, out: Quaternion = Quaternion()) = out.set(
-        a.w * b.x + a.x * b.w + a.y * b.z - a.z * b.y,
-        a.w * b.y - a.x * b.z + a.y * b.w + a.z * b.x,
-        a.w * b.z + a.x * b.y - a.y * b.x + a.z * b.w,
+/** Multiplies [a] with [b]. */
+inline fun multiply(a: Quaternion, b: Quaternion) = Quaternion(
+        a.x * b.w + a.y * b.z - a.z * b.y + a.w * b.x,
+        a.y * b.w + a.z * b.x + a.w * b.y - a.x * b.z,
+        a.z * b.w + a.w * b.z + a.x * b.y - a.y * b.x,
         a.w * b.w - a.x * b.x - a.y * b.y - a.z * b.z
 )
 
 /**
- * Rotates [v] with [q] and stores the result in [out].
+ * Rotates [v] with [q].
  *
- * If [q] is known to be a unit quaternion, [rotateUnsafe] is a cheaper alternative.
- *
- * @return The [out] vector for chaining.
+ * If [q] is known to be a unit quaternion, [transform] is a cheaper alternative.
  */
-fun rotate(q: Quaternion, v: Vector3, out: Vector3 = Vector3()) : Vector3 {
-    val axis = cQuaternion(q).normalize()
-
-    return rotateUnsafe(q, v, out)
-}
+fun transformSafe(q: Quaternion, v: Vector3) = transform(q.normalized, v)
 
 /**
- * Rotates [v] with [q] and stores the result in [out].
+ * Rotates [v] with [q].
  *
  * [q] must be a unit quaternion.
- *
- * @return The [out] vector for chaining.
  */
-fun rotateUnsafe(q: Quaternion, v: Vector3, out: Vector3 = Vector3()) : Vector3 {
-    //TODO("Avoid resources allocation")
-    val b = q.getVectorPart(Vector3())
-    val b2 = b.x * b.x + b.y * b.y + b.z * b.z
+fun transform(q: Quaternion, v: Vector3) : Vector3 {
+    val b = q.vectorPart
 
-    return out.set(v * (q.w * q.w - b2) + b * (dot(v, b) * 2) + cross(b, v, Vector3()) * (q.w * 2))
+    return v * (q.w * q.w - b.magnitudeSquared) + b * (dot(v, b) * 2f) + b X v * (q.w * 2f)
 }
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-inline operator fun Quaternion.unaryPlus() = this.copy()
-inline operator fun Quaternion.unaryMinus() = negate(this, Quaternion())
-
-inline operator fun Quaternion.plus(other: Quaternion) = add(this, other, Quaternion())
-inline operator fun Quaternion.minus(other: Quaternion) = subtract(this, other, Quaternion())
-inline operator fun Quaternion.times(scalar: Float) = scale(this, scalar, Quaternion())
-inline operator fun Quaternion.times(other: Quaternion) = multiply(this, other, Quaternion())
-inline operator fun Quaternion.div(scalar: Float) = times(1 / scalar)
-
-inline operator fun Quaternion.plusAssign(other: Quaternion) { add(other) }
-inline operator fun Quaternion.minusAssign(other: Quaternion) { subtract(other) }
-inline operator fun Quaternion.timesAssign(scalar: Float) { scale(scalar) }
-inline operator fun Quaternion.timesAssign(other: Quaternion) { multiply(other) }
-inline operator fun Quaternion.divAssign(scalar: Float) = timesAssign(1 / scalar)
-
-
-/**
- * Negates every component of this quaternion.
- *
- * @return This quaternion for chaining.
- */
-inline fun Quaternion.negate() = negate(this, this)
-
-/**
- * Normalizes this quaternion.
- *
- * @return This quaternion for chaining.
- */
-inline fun Quaternion.normalize() = normalize(this, this)
-/**
- * Conjugates this quaternion (i.e., it negates the vector part).
- *
- * @return This quaternion for chaining.
- */
-inline fun Quaternion.conjugate() = conjugate(this, this)
-/**
- * Inverts this quaternion.
- *
- * @return This quaternion for chaining.
- */
-inline fun Quaternion.inverse() = inverse(this, this)
-
-/**
- * Scales this quaternion (i.e., multiplies each component with [scalar]).
- *
- * @return This quaternion for chaining.
- */
-inline fun Quaternion.scale(scalar: Float) = scale(this, scalar, this)
-
-/**
- * Adds [other] to this quaternion.
- *
- * @return This quaternion for chaining.
- */
-inline fun Quaternion.add(other: Quaternion) = add(this, other, this)
-
-/**
- * Subtracts [other] from this quaternion.
- *
- * @return This quaternion for chaining.
- */
-inline fun Quaternion.subtract(other: Quaternion) = subtract(this, other, this)
-
-/**
- * Multiplies this quaternion with [other].
- *
- * @return This quaternion for chaining.
- */
-inline fun Quaternion.multiply(other: Quaternion) = multiply(this, other, this)
-/**
- * Multiplies [other] with this quaternion.
- *
- * @return This quaternion for chaining.
- */
-inline fun Quaternion.multiplyLeft(other: Quaternion) = multiply(other, this, this)
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-private val a by lazy { Quaternion() }
-private val b by lazy { Quaternion() }
-private val q by lazy { Quaternion() }
-
-fun cQuaternion(other: Quaternion) = q.set(other)

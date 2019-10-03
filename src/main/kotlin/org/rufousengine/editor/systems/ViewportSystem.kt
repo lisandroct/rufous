@@ -1,7 +1,5 @@
 package org.rufousengine.editor.systems
 
-import org.lwjgl.opengl.GL11
-import org.lwjgl.opengl.GL11.glLineWidth
 import org.rufousengine.components.Camera
 import org.rufousengine.components.Model
 import org.rufousengine.components.Transform
@@ -65,19 +63,19 @@ object ViewportSystem : System(0) {
         if(middleClick) {
             val cameraTransform = cameras[0].getUnsafe<Transform>()
             val target = cameraTransform.parent
-            val c = cVector(target!!.left).scale(-x * 0.01f)
-            cameraTransform.position.add(c)
-            target?.position?.add(c)
+            val c = target!!.left * (-x * 0.01f)
+            cameraTransform.position += c
+            target.position += c
             //c.set(cameraTransform.up).scale(y * 0.01f)
             //cameraTransform.position.add(c)
             //target?.position?.add(c)
         } else if(rightClick) {
             val cameraTransform = cameras[0].getUnsafe<Transform>()
             val target = cameraTransform.parent
-            val q = rotation(-x * 0.1f, Vector3(0f, 1f, 0f), Quaternion())
-            target!!.rotation.multiplyLeft(q)
-            rotation(-y * 0.1f, target!!.left, q)
-            target!!.rotation.multiplyLeft(q)
+            var q = Quaternion(-x * 0.1f, Vector3(0f, 1f, 0f))
+            target!!.rotation = q * target.rotation
+            q = Quaternion(-y * 0.1f, target.left)
+            target.rotation = q * target.rotation
         }
     }
 
@@ -100,7 +98,7 @@ object ViewportSystem : System(0) {
     private fun scroll(x: Float, y: Float) {
         val cameraTransform = cameras[0].getUnsafe<Transform>()
         val target = cameraTransform.parent
-        val c = cVector(cameraTransform.forward).scale(-y * 0.5f)
-        cameraTransform.position.add(c)
+        val c = cameraTransform.forward * (-y * 0.5f)
+        cameraTransform.position += c
     }
 }
