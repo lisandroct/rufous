@@ -222,8 +222,8 @@ object Materials {
             |    
             |    float a3 = line(abs(position.x) * toScreen, 1) * fade(distance, 90, 135);
             |    float a4 = line(abs(position.z) * toScreen, 1) * fade(distance, 90, 135);
-            |    vec4 z = vec4(0.2, 0.2, 0.9, a3);
-            |    vec4 x = vec4(0.9, 0.2, 0.2, a4);
+            |    vec4 z = vec4(0.4, 0.4, 0.4, a3);
+            |    vec4 x = vec4(0.4, 0.4, 0.4, a4);
             |    
             |    properties.color = mix(mix(mix(mix(grid0, grid1, grid1.a), grid2, grid2.a), z, z.a), x, x.a);
             |    
@@ -233,7 +233,7 @@ object Materials {
             |}
             |
             |void shade() {
-            |    color = properties.color;
+            |    color = vec4(properties.color.rgb, 0.0);
             |}
             |
             |void main()

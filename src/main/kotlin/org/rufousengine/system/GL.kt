@@ -157,6 +157,14 @@ object GL {
         return shader
     }
 
+    inline fun GeometryShader(source: String): Int {
+        val shader = createGeometryShader()
+        setShaderSource(shader, source)
+        compileShader(shader)
+
+        return shader
+    }
+
     inline fun FragmentShader(source: String): Int {
         val shader = createFragmentShader()
         setShaderSource(shader, source)
@@ -166,6 +174,7 @@ object GL {
     }
 
     inline fun createVertexShader() = glCreateShader(GL_VERTEX_SHADER)
+    inline fun createGeometryShader() = glCreateShader(GL_GEOMETRY_SHADER)
     inline fun createFragmentShader() = glCreateShader(GL_FRAGMENT_SHADER)
 
     inline fun setShaderSource(shader: Int, source: String) = glShaderSource(shader, source)
@@ -191,6 +200,21 @@ object GL {
         val program = createProgram()
 
         attachShaderToProgram(program, vertexShader)
+        attachShaderToProgram(program, fragmentShader)
+        linkProgram(program)
+        validateProgram(program)
+
+        deleteShader(vertexShader)
+        deleteShader(fragmentShader)
+
+        return program
+    }
+
+    inline fun ShaderProgram(vertexShader: Int, geometryShader: Int, fragmentShader: Int): Int {
+        val program = createProgram()
+
+        attachShaderToProgram(program, vertexShader)
+        attachShaderToProgram(program, geometryShader)
         attachShaderToProgram(program, fragmentShader)
         linkProgram(program)
         validateProgram(program)
@@ -229,7 +253,7 @@ object GL {
 
     enum class DrawModes(val native: Int) {
         TRIANGLES(GL_TRIANGLES),
-        LINES(GL_LINES),
+        LINES(GL_LINE_STRIP),
         POINTS(GL_POINTS)
     }
 

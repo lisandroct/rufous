@@ -25,87 +25,107 @@ object ViewportSystem : System(0) {
     private var middleClick = false
     private var rightClick = false
 
-    private val lineMesh = Mesh(
+    private val xMesh = Mesh(
             floatArrayOf(
-                    // Prev - Next - Current - Side
-                    0f, 0f, 0f, 5f, 5f, 5f, 0f, 0f, 0f, -1f,
-                    0f, 0f, 0f, 5f, 5f, 5f, 0f, 0f, 0f, 1f,
-                    0f, 0f, 0f, 5f, 5f, 5f, 5f, 5f, 5f, -1f,
-                    0f, 0f, 0f, 5f, 5f, 5f, 5f, 5f, 5f, 1f
+                    0f, 0f, 0f,
+                    1f, 0f, 0f
             ),
             intArrayOf(
-                    0, 2, 1,
-                    1, 2, 3
+                    0, 1
             ),
-            arrayOf(VertexAttribute(0, "previous", 3), VertexAttribute(1, "next", 3), VertexAttribute(2, "current", 3), VertexAttribute(3, "direction", 1))
+            arrayOf(VertexAttribute(0, "aPosition", 3))
+    )
+    private val yMesh = Mesh(
+            floatArrayOf(
+                    0f, 0f, 0f,
+                    0f, 1f, 0f
+            ),
+            intArrayOf(
+                    0, 1
+            ),
+            arrayOf(VertexAttribute(0, "aPosition", 3))
+    )
+    private val zMesh = Mesh(
+            floatArrayOf(
+                    0f, 0f, 0f,
+                    0f, 0f, 1f
+            ),
+            intArrayOf(
+                    0, 1
+            ),
+            arrayOf(VertexAttribute(0, "aPosition", 3))
     )
     private val vertex = GL.VertexShader("""
         |#version 330 core
-        |layout (location = 0) in vec3 previous;
-        |layout (location = 1) in vec3 next;
-        |layout (location = 2) in vec3 current;
-        |layout (location = 3) in float direction;
+        |layout (location = 0) in vec3 aPosition;
         |
         |uniform mat4 uView;
         |uniform mat4 uProjection;
-        |uniform float uAspect;
-        |uniform float uTFov;
-        |uniform vec3 uCameraPosition;
-        |uniform float uLineWidth;
         |
         |void main()
         |{
-        |    float distance = length(uCameraPosition - current);
-        |    float toScreen = (uTFov * distance * 2.0) / 720.0;
+        |    gl_Position = uProjection * uView * vec4(aPosition, 1.0);
+        |}
+        |""".trimMargin())
+    private val geometry = GL.GeometryShader("""
+        |#version 330 core
+        |layout (lines) in;
+        |layout (triangle_strip, max_vertices = 4) out;
+        |
+        |uniform float uThickness;
+        |uniform vec2 uViewport;
+        |
+        |void main()
+        |{
+        |    vec2 thick = uThickness / uViewport;
         |    
-        |    mat4 projView = uProjection * uView;
+        |    vec4 p0 = gl_in[0].gl_Position;
+        |    vec4 p1 = gl_in[1].gl_Position;
         |    
-        |    vec4 previousProjected = projView * vec4(previous, 1.0f);
-        |    vec2 previousScreen = previousProjected.xy / previousProjected.w;
-        |    previousScreen.x *= uAspect;
-        |    
-        |    vec4 nextProjected = projView * vec4(next, 1.0f);
-        |    vec2 nextScreen = nextProjected.xy / nextProjected.w;
-        |    nextScreen.x *= uAspect;
-        |    
-        |    vec4 currentProjected = projView * vec4(current, 1.0f);
-        |    vec2 currentScreen = currentProjected.xy / currentProjected.w;
-        |    currentScreen.x *= uAspect;
-        |    
-        |    float w = uLineWidth * toScreen;
-        |            
-        |    vec2 dir;
-        |    if(nextScreen == currentScreen) dir = normalize(currentScreen - previousScreen);
-        |    else if(previousScreen == currentScreen) dir = normalize(nextScreen - currentScreen);
-        |    else dir = normalize(nextScreen - previousScreen);
-        |    
+        |    vec2 dir = normalize(p0.w * p1.xy - p1.w * p0.xy);
         |    vec2 normal = vec2(-dir.y, dir.x);
-        |    normal.x /= uAspect;
-        |    normal *= .5 * w;
         |    
-        |    vec2 offset = normal * direction;
-        |    currentProjected.xy += offset;
+        |    vec4 offset = vec4(thick * normal, 0.0, 0.0);
+        |    if (p0.w < 0) {
+        |        gl_Position = (p0.w * p1 - p1.w * p0) / (p0.w - p1.w);
+        |        EmitVertex();
+        |    } else {
+        |        gl_Position = p0 + offset * p0.w;
+        |        EmitVertex();
+        |        gl_Position = p0 - offset * p0.w;
+        |        EmitVertex();
+        |    }
+        |    if (p1.w < 0) {
+        |        gl_Position = (p0.w * p1 - p1.w * p0) / (p0.w - p1.w);
+        |        EmitVertex();
+        |    } else {
+        |        gl_Position = p1 + offset * p1.w;
+        |        EmitVertex();
+        |        gl_Position = p1 - offset * p1.w;
+        |        EmitVertex();
+        |    }
         |    
-        |    gl_Position = currentProjected;
+        |    EndPrimitive();
         |}
         |""".trimMargin())
     private val fragment = GL.FragmentShader("""
         |#version 330 core
         |layout (location = 0) out vec4 FragColor;
         |
+        |uniform vec4 uColor;
+        |
         |void main()
         |{
-        |    FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+        |    FragColor = uColor;
         |}
         |""".trimMargin())
 
-    private val shader = GL.ShaderProgram(vertex, fragment)
+    private val shader = GL.ShaderProgram(vertex, geometry, fragment)
     private val viewLocation = GL.getUniformLocation(shader, "uView")
     private val projectionLocation = GL.getUniformLocation(shader, "uProjection")
-    private val aspectLocation = GL.getUniformLocation(shader, "uAspect")
-    private val tfovLocation = GL.getUniformLocation(shader, "uTFov")
-    private val cameraPositionLocation = GL.getUniformLocation(shader, "uCameraPosition")
-    private val lineWidthLocation = GL.getUniformLocation(shader, "uLineWidth")
+    private val viewportLocation = GL.getUniformLocation(shader, "uViewport")
+    private val thicknessLocation = GL.getUniformLocation(shader, "uThickness")
+    private val colorLocation = GL.getUniformLocation(shader, "uColor")
 
     init {
         GL.setClearColor(29 / 255f, 22 / 255f, 21 / 255f, 1f)
@@ -122,6 +142,7 @@ object ViewportSystem : System(0) {
         val camera = cameras[0].getUnsafe<Camera>()
         val cameraTransform = cameras[0].getUnsafe<Transform>()
 
+        GL.enableFaceCulling()
         GL.enableDepthTest()
         GL.clear()
 
@@ -142,16 +163,22 @@ object ViewportSystem : System(0) {
             }
         }
 
+        GL.disableFaceCulling()
         GL.disableDepthTest()
         GL.useProgram(shader)
         GL.setUniformMatrix(viewLocation, cameraTransform.inverse)
         GL.setUniformMatrix(projectionLocation, camera.projection)
-        GL.setUniformFloat(aspectLocation, camera.aspectRatio)
-        GL.setUniformFloat(tfovLocation, tan(camera.fieldOfView * 0.5f))
-        GL.setUniformPoint(cameraPositionLocation, cameraTransform.worldPosition)
-        GL.setUniformFloat(lineWidthLocation, 40f)
-        GL.bindVertexArray(lineMesh.vao)
-        GL.drawElements(lineMesh.count)
+        GL.setUniformVector(viewportLocation, Vector2(1280f, 720f))
+        GL.setUniformFloat(thicknessLocation, 2f)
+        GL.bindVertexArray(xMesh.vao)
+        GL.setUniformVector(colorLocation, Vector4(1f, 0f, 0f, 1f))
+        GL.drawElements(xMesh.count, GL.DrawModes.LINES)
+        GL.bindVertexArray(yMesh.vao)
+        GL.setUniformVector(colorLocation, Vector4(0f, 1f, 0f, 1f))
+        GL.drawElements(yMesh.count, GL.DrawModes.LINES)
+        GL.bindVertexArray(zMesh.vao)
+        GL.setUniformVector(colorLocation, Vector4(0f, 0f, 1f, 1f))
+        GL.drawElements(zMesh.count, GL.DrawModes.LINES)
         GL.unbindVertexArray()
     }
 
